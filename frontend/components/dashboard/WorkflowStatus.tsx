@@ -14,6 +14,7 @@ import {
   Shield,
   BarChart
 } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
 
 interface Workflow {
   id: string
@@ -112,10 +113,7 @@ function WorkflowItem({ workflow }: WorkflowItemProps) {
 export default function WorkflowStatus() {
   const { data: workflows, isLoading } = useQuery({
     queryKey: ['workflows'],
-    queryFn: async () => {
-      const response = await fetch('/api/workflows')
-      return response.json()
-    },
+    queryFn: () => apiClient.getWorkflows(),
     refetchInterval: 5000 // Refresh every 5 seconds
   })
 

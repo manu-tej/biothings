@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+LICENSE
+
+# Tests
+tests/
+*_test.py
+*.test.py
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Development
+scratch_notes/
+examples/
+scripts/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Node (if frontend included)
+node_modules/
+.next/
+npm-debug.log
+yarn-error.log

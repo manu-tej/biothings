@@ -1,50 +1,36 @@
 """
-Main FastAPI Application with Real LLM Integration
+BioThings Main Application
+Clean FastAPI implementation
 """
 import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Dict, Any, List
-import asyncio
-import json
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from typing import Dict, Any, Optional, List
 from datetime import datetime
 from dotenv import load_dotenv
-import structlog
 
 # Load environment variables
 load_dotenv()
 
-# Configure structured logging
-structlog.configure(
-    processors=[
-        structlog.stdlib.filter_by_level,
-        structlog.stdlib.add_logger_name,
-        structlog.stdlib.add_log_level,
-        structlog.stdlib.PositionalArgumentsFormatter(),
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.StackInfoRenderer(),
-        structlog.processors.format_exc_info,
-        structlog.dev.ConsoleRenderer()
-    ],
-    context_class=dict,
-    logger_factory=structlog.stdlib.LoggerFactory(),
-    cache_logger_on_first_use=True,
-)
-
-logger = structlog.get_logger()
-
 # Import our modules
-from app.core.messaging import message_broker
 from app.agents.ceo_agent import CEOAgent
 from app.agents.cso_agent import CSOAgent
 from app.agents.cfo_agent import CFOAgent
 from app.agents.cto_agent import CTOAgent
 from app.agents.coo_agent import COOAgent
-from app.workflows.biotech_workflows import workflow_engine
-from app.workflows.advanced_biotech_workflows import advanced_workflow_engine
-from app.analytics.metrics_engine import metrics_engine
+from app.core.messaging import message_broker
 from app.core.llm import llm_service
+from app.workflows.biotech_workflows import workflow_engine
+from app.analytics.metrics_engine import metrics_engine
+from app.workflows.advanced_biotech_workflows import advanced_workflow_engine
+import structlog
+import json
+
+# Setup logging
+logger = structlog.get_logger()
 
 
 class ConnectionManager:
@@ -139,9 +125,9 @@ async def root():
         "version": "1.0.0",
         "status": "operational",
         "features": {
-            "llm_integration": llm_service.config.provider if llm_service.llm else "mock",
+            "llm_model": llm_service.model if hasattr(llm_service, 'model') else "gemini-2.5-flash",
             "agents_active": len(agents),
-            "workflows_available": len(workflow_engine.protocols)
+            "workflows_available": len(workflow_engine.protocols) if hasattr(workflow_engine, 'protocols') else 0
         }
     }
 

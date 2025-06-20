@@ -12,6 +12,7 @@ import {
   TrendingUp,
   TrendingDown
 } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
 
 interface MetricCardProps {
   title: string
@@ -67,10 +68,7 @@ export default function SystemMetrics() {
   // Fetch current metrics
   const { data: metrics, isLoading } = useQuery({
     queryKey: ['system-metrics'],
-    queryFn: async () => {
-      const response = await fetch('http://localhost:8000/api/monitoring/metrics/current')
-      return response.json()
-    },
+    queryFn: () => apiClient.getMetrics(),
     refetchInterval: 5000 // Refresh every 5 seconds
   })
 
@@ -220,8 +218,8 @@ export default function SystemMetrics() {
     return <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-96 rounded-lg" />
   }
 
-  const systemData = metrics?.system || {}
-  const agentData = metrics?.agents || {}
+  const systemData = metrics?.system || { cpu_percent: 0, memory_percent: 0 }
+  const agentData = metrics?.agents || { active_agents: 0, total_agents: 0 }
   const cpuPercent = systemData.cpu_percent || 0
   const memoryPercent = systemData.memory_percent || 0
   const cpuStatus = cpuPercent > 80 ? 'critical' : cpuPercent > 60 ? 'warning' : 'good'

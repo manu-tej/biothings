@@ -12,6 +12,7 @@ import {
   UserCheck,
   AlertCircle
 } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
 
 interface Agent {
   id: string
@@ -112,10 +113,7 @@ function AgentCard({ agent, isExecutive }: AgentCardProps) {
 export default function AgentOverview() {
   const { data: agents, isLoading } = useQuery({
     queryKey: ['agents'],
-    queryFn: async () => {
-      const response = await fetch('http://localhost:8000/api/agents')
-      return response.json()
-    },
+    queryFn: () => apiClient.getAgents(),
     refetchInterval: 10000 // Refresh every 10 seconds
   })
 
@@ -123,43 +121,15 @@ export default function AgentOverview() {
     return <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-96 rounded-lg" />
   }
 
-  // Mock hierarchy for demonstration
-  const mockAgents: Agent[] = agents || [
-    {
-      id: 'ceo-001',
-      name: 'CEO Strategic Director',
-      agent_type: 'CEO',
-      status: 'active',
-      parent_id: null,
-      subordinates: ['coo-001', 'cso-001', 'cfo-001', 'cto-001'],
-      last_active: new Date().toISOString()
-    },
-    {
-      id: 'coo-001',
-      name: 'COO Operations Director',
-      agent_type: 'COO',
-      status: 'executing',
-      parent_id: 'ceo-001',
-      subordinates: ['lab-mgr-001', 'mfg-mgr-001'],
-      last_active: new Date(Date.now() - 5 * 60000).toISOString()
-    },
-    {
-      id: 'cso-001',
-      name: 'CSO Research Director',
-      agent_type: 'CSO',
-      status: 'thinking',
-      parent_id: 'ceo-001',
-      subordinates: ['research-mgr-001'],
-      last_active: new Date(Date.now() - 15 * 60000).toISOString()
-    }
-  ]
+  // Use the transformed agents data
+  const agentsList: Agent[] = agents || []
 
-  const executives = mockAgents.filter(a => ['CEO', 'COO', 'CSO', 'CFO', 'CTO'].includes(a.agent_type))
-  const managers = mockAgents.filter(a => a.agent_type === 'Manager')
-  const workers = mockAgents.filter(a => a.agent_type === 'Worker')
+  const executives = agentsList.filter(a => ['CEO', 'COO', 'CSO', 'CFO', 'CTO'].includes(a.agent_type))
+  const managers = agentsList.filter(a => a.agent_type === 'Manager')
+  const workers = agentsList.filter(a => a.agent_type === 'Worker')
 
-  const activeCount = mockAgents.filter(a => a.status === 'active').length
-  const totalCount = mockAgents.length
+  const activeCount = agentsList.filter(a => a.status === 'active').length
+  const totalCount = agentsList.length
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">

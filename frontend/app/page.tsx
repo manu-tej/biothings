@@ -6,20 +6,16 @@ import SystemMetrics from '@/components/dashboard/SystemMetrics'
 import AgentOverview from '@/components/dashboard/AgentOverview'
 import WorkflowStatus from '@/components/dashboard/WorkflowStatus'
 import RealtimeAlerts from '@/components/dashboard/RealtimeAlerts'
-import { useWebSocket } from '@/hooks/useWebSocket'
+import { useWebSocket } from '@/lib/hooks/useWebSocket'
 
 export default function DashboardPage() {
-  const [isConnected, setIsConnected] = useState(false)
-  const [lastUpdate, setLastUpdate] = useState<any>(null)
+  const { isConnected, sendMessage, lastMessage } = useWebSocket()
   
-  const { sendMessage } = useWebSocket({
-    onConnect: () => setIsConnected(true),
-    onDisconnect: () => setIsConnected(false),
-    onMessage: (data) => {
-      console.log('WebSocket message:', data)
-      setLastUpdate(data)
+  useEffect(() => {
+    if (lastMessage) {
+      console.log('WebSocket message:', lastMessage)
     }
-  })
+  }, [lastMessage])
 
   return (
     <DashboardLayout>

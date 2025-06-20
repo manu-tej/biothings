@@ -12,6 +12,7 @@ import {
   BellOff
 } from 'lucide-react'
 import { useWebSocket } from '@/lib/hooks/useWebSocket'
+import { apiClient } from '@/lib/api-client'
 
 interface Alert {
   id: string
@@ -116,10 +117,7 @@ export default function RealtimeAlerts() {
   // Fetch initial alerts
   const { data: initialAlerts } = useQuery({
     queryKey: ['alerts'],
-    queryFn: async () => {
-      const response = await fetch('/api/monitoring/alerts')
-      return response.json()
-    }
+    queryFn: () => apiClient.getAlerts()
   })
 
   useEffect(() => {

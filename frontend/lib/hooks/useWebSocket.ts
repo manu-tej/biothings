@@ -14,7 +14,12 @@ export function useWebSocket() {
 
   const connect = useCallback(() => {
     try {
-      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws'
+      // Use relative WebSocket URL in production
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      const host = process.env.NODE_ENV === 'production' 
+        ? window.location.host 
+        : 'localhost:8000'
+      const wsUrl = `${protocol}//${host}/ws`
       wsRef.current = new WebSocket(`${wsUrl}/${clientId.current}`)
 
       wsRef.current.onopen = () => {

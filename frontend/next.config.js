@@ -4,16 +4,22 @@ const nextConfig = {
   swcMinify: true,
   output: 'standalone',
   
-  // API proxy configuration for development
+  // API proxy configuration
   async rewrites() {
+    // Use backend service name in Docker, localhost in dev
+    const isDocker = process.env.DOCKER_ENV === 'true';
+    const apiUrl = isDocker 
+      ? 'http://backend:8000' 
+      : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000');
+    
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8000/api/:path*',
+        destination: `${apiUrl}/api/:path*`,
       },
       {
         source: '/ws/:path*',
-        destination: 'http://localhost:8000/ws/:path*',
+        destination: `${apiUrl}/ws/:path*`,
       },
     ];
   },
