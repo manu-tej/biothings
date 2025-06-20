@@ -22,16 +22,12 @@ Created a full-stack AI-powered biotech company dashboard with real LLM integrat
 - **Interactive**: Chat interface, task assignment
 
 ### AI/LLM Integration
-1. **Direct Claude API** (`llm_claude.py`)
-   - Streaming responses
-   - Tool use capability
-   - Conversation history
-
-2. **Claude Code + LangChain** (`claude_code_langchain_simple.py`)
-   - Leverages Claude Code's native capabilities
-   - Web search through prompting
-   - Code execution (Python/bash)
-   - File operations
+**Google Gemini Only** (`llm.py`)
+   - Single, simplified LLM service
+   - Chat completions with conversation history
+   - Streaming support
+   - Context-aware responses
+   - Cost-effective and fast
 
 ## 🔬 Key Features
 
@@ -58,14 +54,15 @@ biothings/
 ├── backend/
 │   ├── app/
 │   │   ├── core/
-│   │   │   ├── llm_claude.py              # Direct Claude API
-│   │   │   ├── claude_code_langchain.py   # Full integration
-│   │   │   ├── claude_code_langchain_simple.py  # Simple integration
+│   │   │   ├── llm.py                     # Google Gemini LLM service
 │   │   │   └── messaging.py               # Redis pub/sub
 │   │   ├── agents/
-│   │   │   ├── base_agent.py             # Base agent class
-│   │   │   ├── ceo_agent.py              # CEO implementation
-│   │   │   └── claude_code_agent.py      # Claude Code agents
+│   │   │   ├── base_agent.py              # Base agent class
+│   │   │   ├── ceo_agent.py               # CEO implementation
+│   │   │   ├── cso_agent.py               # CSO implementation
+│   │   │   ├── cfo_agent.py               # CFO implementation
+│   │   │   ├── cto_agent.py               # CTO implementation
+│   │   │   └── coo_agent.py               # COO implementation
 │   │   ├── workflows/
 │   │   │   └── biotech_workflows.py      # Lab protocols
 │   │   └── main.py                        # FastAPI app
@@ -80,9 +77,8 @@ biothings/
 │   │       └── ExperimentList.tsx
 │   └── package.json
 ├── docker-compose.yml
-├── demo_real_llm.py                      # LLM demo
-├── demo_claude_code_langchain.py        # Integration demo
-└── README files...
+├── demo.py                               # Gemini demo
+└── README.md
 ```
 
 ## 🚀 Running the System
@@ -95,7 +91,7 @@ cd ../frontend && npm install
 
 # Configure API keys
 cp backend/.env.example backend/.env
-# Add ANTHROPIC_API_KEY to .env
+# Add GOOGLE_API_KEY to .env
 
 # Start Redis
 docker run -d -p 6379:6379 redis:alpine
@@ -110,17 +106,20 @@ cd backend && python -m app.main
 cd frontend && npm run dev
 
 # Terminal 3: Demo (optional)
-python demo_claude_code_langchain.py
+python demo.py
 ```
 
 ## 💡 Key Innovations
 
-### 1. Claude Code Integration
-Instead of reimplementing features, we prompt Claude Code to use its native capabilities:
+### 1. Simplified Architecture
+Single LLM provider (Google Gemini) for all AI operations:
 ```python
-# Simple but powerful
-result = await agent.arun("Search for FDA approvals and analyze trends")
-# Claude Code automatically searches web + writes analysis code
+# Clean and simple
+response = await llm_service.generate_response(
+    agent_id="ceo-001",
+    system_prompt="You are the CEO",
+    user_message="Should we invest in gene therapy?"
+)
 ```
 
 ### 2. Multi-Phase Workflows
@@ -149,9 +148,8 @@ Actual lab workflows with realistic parameters:
 
 ### Environment Variables
 ```env
-ANTHROPIC_API_KEY=your-key-here
-LLM_PROVIDER=anthropic
-LLM_MODEL=claude-3-opus-20240229
+GOOGLE_API_KEY=your-key-here
+GEMINI_MODEL=gemini-2.0-flash-exp
 REDIS_URL=redis://localhost:6379
 ```
 
@@ -171,23 +169,24 @@ docker-compose up -d
 ## 🎉 Achievements
 
 ✅ Full-stack biotech dashboard
-✅ Real LLM integration (Claude)
-✅ Claude Code + LangChain bridge
+✅ Google Gemini as sole LLM provider
+✅ Simplified, clean architecture
 ✅ Working agent system with workflows
 ✅ Real-time updates via WebSocket
 ✅ Biotech-specific protocols
 ✅ Multi-agent collaboration
-✅ Web search + code execution
+✅ Executive decision-making
 ✅ Docker deployment ready
 
 ## 📝 Notes
 
-- System gracefully falls back to mock mode without API keys
+- System shows warning if API key not configured
 - All agent decisions are logged and traceable
 - Protocols follow industry standards
 - Architecture supports horizontal scaling
 - Clean separation of concerns throughout
+- Single LLM provider simplifies maintenance
 
 ---
 
-Created by combining Claude Code's native capabilities with LangChain for a powerful, production-ready biotech AI system.
+BioThings - A streamlined biotech AI platform powered exclusively by Google Gemini.

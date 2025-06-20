@@ -89,7 +89,7 @@ docker-compose up -d
 1. Create virtual environment:
 ```bash
 cd backend
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
@@ -100,7 +100,7 @@ pip install -r requirements.txt
 
 3. Run the backend:
 ```bash
-python main.py
+python -m app.main
 ```
 
 ### Frontend Development
@@ -121,15 +121,21 @@ npm run dev
 ```
 biothings/
 ├── backend/
-│   ├── agents/          # AI agent implementations
-│   ├── api/             # FastAPI endpoints
-│   ├── monitoring/      # Metrics and monitoring
-│   └── workflows/       # Business logic workflows
+│   ├── app/
+│   │   ├── agents/          # AI agent implementations
+│   │   ├── api/             # FastAPI endpoints  
+│   │   ├── core/            # Core services (LLM, messaging)
+│   │   ├── models/          # Data models
+│   │   └── workflows/       # Biotech workflows
+│   ├── requirements.txt
+│   └── .env.example
 ├── frontend/
-│   ├── app/             # Next.js app directory
-│   ├── components/      # React components
-│   └── lib/             # Utilities and hooks
-└── docker-compose.yml   # Container orchestration
+│   ├── app/                 # Next.js app directory
+│   ├── components/          # React components
+│   └── package.json
+├── demo.py                  # Quick demo script
+├── docker-compose.yml       # Container orchestration
+└── README.md
 ```
 
 ## API Endpoints
@@ -148,6 +154,21 @@ biothings/
 4. Push to the branch
 5. Create a Pull Request
 
+## Running the Demo
+
+```bash
+python demo.py
+```
+
+This will test:
+- Basic LLM responses
+- Executive agent decision-making
+- Inter-agent collaboration
+
+## Get Google API Key
+
+Visit https://makersuite.google.com/app/apikey to get your Gemini API key.
+
 ## License
 
-This project is proprietary and confidential.
+MIT License
