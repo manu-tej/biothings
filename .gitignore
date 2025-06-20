@@ -43,3 +43,4 @@ htmlcov/
 
 scratch_notes/
 *.log
+.claude
