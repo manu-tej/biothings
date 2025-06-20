@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
-import { Users, Crown, Briefcase, FlaskConical, DollarSign, Cpu, UserCheck } from 'lucide-react'
+import AgentChat from '@/components/agents/AgentChat'
+import { Users, Crown, Briefcase, FlaskConical, DollarSign, Cpu, UserCheck, MessageCircle, Eye } from 'lucide-react'
 
 const agentIcons: Record<string, React.ReactNode> = {
   CEO: <Crown className="w-6 h-6" />,
@@ -24,6 +26,9 @@ const statusColors: Record<string, string> = {
 }
 
 export default function AgentsPage() {
+  const [selectedAgent, setSelectedAgent] = useState<any>(null)
+  const [showChat, setShowChat] = useState(false)
+  
   const { data: agents, isLoading } = useQuery({
     queryKey: ['agents'],
     queryFn: async () => {
@@ -149,9 +154,20 @@ export default function AgentsPage() {
                 )}
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button className="w-full px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
-                  View Details
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+                <button 
+                  onClick={() => {
+                    setSelectedAgent(agent)
+                    setShowChat(true)
+                  }}
+                  className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Chat</span>
+                </button>
+                <button className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors border border-primary-600 dark:border-primary-400">
+                  <Eye className="w-4 h-4" />
+                  <span>Details</span>
                 </button>
               </div>
             </div>
@@ -174,6 +190,18 @@ export default function AgentsPage() {
           </div>
         )}
       </div>
+
+      {/* Agent Chat Modal */}
+      {selectedAgent && (
+        <AgentChat
+          agent={selectedAgent}
+          isOpen={showChat}
+          onClose={() => {
+            setShowChat(false)
+            setSelectedAgent(null)
+          }}
+        />
+      )}
     </DashboardLayout>
   )
 }

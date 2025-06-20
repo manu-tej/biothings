@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
-import { FlaskConical, Thermometer, Zap, CheckCircle, AlertTriangle, Clock } from 'lucide-react'
+import { FlaskConical, Thermometer, Zap, CheckCircle, AlertTriangle, Clock, Plus, Play, Pause, X } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 const equipmentData = [
   {
@@ -85,6 +87,16 @@ const statusIcons: Record<string, React.ReactNode> = {
 }
 
 export default function LaboratoryPage() {
+  const [showNewExperiment, setShowNewExperiment] = useState(false)
+  const [selectedExperiment, setSelectedExperiment] = useState<any>(null)
+  const [newExperimentData, setNewExperimentData] = useState({
+    name: '',
+    type: 'Molecular Biology',
+    researcher: 'CSO Agent',
+    equipment: []
+  })
+  const queryClient = useQueryClient()
+
   const formatTime = (timeString: string) => {
     return new Date(timeString).toLocaleTimeString('en-US', {
       hour: '2-digit',
@@ -104,8 +116,12 @@ export default function LaboratoryPage() {
               Monitor equipment, experiments, and laboratory operations
             </p>
           </div>
-          <button className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-            New Experiment
+          <button 
+            onClick={() => setShowNewExperiment(true)}
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center space-x-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Experiment</span>
           </button>
         </div>
 
@@ -166,7 +182,7 @@ export default function LaboratoryPage() {
             {equipmentData.map((equipment) => (
               <div
                 key={equipment.id}
-                className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
               >
                 <div className="flex items-center space-x-4">
                   <div className="p-2 rounded-lg bg-primary-50 dark:bg-primary-900/20">
@@ -222,7 +238,8 @@ export default function LaboratoryPage() {
             {experiments.map((experiment) => (
               <div
                 key={experiment.id}
-                className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => setSelectedExperiment(experiment)}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div>
@@ -264,6 +281,203 @@ export default function LaboratoryPage() {
           </div>
         </div>
       </div>
+
+      {/* New Experiment Modal */}
+      {showNewExperiment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                New Experiment
+              </h3>
+              <button
+                onClick={() => setShowNewExperiment(false)}
+                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            
+            <form className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Experiment Name
+                </label>
+                <input
+                  type="text"
+                  value={newExperimentData.name}
+                  onChange={(e) => setNewExperimentData({...newExperimentData, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                  placeholder="Enter experiment name"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Experiment Type
+                </label>
+                <select 
+                  value={newExperimentData.type}
+                  onChange={(e) => setNewExperimentData({...newExperimentData, type: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                >
+                  <option>Molecular Biology</option>
+                  <option>Cell Culture</option>
+                  <option>Protein Analysis</option>
+                  <option>DNA Sequencing</option>
+                  <option>Drug Discovery</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Lead Researcher
+                </label>
+                <select 
+                  value={newExperimentData.researcher}
+                  onChange={(e) => setNewExperimentData({...newExperimentData, researcher: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                >
+                  <option>CSO Agent</option>
+                  <option>Research Manager</option>
+                  <option>Lab Tech Worker 1</option>
+                  <option>Lab Tech Worker 2</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Required Equipment
+                </label>
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {equipmentData.map((equipment) => (
+                    <label key={equipment.id} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setNewExperimentData({
+                              ...newExperimentData,
+                              equipment: [...newExperimentData.equipment, equipment.id]
+                            })
+                          } else {
+                            setNewExperimentData({
+                              ...newExperimentData,
+                              equipment: newExperimentData.equipment.filter((id: string) => id !== equipment.id)
+                            })
+                          }
+                        }}
+                      />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{equipment.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowNewExperiment(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    // TODO: Add experiment creation logic
+                    console.log('Creating experiment:', newExperimentData)
+                    setShowNewExperiment(false)
+                  }}
+                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                >
+                  Create Experiment
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Experiment Details Modal */}
+      {selectedExperiment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                {selectedExperiment.name}
+              </h3>
+              <button
+                onClick={() => setSelectedExperiment(null)}
+                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Type</p>
+                  <p className="text-gray-900 dark:text-white">{selectedExperiment.type}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</p>
+                  <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${statusColors[selectedExperiment.status]}`}>
+                    {statusIcons[selectedExperiment.status]}
+                    <span className="capitalize">{selectedExperiment.status.replace('_', ' ')}</span>
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Researcher</p>
+                  <p className="text-gray-900 dark:text-white">{selectedExperiment.researcher}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Equipment</p>
+                  <p className="text-gray-900 dark:text-white">{selectedExperiment.equipment.length} devices assigned</p>
+                </div>
+              </div>
+              
+              <div className="border-t pt-4">
+                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Timeline</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Start Time</span>
+                    <span className="text-sm text-gray-900 dark:text-white">{formatTime(selectedExperiment.startDate)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Estimated Completion</span>
+                    <span className="text-sm text-gray-900 dark:text-white">{formatTime(selectedExperiment.estimatedCompletion)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border-t pt-4">
+                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Actions</h4>
+                <div className="flex gap-2">
+                  {selectedExperiment.status === 'pending' && (
+                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+                      <Play className="w-4 h-4" />
+                      <span>Start Experiment</span>
+                    </button>
+                  )}
+                  {selectedExperiment.status === 'in_progress' && (
+                    <button className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors flex items-center space-x-2">
+                      <Pause className="w-4 h-4" />
+                      <span>Pause Experiment</span>
+                    </button>
+                  )}
+                  <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    View Logs
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   )
 }

@@ -1,26 +1,28 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import * as echarts from 'echarts'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
-import { TrendingUp, TrendingDown, BarChart3, PieChart, Activity, DollarSign } from 'lucide-react'
+import { TrendingUp, TrendingDown, BarChart3, PieChart, Activity, DollarSign, Download, Calendar, RefreshCw } from 'lucide-react'
 
 export default function AnalyticsPage() {
+  const [dateRange, setDateRange] = useState('week')
+  const [isExporting, setIsExporting] = useState(false)
   const performanceChartRef = useRef<HTMLDivElement>(null)
   const costChartRef = useRef<HTMLDivElement>(null)
   const productivityChartRef = useRef<HTMLDivElement>(null)
 
-  const { data: metrics } = useQuery({
-    queryKey: ['analytics-metrics'],
+  const { data: metrics, isLoading, refetch } = useQuery({
+    queryKey: ['analytics-metrics', dateRange],
     queryFn: async () => {
-      // Mock analytics data
+      // Mock analytics data - in production, fetch from API
       return {
         kpis: {
-          researchEfficiency: 87.5,
-          costPerExperiment: 4250,
-          successRate: 92.3,
-          timeToCompletion: 14.2
+          researchEfficiency: 87.5 + Math.random() * 10,
+          costPerExperiment: 4250 + Math.random() * 500,
+          successRate: 92.3 + Math.random() * 5,
+          timeToCompletion: 14.2 + Math.random() * 2
         },
         trends: {
           researchOutput: { value: 15.3, direction: 'up' },
@@ -225,10 +227,42 @@ export default function AnalyticsPage() {
             </p>
           </div>
           <div className="flex space-x-2">
-            <button className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
-              Export Report
+            <select
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="day">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="quarter">This Quarter</option>
+              <option value="year">This Year</option>
+            </select>
+            <button 
+              onClick={() => refetch()}
+              className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title="Refresh data"
+            >
+              <RefreshCw className="w-5 h-5" />
             </button>
-            <button className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+            <button 
+              onClick={async () => {
+                setIsExporting(true)
+                // Simulate export
+                await new Promise(resolve => setTimeout(resolve, 2000))
+                alert('Report exported successfully!')
+                setIsExporting(false)
+              }}
+              disabled={isExporting}
+              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
+            >
+              <Download className="w-4 h-4" />
+              <span>{isExporting ? 'Exporting...' : 'Export Report'}</span>
+            </button>
+            <button 
+              onClick={() => alert('AI insights generation coming soon!')}
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            >
               Generate Insights
             </button>
           </div>
@@ -241,7 +275,7 @@ export default function AnalyticsPage() {
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Research Efficiency</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {metrics?.kpis?.researchEfficiency}%
+                  {isLoading ? '...' : `${metrics?.kpis?.researchEfficiency.toFixed(1)}%`}
                 </p>
               </div>
               <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20">
@@ -255,7 +289,7 @@ export default function AnalyticsPage() {
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Cost per Experiment</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {formatCurrency(metrics?.kpis?.costPerExperiment || 0)}
+                  {isLoading ? '...' : formatCurrency(metrics?.kpis?.costPerExperiment || 0)}
                 </p>
               </div>
               <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20">
@@ -269,7 +303,7 @@ export default function AnalyticsPage() {
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Success Rate</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {metrics?.kpis?.successRate}%
+                  {isLoading ? '...' : `${metrics?.kpis?.successRate.toFixed(1)}%`}
                 </p>
               </div>
               <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/20">
@@ -283,7 +317,7 @@ export default function AnalyticsPage() {
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Avg Time to Completion</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {metrics?.kpis?.timeToCompletion} days
+                  {isLoading ? '...' : `${metrics?.kpis?.timeToCompletion.toFixed(1)} days`}
                 </p>
               </div>
               <div className="p-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">

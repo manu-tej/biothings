@@ -1,7 +1,7 @@
 'use client'
 
-import React from 'react'
-import { useQuery } from '@tanstack/react-query'
+import React, { useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { 
   Play, 
   Pause, 
@@ -15,6 +15,7 @@ import {
   BarChart
 } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { useWebSocket } from '@/hooks/useWebSocket'
 
 interface Workflow {
   id: string
@@ -91,9 +92,11 @@ function WorkflowItem({ workflow }: WorkflowItemProps) {
           </div>
           <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
             <div 
-              className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+              className="bg-primary-600 h-2 rounded-full transition-all duration-300 relative overflow-hidden"
               style={{ width: `${workflow.progress * 100}%` }}
-            />
+            >
+              <div className="absolute inset-0 bg-white/20 animate-pulse" />
+            </div>
           </div>
         </div>
       )}
@@ -111,10 +114,45 @@ function WorkflowItem({ workflow }: WorkflowItemProps) {
 }
 
 export default function WorkflowStatus() {
+  const queryClient = useQueryClient()
+  
   const { data: workflows, isLoading } = useQuery({
     queryKey: ['workflows'],
     queryFn: () => apiClient.getWorkflows(),
-    refetchInterval: 5000 // Refresh every 5 seconds
+    refetchInterval: 30000 // Reduced frequency since we have WebSocket
+  })
+
+  // WebSocket for real-time workflow updates
+  useWebSocket({
+    onMessage: (data) => {
+      if (data.type === 'workflow_update') {
+        // Update specific workflow
+        queryClient.setQueryData(['workflows'], (oldData: Workflow[] | undefined) => {
+          if (!oldData) return oldData
+          return oldData.map(workflow => 
+            workflow.id === data.workflow_id 
+              ? { ...workflow, ...data.workflow }
+              : workflow
+          )
+        })
+      } else if (data.type === 'workflow_progress') {
+        // Update workflow progress
+        queryClient.setQueryData(['workflows'], (oldData: Workflow[] | undefined) => {
+          if (!oldData) return oldData
+          return oldData.map(workflow => 
+            workflow.id === data.workflow_id 
+              ? { ...workflow, progress: data.progress, status: data.status }
+              : workflow
+          )
+        })
+      } else if (data.type === 'workflows_update') {
+        // Full workflows update
+        queryClient.setQueryData(['workflows'], data.workflows)
+      }
+    },
+    onConnect: () => {
+      console.log('WebSocket connected for workflow monitoring')
+    }
   })
 
   if (isLoading) {

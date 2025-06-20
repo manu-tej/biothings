@@ -6,16 +6,23 @@ import SystemMetrics from '@/components/dashboard/SystemMetrics'
 import AgentOverview from '@/components/dashboard/AgentOverview'
 import WorkflowStatus from '@/components/dashboard/WorkflowStatus'
 import RealtimeAlerts from '@/components/dashboard/RealtimeAlerts'
-import { useWebSocket } from '@/lib/hooks/useWebSocket'
+import { useWebSocket } from '@/hooks/useWebSocket'
 
 export default function DashboardPage() {
-  const { isConnected, sendMessage, lastMessage } = useWebSocket()
+  const [connectionStatus, setConnectionStatus] = useState('connecting')
   
-  useEffect(() => {
-    if (lastMessage) {
-      console.log('WebSocket message:', lastMessage)
+  useWebSocket({
+    onConnect: () => {
+      setConnectionStatus('connected')
+      console.log('Dashboard WebSocket connected')
+    },
+    onDisconnect: () => {
+      setConnectionStatus('disconnected')
+    },
+    onMessage: (data) => {
+      console.log('Dashboard received:', data)
     }
-  }, [lastMessage])
+  })
 
   return (
     <DashboardLayout>
@@ -30,11 +37,28 @@ export default function DashboardPage() {
               Real-time monitoring and control of your biotech operations
             </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <span className={`status-indicator ${isConnected ? 'active' : 'inactive'}`} />
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {isConnected ? 'Connected' : 'Disconnected'}
-            </span>
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700">
+              <span className={`w-2 h-2 rounded-full ${
+                connectionStatus === 'connected' ? 'bg-green-500 animate-pulse' : 
+                connectionStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+                'bg-red-500'
+              }`} />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {connectionStatus === 'connected' ? 'Live' : 
+                 connectionStatus === 'connecting' ? 'Connecting...' : 
+                 'Offline'}
+              </span>
+            </div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title="Refresh dashboard"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 'use client'
 
-import React from 'react'
-import { useQuery } from '@tanstack/react-query'
+import React, { useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { 
   Users, 
   Crown,
@@ -13,6 +13,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { useWebSocket } from '@/hooks/useWebSocket'
 
 interface Agent {
   id: string
@@ -111,10 +112,37 @@ function AgentCard({ agent, isExecutive }: AgentCardProps) {
 }
 
 export default function AgentOverview() {
+  const queryClient = useQueryClient()
+  const [realtimeAgents, setRealtimeAgents] = useState<Agent[]>([])
+  
   const { data: agents, isLoading } = useQuery({
     queryKey: ['agents'],
     queryFn: () => apiClient.getAgents(),
-    refetchInterval: 10000 // Refresh every 10 seconds
+    refetchInterval: 30000 // Reduced frequency since we have WebSocket
+  })
+
+  // WebSocket for real-time updates
+  useWebSocket({
+    onMessage: (data) => {
+      if (data.type === 'agent_status_update') {
+        // Update the specific agent in the cache
+        queryClient.setQueryData(['agents'], (oldData: Agent[] | undefined) => {
+          if (!oldData) return oldData
+          return oldData.map(agent => 
+            agent.id === data.agent_id 
+              ? { ...agent, status: data.status, last_active: data.timestamp }
+              : agent
+          )
+        })
+      } else if (data.type === 'agents_update') {
+        // Full agents update
+        setRealtimeAgents(data.agents)
+        queryClient.setQueryData(['agents'], data.agents)
+      }
+    },
+    onConnect: () => {
+      console.log('WebSocket connected for agent monitoring')
+    }
   })
 
   if (isLoading) {
