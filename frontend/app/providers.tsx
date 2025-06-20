@@ -2,7 +2,8 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { registerServiceWorker } from '@/lib/register-sw'
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -10,12 +11,25 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000, // 1 minute
-            refetchInterval: 5 * 1000, // 5 seconds for real-time updates
+            staleTime: 30 * 1000, // 30 seconds
+            gcTime: 5 * 60 * 1000, // 5 minutes garbage collection time
+            refetchInterval: false, // Disable automatic refetch by default
+            refetchOnWindowFocus: false, // Don't refetch on window focus
+            retry: 1, // Only retry once
+            retryDelay: 1000, // 1 second retry delay
+          },
+          mutations: {
+            retry: 1,
+            retryDelay: 1000,
           },
         },
       })
   )
+
+  useEffect(() => {
+    // Register service worker for offline support
+    registerServiceWorker()
+  }, [])
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send, X, Bot, User, Loader2 } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
-import { apiClient } from '@/lib/api-client'
+import { optimizedApiClient } from '@/lib/optimized-api-client'
 
 interface Message {
   id: string
@@ -54,7 +54,7 @@ export default function AgentChat({ agent, isOpen, onClose }: AgentChatProps) {
 
   const sendMessage = useMutation({
     mutationFn: async (message: string) => {
-      return apiClient.chat(agent.id, message)
+      return optimizedApiClient.chat(agent.id, message)
     },
     onSuccess: (response) => {
       setMessages(prev => [...prev, {

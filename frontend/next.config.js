@@ -4,6 +4,58 @@ const nextConfig = {
   swcMinify: true,
   output: 'standalone',
   
+  // Performance optimizations
+  // experimental: {
+  //   optimizeCss: true,  // Requires 'critters' package
+  // },
+  
+  // Enable compression
+  compress: true,
+  
+  // Optimize production builds
+  productionBrowserSourceMaps: false,
+  
+  // Module federation for better code splitting
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          framework: {
+            name: 'framework',
+            chunks: 'all',
+            test: /[\\/]node_modules[\\/](react|react-dom|scheduler|next)[\\/]/,
+            priority: 40,
+            enforce: true,
+          },
+          commons: {
+            name: 'commons',
+            chunks: 'all',
+            minChunks: 2,
+            priority: 20,
+          },
+          lib: {
+            test: /[\\/]node_modules[\\/]/,
+            chunks: 'all',
+            name(module, chunks, cacheGroupKey) {
+              const moduleFileName = module
+                .identifier()
+                .split('/')
+                .reduceRight((item) => item);
+              return `${cacheGroupKey}-${moduleFileName}`;
+            },
+            priority: 30,
+            minChunks: 1,
+            reuseExistingChunk: true,
+          },
+        },
+      };
+    }
+    return config;
+  },
+  
   // API proxy configuration
   async rewrites() {
     // Use backend service name in Docker, localhost in dev

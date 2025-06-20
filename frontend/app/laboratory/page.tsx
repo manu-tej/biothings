@@ -89,13 +89,22 @@ const statusIcons: Record<string, React.ReactNode> = {
 export default function LaboratoryPage() {
   const [showNewExperiment, setShowNewExperiment] = useState(false)
   const [selectedExperiment, setSelectedExperiment] = useState<any>(null)
-  const [newExperimentData, setNewExperimentData] = useState({
+  const [newExperimentData, setNewExperimentData] = useState<{
+    name: string;
+    type: string;
+    researcher: string;
+    equipment: string[];
+  }>({
     name: '',
     type: 'Molecular Biology',
     researcher: 'CSO Agent',
     equipment: []
   })
   const queryClient = useQueryClient()
+  
+  // Optimize by only showing modals when needed
+  const shouldRenderNewExperimentModal = showNewExperiment
+  const shouldRenderDetailsModal = !!selectedExperiment
 
   const formatTime = (timeString: string) => {
     return new Date(timeString).toLocaleTimeString('en-US', {

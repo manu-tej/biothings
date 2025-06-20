@@ -1,12 +1,30 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
-import SystemMetrics from '@/components/dashboard/SystemMetrics'
-import AgentOverview from '@/components/dashboard/AgentOverview'
-import WorkflowStatus from '@/components/dashboard/WorkflowStatus'
-import RealtimeAlerts from '@/components/dashboard/RealtimeAlerts'
 import { useWebSocket } from '@/hooks/useWebSocket'
+
+// Dynamic imports with loading states
+const SystemMetrics = dynamic(() => import('@/components/dashboard/SystemMetrics'), {
+  loading: () => <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-64 rounded-lg" />,
+  ssr: false
+})
+
+const AgentOverview = dynamic(() => import('@/components/dashboard/OptimizedAgentOverview'), {
+  loading: () => <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-96 rounded-lg" />,
+  ssr: false
+})
+
+const WorkflowStatus = dynamic(() => import('@/components/dashboard/WorkflowStatus'), {
+  loading: () => <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-96 rounded-lg" />,
+  ssr: false
+})
+
+const RealtimeAlerts = dynamic(() => import('@/components/dashboard/RealtimeAlerts'), {
+  loading: () => <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-64 rounded-lg" />,
+  ssr: false
+})
 
 export default function DashboardPage() {
   const [connectionStatus, setConnectionStatus] = useState('connecting')
@@ -65,17 +83,25 @@ export default function DashboardPage() {
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3">
-            <SystemMetrics />
+            <Suspense fallback={<div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-64 rounded-lg" />}>
+              <SystemMetrics />
+            </Suspense>
           </div>
           <div className="lg:col-span-1">
-            <RealtimeAlerts />
+            <Suspense fallback={<div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-64 rounded-lg" />}>
+              <RealtimeAlerts />
+            </Suspense>
           </div>
         </div>
 
         {/* Agent and Workflow Overview */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AgentOverview />
-          <WorkflowStatus />
+          <Suspense fallback={<div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-96 rounded-lg" />}>
+            <AgentOverview />
+          </Suspense>
+          <Suspense fallback={<div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-96 rounded-lg" />}>
+            <WorkflowStatus />
+          </Suspense>
         </div>
       </div>
     </DashboardLayout>

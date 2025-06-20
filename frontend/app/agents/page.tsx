@@ -1,10 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import dynamic from 'next/dynamic'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
-import AgentChat from '@/components/agents/AgentChat'
 import { Users, Crown, Briefcase, FlaskConical, DollarSign, Cpu, UserCheck, MessageCircle, Eye } from 'lucide-react'
+
+// Lazy load heavy components
+const AgentChat = dynamic(() => import('@/components/agents/AgentChat'), {
+  loading: () => <div className="animate-pulse">Loading chat...</div>,
+  ssr: false
+})
 
 const agentIcons: Record<string, React.ReactNode> = {
   CEO: <Crown className="w-6 h-6" />,
@@ -35,7 +41,8 @@ export default function AgentsPage() {
       const response = await fetch('http://localhost:8000/api/agents')
       return response.json()
     },
-    refetchInterval: 5000
+    refetchInterval: 30000, // Reduced frequency
+    staleTime: 10000 // Consider data fresh for 10s
   })
 
   const { data: hierarchy } = useQuery({
@@ -44,7 +51,8 @@ export default function AgentsPage() {
       const response = await fetch('http://localhost:8000/api/hierarchy')
       return response.json()
     },
-    refetchInterval: 10000
+    refetchInterval: 60000, // Reduced frequency
+    staleTime: 30000
   })
 
   if (isLoading) {
