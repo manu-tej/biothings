@@ -1,43 +1,58 @@
-# BioThings AI Platform
+# BioThings - AI-Powered Biotech Dashboard
 
-An LLM-powered monitoring interface for automating biotech operations using hierarchical AI agents.
+An AI-powered biotech company simulation with executive agents using Google Gemini.
 
 ## Overview
 
-This platform enables you to operate as the board of directors, overseeing all biotech operations through AI agents that handle day-to-day tasks while providing real-time visibility and control.
+BioThings is a real-time dashboard where AI agents (CEO, CSO, CFO, CTO, COO) collaborate to make strategic decisions, manage research workflows, and optimize biotech operations.
 
 ### Architecture
 
 ```
-Board of Directors (You)
-    ├── CEO Agent
-    │   ├── COO Agent (Operations)
-    │   ├── CSO Agent (Science)
-    │   ├── CFO Agent (Finance)
-    │   └── CTO Agent (Technology)
-    └── Real-time Monitoring Dashboard
+┌─────────────────────────────────────────┐
+│       Next.js Frontend Dashboard        │
+│         Real-time WebSocket             │
+└────────────────┬───────────────────────┘
+                 │
+┌────────────────▼───────────────────────┐
+│         FastAPI Backend                 │
+│  ┌─────────────────────────────────┐  │
+│  │   Executive AI Agents           │  │
+│  │  CEO, CSO, CFO, CTO, COO       │  │
+│  └──────────┬──────────────────────┘  │
+│             │                          │
+│  ┌──────────▼──────────────────────┐  │
+│  │   Google Gemini LLM Service     │  │
+│  │  • Strategic decisions          │  │
+│  │  • Scientific analysis          │  │
+│  │  • Financial planning           │  │
+│  └─────────────────────────────────┘  │
+└────────────────────────────────────────┘
 ```
 
 ## Features
 
-- **Hierarchical Multi-Agent System**: AI agents organized in a corporate structure
-- **Real-time Monitoring**: WebSocket-based live updates and metrics
-- **Task Delegation**: Automatic task assignment and tracking
-- **Biotech Integration**: Lab equipment monitoring, experiment tracking, inventory management
-- **Scalable Architecture**: Microservices-based design with Docker
+- **AI Executive Agents**: CEO, CSO, CFO, CTO, COO with specialized roles
+- **Real-time Monitoring**: WebSocket-based live updates and agent communication
+- **Biotech Workflows**: CRISPR, protein synthesis, drug screening automation
+- **Inter-agent Collaboration**: Agents communicate and make collective decisions
+- **Google Gemini Integration**: Fast, cost-effective AI with advanced capabilities
 
 ## Tech Stack
 
-- **Backend**: FastAPI, LangChain, LangGraph, PostgreSQL, Redis
-- **Frontend**: Next.js 14, TypeScript, React Query, WebSockets
-- **Infrastructure**: Docker, Nginx
+- **Backend**: FastAPI, LangChain, LangGraph, Redis
+- **Frontend**: Next.js 14, TypeScript, React, WebSockets
+- **AI/LLM**: Google Gemini (gemini-2.0-flash-exp)
+- **Infrastructure**: Docker, Redis Pub/Sub
 
 ## Quick Start
 
 ### Prerequisites
 
+- Python 3.11+
+- Node.js 18+
 - Docker and Docker Compose
-- OpenAI API key
+- Google API key for Gemini
 
 ### Installation
 
@@ -49,12 +64,12 @@ cd biothings
 
 2. Copy environment variables:
 ```bash
-cp .env.example .env
+cp backend/.env.example backend/.env
 ```
 
-3. Edit `.env` and add your OpenAI API key:
+3. Edit `backend/.env` and add your Google API key:
 ```
-OPENAI_API_KEY=your-actual-api-key-here
+GOOGLE_API_KEY=your-actual-api-key-here
 ```
 
 4. Start the platform:
