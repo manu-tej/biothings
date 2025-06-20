@@ -1,0 +1,232 @@
+{
+  "id": null,
+  "title": "BioThings System Overview",
+  "tags": [
+    "biothings",
+    "system",
+    "overview"
+  ],
+  "timezone": "UTC",
+  "panels": [
+    {
+      "id": 1,
+      "title": "System Health Status",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "up{job=\"biothings\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "System Status",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "text": "DOWN"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "1": {
+                  "text": "UP"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "yAxes": null
+    },
+    {
+      "id": 2,
+      "title": "CPU Usage",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "biothings_cpu_usage_percent",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "CPU %",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 4,
+        "y": 0
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": [
+        {
+          "label": "Percent",
+          "max": 100,
+          "min": 0
+        },
+        {
+          "show": false
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Memory Usage",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "biothings_memory_usage_percent",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Memory %",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 12,
+        "y": 0
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": [
+        {
+          "label": "Percent",
+          "max": 100,
+          "min": 0
+        },
+        {
+          "show": false
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Active Agents",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(biothings_agents_active)",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Total Active Agents",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": null
+    },
+    {
+      "id": 5,
+      "title": "HTTP Request Rate",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(biothings_http_requests_total[5m])",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Requests/sec",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": null
+    },
+    {
+      "id": 6,
+      "title": "WebSocket Connections",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "biothings_websocket_connections_active",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Active Connections",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": null
+    }
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "refresh": "30s",
+  "schemaVersion": 27,
+  "version": 1
+}

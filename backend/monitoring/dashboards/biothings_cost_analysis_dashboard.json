@@ -1,0 +1,195 @@
+{
+  "id": null,
+  "title": "BioThings Cost Analysis",
+  "tags": [
+    "biothings",
+    "cost",
+    "llm"
+  ],
+  "timezone": "UTC",
+  "panels": [
+    {
+      "id": 17,
+      "title": "LLM Cost Today",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "increase(biothings_llm_cost_total[24h])",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Cost ($)",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "options": null,
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "currencyUSD",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 100
+              },
+              {
+                "color": "red",
+                "value": 500
+              }
+            ]
+          }
+        }
+      },
+      "yAxes": null
+    },
+    {
+      "id": 18,
+      "title": "Cost by Provider",
+      "type": "piechart",
+      "targets": [
+        {
+          "expr": "sum by (provider) (increase(biothings_llm_cost_total[24h]))",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{provider}}",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": null
+    },
+    {
+      "id": 19,
+      "title": "Cost by Agent Type",
+      "type": "piechart",
+      "targets": [
+        {
+          "expr": "sum by (agent_type) (increase(biothings_llm_cost_total[24h]))",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{agent_type}}",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": null
+    },
+    {
+      "id": 20,
+      "title": "Token Usage Rate",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(biothings_llm_tokens_total{token_type=\"input\"}[5m])",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Input Tokens/sec",
+          "refId": "A",
+          "step": 30
+        },
+        {
+          "expr": "rate(biothings_llm_tokens_total{token_type=\"output\"}[5m])",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Output Tokens/sec",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": null
+    },
+    {
+      "id": 21,
+      "title": "Monthly Cost Projection",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "avg_over_time(rate(biothings_llm_cost_total[1h])[24h:1h]) * 24 * 30",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Projected Monthly Cost",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 4
+      },
+      "options": null,
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "currencyUSD",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1000
+              },
+              {
+                "color": "red",
+                "value": 5000
+              }
+            ]
+          }
+        }
+      },
+      "yAxes": null
+    }
+  ],
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "refresh": "5m",
+  "schemaVersion": 27,
+  "version": 1
+}

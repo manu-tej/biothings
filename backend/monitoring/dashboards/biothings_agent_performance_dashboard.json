@@ -1,0 +1,147 @@
+{
+  "id": null,
+  "title": "BioThings Agent Performance",
+  "tags": [
+    "biothings",
+    "agents",
+    "performance"
+  ],
+  "timezone": "UTC",
+  "panels": [
+    {
+      "id": 7,
+      "title": "Agent Task Rate by Type",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(biothings_agent_tasks_total[5m])",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{agent_type}} - {{task_type}}",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": null
+    },
+    {
+      "id": 8,
+      "title": "Agent Response Time",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(biothings_agent_task_duration_seconds_bucket[5m]))",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "95th percentile",
+          "refId": "A",
+          "step": 30
+        },
+        {
+          "expr": "histogram_quantile(0.50, rate(biothings_agent_task_duration_seconds_bucket[5m]))",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "50th percentile",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": null
+    },
+    {
+      "id": 9,
+      "title": "Agent Error Rate",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(biothings_agent_errors_total[5m])",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{agent_type}} - {{error_type}}",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": null
+    },
+    {
+      "id": 10,
+      "title": "Agent Success Rate",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "rate(biothings_agent_tasks_total{status=\"success\"}[5m]) / rate(biothings_agent_tasks_total[5m]) * 100",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Success Rate %",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "options": null,
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 90
+              },
+              {
+                "color": "green",
+                "value": 95
+              }
+            ]
+          }
+        }
+      },
+      "yAxes": null
+    }
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "refresh": "30s",
+  "schemaVersion": 27,
+  "version": 1
+}

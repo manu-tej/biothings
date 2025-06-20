@@ -1,0 +1,221 @@
+{
+  "id": null,
+  "title": "BioThings Business Intelligence",
+  "tags": [
+    "biothings",
+    "business",
+    "research"
+  ],
+  "timezone": "UTC",
+  "panels": [
+    {
+      "id": 11,
+      "title": "Research Productivity Score",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "biothings_research_productivity_score",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Productivity Score",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "options": null,
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "max": 1,
+          "min": 0,
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.6
+              },
+              {
+                "color": "green",
+                "value": 0.8
+              }
+            ]
+          }
+        }
+      },
+      "yAxes": null
+    },
+    {
+      "id": 12,
+      "title": "Experiments Completed Today",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "increase(biothings_experiments_total{status=\"success\"}[24h])",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Completed Experiments",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": null
+    },
+    {
+      "id": 13,
+      "title": "Active Experiments",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(biothings_experiments_active)",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Active Experiments",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": null
+    },
+    {
+      "id": 14,
+      "title": "Experiment Success Rate",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "avg(biothings_experiment_success_rate) * 100",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Success Rate %",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "options": null,
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              },
+              {
+                "color": "green",
+                "value": 90
+              }
+            ]
+          }
+        }
+      },
+      "yAxes": null
+    },
+    {
+      "id": 15,
+      "title": "Experiment Duration Distribution",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(biothings_experiment_duration_seconds_bucket[1h]))",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "95th percentile",
+          "refId": "A",
+          "step": 30
+        },
+        {
+          "expr": "histogram_quantile(0.50, rate(biothings_experiment_duration_seconds_bucket[1h]))",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Median",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": null
+    },
+    {
+      "id": 16,
+      "title": "Publications Generated",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "increase(biothings_publications_generated_total[24h])",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{publication_type}}",
+          "refId": "A",
+          "step": 30
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "options": null,
+      "fieldConfig": null,
+      "yAxes": null
+    }
+  ],
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "refresh": "5m",
+  "schemaVersion": 27,
+  "version": 1
+}

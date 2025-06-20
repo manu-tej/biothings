@@ -1,0 +1,307 @@
+groups:
+- name: biothings_system_health
+  interval: 30s
+  rules:
+  - alert: BioThingsSystemDown
+    expr: up{job="biothings"} == 0
+    for: 30s
+    labels:
+      severity: critical
+      component: system
+      sla_impact: high
+    annotations:
+      summary: BioThings system is down
+      description: The BioThings system has been down for more than 30 seconds. This
+        is a critical SLA breach.
+      runbook_url: https://docs.biothings.com/runbooks/system-down
+      action_required: Immediate investigation and recovery required
+  - alert: BioThingsHighCPUUsage
+    expr: biothings_cpu_usage_percent > 85
+    for: 5m
+    labels:
+      severity: warning
+      component: system
+      sla_impact: medium
+    annotations:
+      summary: High CPU usage detected
+      description: 'CPU usage is above 85% for more than 5 minutes. Current usage:
+        {{ $value }}%'
+      runbook_url: https://docs.biothings.com/runbooks/high-cpu
+      action_required: Monitor system performance and consider scaling
+  - alert: BioThingsCriticalCPUUsage
+    expr: biothings_cpu_usage_percent > 95
+    for: 2m
+    labels:
+      severity: critical
+      component: system
+      sla_impact: high
+    annotations:
+      summary: Critical CPU usage detected
+      description: 'CPU usage is above 95% for more than 2 minutes. Current usage:
+        {{ $value }}%. System may become unresponsive.'
+      runbook_url: https://docs.biothings.com/runbooks/critical-cpu
+      action_required: Immediate action required - scale or investigate high CPU processes
+  - alert: BioThingsHighMemoryUsage
+    expr: biothings_memory_usage_percent > 80
+    for: 5m
+    labels:
+      severity: warning
+      component: system
+      sla_impact: medium
+    annotations:
+      summary: High memory usage detected
+      description: 'Memory usage is above 80% for more than 5 minutes. Current usage:
+        {{ $value }}%'
+      runbook_url: https://docs.biothings.com/runbooks/high-memory
+      action_required: Monitor memory usage and consider scaling
+  - alert: BioThingsCriticalMemoryUsage
+    expr: biothings_memory_usage_percent > 90
+    for: 2m
+    labels:
+      severity: critical
+      component: system
+      sla_impact: high
+    annotations:
+      summary: Critical memory usage detected
+      description: 'Memory usage is above 90% for more than 2 minutes. Current usage:
+        {{ $value }}%. Risk of OOM kills.'
+      runbook_url: https://docs.biothings.com/runbooks/critical-memory
+      action_required: Immediate action required - free memory or scale system
+  - alert: BioThingsLowDiskSpace
+    expr: biothings_disk_usage_percent > 85
+    for: 5m
+    labels:
+      severity: warning
+      component: storage
+      sla_impact: medium
+    annotations:
+      summary: Low disk space detected
+      description: 'Disk usage is above 85% for more than 5 minutes. Current usage:
+        {{ $value }}%'
+      runbook_url: https://docs.biothings.com/runbooks/low-disk-space
+      action_required: Clean up disk space or expand storage
+- name: biothings_application_health
+  interval: 30s
+  rules:
+  - alert: BioThingsHighErrorRate
+    expr: rate(biothings_http_requests_total{status_code=~"5.."}[5m]) / rate(biothings_http_requests_total[5m])
+      > 0.05
+    for: 2m
+    labels:
+      severity: warning
+      component: api
+      sla_impact: medium
+    annotations:
+      summary: High HTTP error rate detected
+      description: 'HTTP error rate is above 5% for more than 2 minutes. Current rate:
+        {{ $value | humanizePercentage }}'
+      runbook_url: https://docs.biothings.com/runbooks/high-error-rate
+      action_required: Investigate application errors and fix issues
+  - alert: BioThingsCriticalErrorRate
+    expr: rate(biothings_http_requests_total{status_code=~"5.."}[5m]) / rate(biothings_http_requests_total[5m])
+      > 0.15
+    for: 1m
+    labels:
+      severity: critical
+      component: api
+      sla_impact: high
+    annotations:
+      summary: Critical HTTP error rate detected
+      description: 'HTTP error rate is above 15% for more than 1 minute. Current rate:
+        {{ $value | humanizePercentage }}. SLA breach imminent.'
+      runbook_url: https://docs.biothings.com/runbooks/critical-error-rate
+      action_required: Immediate action required - rollback or emergency fix
+  - alert: BioThingsSlowResponseTime
+    expr: histogram_quantile(0.95, rate(biothings_http_request_duration_seconds_bucket[5m]))
+      > 2
+    for: 5m
+    labels:
+      severity: warning
+      component: api
+      sla_impact: medium
+    annotations:
+      summary: Slow API response times detected
+      description: '95th percentile response time is above 2 seconds for more than
+        5 minutes. Current: {{ $value }}s'
+      runbook_url: https://docs.biothings.com/runbooks/slow-response
+      action_required: Investigate performance bottlenecks
+  - alert: BioThingsNoActiveAgents
+    expr: sum(biothings_agents_active) == 0
+    for: 1m
+    labels:
+      severity: critical
+      component: agents
+      sla_impact: high
+    annotations:
+      summary: No active agents detected
+      description: No agents are currently active. This will prevent any research
+        tasks from being processed.
+      runbook_url: https://docs.biothings.com/runbooks/no-agents
+      action_required: Immediate action required - restart agent system
+  - alert: BioThingsLowAgentCount
+    expr: sum(biothings_agents_active) < 3
+    for: 5m
+    labels:
+      severity: warning
+      component: agents
+      sla_impact: medium
+    annotations:
+      summary: Low number of active agents
+      description: Only {{ $value }} agents are currently active. Normal operation
+        requires at least 3 agents.
+      runbook_url: https://docs.biothings.com/runbooks/low-agent-count
+      action_required: Check agent health and restart failed agents
+- name: biothings_business_sla
+  interval: 1m
+  rules:
+  - alert: BioThingsLowResearchProductivity
+    expr: biothings_research_productivity_score < 0.7
+    for: 15m
+    labels:
+      severity: warning
+      component: research
+      sla_impact: medium
+    annotations:
+      summary: Research productivity below target
+      description: Research productivity score is {{ $value | humanizePercentage }},
+        below the 70% target for more than 15 minutes.
+      runbook_url: https://docs.biothings.com/runbooks/low-productivity
+      action_required: Investigate research bottlenecks and agent performance
+  - alert: BioThingsHighExperimentFailureRate
+    expr: rate(biothings_experiments_total{status="failed"}[1h]) / rate(biothings_experiments_total[1h])
+      > 0.2
+    for: 10m
+    labels:
+      severity: warning
+      component: experiments
+      sla_impact: medium
+    annotations:
+      summary: High experiment failure rate
+      description: Experiment failure rate is {{ $value | humanizePercentage }}, above
+        the 20% threshold.
+      runbook_url: https://docs.biothings.com/runbooks/experiment-failures
+      action_required: Investigate experiment execution issues
+  - alert: BioThingsNoActiveExperiments
+    expr: sum(biothings_experiments_active) == 0
+    for: 30m
+    labels:
+      severity: warning
+      component: experiments
+      sla_impact: low
+    annotations:
+      summary: No active experiments
+      description: No experiments have been running for more than 30 minutes. This
+        may indicate a problem with experiment scheduling.
+      runbook_url: https://docs.biothings.com/runbooks/no-experiments
+      action_required: Check experiment queue and scheduling system
+- name: biothings_cost_monitoring
+  interval: 1m
+  rules:
+  - alert: BioThingsHighDailyLLMCost
+    expr: increase(biothings_llm_cost_total[24h]) > 200
+    for: 0s
+    labels:
+      severity: warning
+      component: cost
+      sla_impact: low
+    annotations:
+      summary: High daily LLM cost
+      description: Daily LLM cost is ${{ $value }}, above the $200 budget threshold.
+      runbook_url: https://docs.biothings.com/runbooks/high-llm-cost
+      action_required: Review LLM usage patterns and optimize costs
+  - alert: BioThingsCriticalDailyLLMCost
+    expr: increase(biothings_llm_cost_total[24h]) > 500
+    for: 0s
+    labels:
+      severity: critical
+      component: cost
+      sla_impact: high
+    annotations:
+      summary: Critical daily LLM cost
+      description: Daily LLM cost is ${{ $value }}, exceeding the critical $500 threshold.
+        Budget overrun imminent.
+      runbook_url: https://docs.biothings.com/runbooks/critical-llm-cost
+      action_required: Immediate action required - implement cost controls or throttling
+  - alert: BioThingsHighMonthlyProjection
+    expr: avg_over_time(rate(biothings_llm_cost_total[1h])[24h:1h]) * 24 * 30 > 3000
+    for: 1h
+    labels:
+      severity: warning
+      component: cost
+      sla_impact: medium
+    annotations:
+      summary: High monthly cost projection
+      description: Projected monthly LLM cost is ${{ $value }}, above the $3000 budget.
+      runbook_url: https://docs.biothings.com/runbooks/high-monthly-cost
+      action_required: Review and optimize LLM usage to stay within budget
+- name: biothings_security_monitoring
+  interval: 30s
+  rules:
+  - alert: BioThingsHighAuthFailures
+    expr: rate(biothings_authentication_attempts_total{result="failure"}[5m]) > 5
+    for: 2m
+    labels:
+      severity: warning
+      component: security
+      sla_impact: medium
+    annotations:
+      summary: High authentication failure rate
+      description: Authentication failure rate is {{ $value }} attempts/second, indicating
+        possible brute force attack.
+      runbook_url: https://docs.biothings.com/runbooks/auth-failures
+      action_required: Investigate authentication failures and consider IP blocking
+  - alert: BioThingsSecurityEvents
+    expr: rate(biothings_security_events_total{severity="critical"}[5m]) > 0
+    for: 0s
+    labels:
+      severity: critical
+      component: security
+      sla_impact: high
+    annotations:
+      summary: Critical security event detected
+      description: 'Critical security event detected: {{ $labels.event_type }}'
+      runbook_url: https://docs.biothings.com/runbooks/security-events
+      action_required: Immediate security investigation required
+  - alert: BioThingsHighRateLimitHits
+    expr: rate(biothings_rate_limit_hits_total[5m]) > 10
+    for: 5m
+    labels:
+      severity: warning
+      component: security
+      sla_impact: low
+    annotations:
+      summary: High rate limit violations
+      description: Rate limit violations are occurring at {{ $value }} hits/second
+        for endpoint {{ $labels.endpoint }}
+      runbook_url: https://docs.biothings.com/runbooks/rate-limits
+      action_required: Review rate limiting policies and client behavior
+- name: biothings_infrastructure
+  interval: 30s
+  rules:
+  - alert: BioThingsWebSocketConnectionLoss
+    expr: rate(biothings_websocket_connections_active[5m]) < -0.5
+    for: 2m
+    labels:
+      severity: warning
+      component: websocket
+      sla_impact: medium
+    annotations:
+      summary: WebSocket connections dropping rapidly
+      description: WebSocket connections are dropping at {{ $value }} connections/second,
+        indicating connectivity issues.
+      runbook_url: https://docs.biothings.com/runbooks/websocket-issues
+      action_required: Investigate WebSocket connectivity and server health
+  - alert: BioThingsDatabaseConnectionIssues
+    expr: rate(biothings_database_queries_total{status="error"}[5m]) / rate(biothings_database_queries_total[5m])
+      > 0.1
+    for: 2m
+    labels:
+      severity: critical
+      component: database
+      sla_impact: high
+    annotations:
+      summary: High database error rate
+      description: Database error rate is {{ $value | humanizePercentage }}, indicating
+        connection or query issues.
+      runbook_url: https://docs.biothings.com/runbooks/database-errors
+      action_required: Immediate database investigation required
