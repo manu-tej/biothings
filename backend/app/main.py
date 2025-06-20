@@ -38,7 +38,7 @@ logger = structlog.get_logger()
 from app.core.messaging import message_broker
 from app.agents.ceo_agent import CEOAgent
 from app.workflows.biotech_workflows import workflow_engine
-from app.core.llm import llm_service
+from app.core.llm_claude import llm_service
 
 
 class ConnectionManager:
