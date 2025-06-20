@@ -69,7 +69,7 @@ class CEOAgent(BaseAgent):
             Provide executive-level insights.
             """
             
-            from app.core.llm_claude import llm_service
+            from app.core.llm import llm_service
             
             market_analysis = await llm_service.generate_response(
                 agent_id=self.agent_id,
@@ -105,7 +105,7 @@ class CEOAgent(BaseAgent):
             6. Risk mitigation strategies
             """
             
-            from app.core.llm_claude import llm_service
+            from app.core.llm import llm_service
             
             strategic_plan = await llm_service.generate_response(
                 agent_id=self.agent_id,
@@ -144,7 +144,7 @@ class CEOAgent(BaseAgent):
             Create specific delegated tasks for each relevant executive.
             """
             
-            from app.core.llm_claude import llm_service
+            from app.core.llm import llm_service
             
             delegation_plan = await llm_service.generate_response(
                 agent_id=self.agent_id,

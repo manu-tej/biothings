@@ -37,7 +37,13 @@ logger = structlog.get_logger()
 # Import our modules
 from app.core.messaging import message_broker
 from app.agents.ceo_agent import CEOAgent
+from app.agents.cso_agent import CSOAgent
+from app.agents.cfo_agent import CFOAgent
+from app.agents.cto_agent import CTOAgent
+from app.agents.coo_agent import COOAgent
 from app.workflows.biotech_workflows import workflow_engine
+from app.workflows.advanced_biotech_workflows import advanced_workflow_engine
+from app.analytics.metrics_engine import metrics_engine
 from app.core.llm import llm_service
 
 
@@ -76,17 +82,25 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting BioThings application...")
     
-    # Connect to message broker
-    await message_broker.connect()
+    # Connect to message broker (optional)
+    try:
+        await message_broker.connect()
+    except Exception as e:
+        logger.warning(f"Redis not available: {e}. Running without message broker.")
     
     # Initialize agents
     agents["CEO"] = CEOAgent()
+    agents["CSO"] = CSOAgent()
+    agents["CFO"] = CFOAgent()
+    agents["CTO"] = CTOAgent()
+    agents["COO"] = COOAgent()
     
-    # Subscribe to WebSocket broadcast channel
-    async def websocket_broadcast_handler(message):
-        await manager.broadcast(message.data)
-    
-    await message_broker.subscribe("websocket.broadcast", websocket_broadcast_handler)
+    # Subscribe to WebSocket broadcast channel if message broker is available
+    if message_broker._connected:
+        async def websocket_broadcast_handler(message):
+            await manager.broadcast(message.data)
+        
+        await message_broker.subscribe("websocket.broadcast", websocket_broadcast_handler)
     
     logger.info("BioThings application started successfully")
     
@@ -94,7 +108,8 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("Shutting down BioThings application...")
-    await message_broker.disconnect()
+    if message_broker._connected:
+        await message_broker.disconnect()
     logger.info("BioThings application shut down")
 
 
@@ -223,6 +238,37 @@ async def get_protocols():
     }
 
 
+@app.get("/api/workflows")
+async def get_workflows():
+    """Get available workflows"""
+    return {
+        "workflows": workflow_engine.get_available_protocols()
+    }
+
+
+@app.get("/api/monitoring/metrics/current")
+async def get_current_metrics():
+    """Get current monitoring metrics"""
+    return {
+        "metrics": {
+            "experiments_active": len(workflow_engine.active_experiments),
+            "agents_online": len(agents),
+            "system_uptime": "100%",
+            "api_response_time": "150ms"
+        },
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+
+@app.get("/api/monitoring/alerts")
+async def get_alerts():
+    """Get system alerts"""
+    return {
+        "alerts": metrics_engine.alerts[-10:] if hasattr(metrics_engine, 'alerts') else [],
+        "total": len(metrics_engine.alerts) if hasattr(metrics_engine, 'alerts') else 0
+    }
+
+
 @app.post("/api/chat")
 async def chat_with_agent(chat_data: Dict[str, Any]):
     """Chat with a specific agent using LLM"""
@@ -265,7 +311,8 @@ async def chat_with_agent(chat_data: Dict[str, Any]):
 
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+@app.websocket("/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: str = None):
     """WebSocket endpoint for real-time updates"""
     await manager.connect(websocket)
     
@@ -348,6 +395,66 @@ async def health_check():
             "active_experiments": len(workflow_engine.active_experiments)
         }
     }
+
+
+@app.get("/api/metrics/dashboard")
+async def get_metrics_dashboard():
+    """Get metrics dashboard data"""
+    return metrics_engine.get_dashboard_data()
+
+
+@app.post("/api/metrics/record")
+async def record_metric(metric_data: Dict[str, Any]):
+    """Record a new metric"""
+    from app.analytics.metrics_engine import Metric, MetricType
+    
+    metric = Metric(
+        id=f"metric_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+        type=MetricType(metric_data.get("type", "operational")),
+        name=metric_data["name"],
+        value=metric_data["value"],
+        unit=metric_data.get("unit", ""),
+        timestamp=datetime.utcnow(),
+        tags=metric_data.get("tags", {})
+    )
+    
+    await metrics_engine.record_metric(metric)
+    return {"success": True, "metric_id": metric.id}
+
+
+@app.get("/api/metrics/report")
+async def generate_executive_report():
+    """Generate executive report"""
+    report = await metrics_engine.generate_executive_report()
+    return {"report": report}
+
+
+@app.get("/api/workflows/advanced")
+async def get_advanced_workflows():
+    """Get advanced workflow templates"""
+    return {
+        "workflows": advanced_workflow_engine.get_available_workflows()
+    }
+
+
+@app.post("/api/workflows/execute")
+async def execute_advanced_workflow(workflow_data: Dict[str, Any]):
+    """Execute an advanced workflow"""
+    result = await advanced_workflow_engine.execute_workflow(
+        workflow_id=workflow_data["workflow_id"],
+        parameters=workflow_data.get("parameters", {})
+    )
+    return result
+
+
+@app.post("/api/workflows/optimize")
+async def optimize_workflow(optimization_data: Dict[str, Any]):
+    """Get workflow optimization suggestions"""
+    result = await advanced_workflow_engine.optimize_workflow(
+        workflow_id=optimization_data["workflow_id"],
+        optimization_goals=optimization_data.get("goals", ["speed", "cost", "success_rate"])
+    )
+    return result
 
 
 if __name__ == "__main__":

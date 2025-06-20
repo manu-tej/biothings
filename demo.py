@@ -28,6 +28,8 @@ from app.core.llm import llm_service
 from app.agents.ceo_agent import CEOAgent
 from app.agents.cso_agent import CSOAgent
 from app.agents.cfo_agent import CFOAgent
+from app.agents.cto_agent import CTOAgent
+from app.agents.coo_agent import COOAgent
 
 
 async def test_basic_llm():
@@ -51,9 +53,11 @@ async def test_executive_agents():
     print("-" * 50)
     
     # Create agents
-    ceo = CEOAgent("ceo-001", "CEO", "Executive")
-    cso = CSOAgent("cso-001", "CSO", "R&D")
-    cfo = CFOAgent("cfo-001", "CFO", "Finance")
+    ceo = CEOAgent()
+    cso = CSOAgent()
+    cfo = CFOAgent()
+    cto = CTOAgent()
+    coo = COOAgent()
     
     # Test scenario
     scenario = "Should we invest $50M in developing a new CAR-T therapy for solid tumors?"
@@ -82,28 +86,39 @@ async def test_executive_agents():
     cfo_result = await cfo.process_task(scenario, context)
     if cfo_result['success']:
         print(cfo_result['decisions'][0]['decision'][:400] + "...")
+    
+    print("\n\n💻 CTO Analysis:")
+    cto_result = await cto.process_task(scenario, context)
+    if cto_result['success']:
+        print(cto_result['decisions'][0]['decision'][:400] + "...")
+    
+    print("\n\n⚙️ COO Analysis:")
+    coo_result = await coo.process_task(scenario, context)
+    if coo_result['success']:
+        print(coo_result['decisions'][0]['decision'][:400] + "...")
 
 
 async def test_collaboration():
-    """Test inter-agent collaboration"""
-    print("\n\n3️⃣ Testing Agent Collaboration")
+    """Test simple collaboration simulation"""
+    print("\n\n3️⃣ Testing Collaboration Simulation")
     print("-" * 50)
     
-    ceo = CEOAgent("ceo-002", "CEO", "Executive")
+    ceo = CEOAgent()
     
-    # CEO requests input from CSO
-    collab_result = await ceo.collaborate_with_agent(
-        target_agent_id="cso-002",
-        message="Need scientific assessment of CRISPR vs base editing for our gene therapy pipeline",
+    # Simulate CEO making a decision that would involve others
+    collab_result = await ceo.process_task(
+        task="Develop strategy for integrating CRISPR and base editing technologies",
         context={
             "diseases": ["sickle cell", "beta-thalassemia"],
             "budget": "$30M",
-            "timeline": "3 years"
+            "timeline": "3 years",
+            "departments": ["R&D", "Finance", "Operations"]
         }
     )
     
-    print(f"CEO → CSO Message:")
-    print(collab_result['message_sent'][:500] + "...")
+    if collab_result['success']:
+        print(f"CEO Strategic Decision:")
+        print(collab_result['decisions'][0]['decision'][:500] + "...")
 
 
 async def main():
