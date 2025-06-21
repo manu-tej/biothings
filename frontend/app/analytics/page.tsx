@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import * as echarts from 'echarts'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { TrendingUp, TrendingDown, BarChart3, PieChart, Activity, DollarSign, Download, Calendar, RefreshCw } from 'lucide-react'
+import { apiClient } from '@/lib/api/client'
 
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState('week')
@@ -15,28 +16,53 @@ export default function AnalyticsPage() {
 
   const { data: metrics, isLoading, refetch } = useQuery({
     queryKey: ['analytics-metrics', dateRange],
-    queryFn: async () => {
-      // Mock analytics data - in production, fetch from API
-      return {
-        kpis: {
-          researchEfficiency: 87.5 + Math.random() * 10,
-          costPerExperiment: 4250 + Math.random() * 500,
-          successRate: 92.3 + Math.random() * 5,
-          timeToCompletion: 14.2 + Math.random() * 2
-        },
-        trends: {
-          researchOutput: { value: 15.3, direction: 'up' },
-          operationalCosts: { value: -8.7, direction: 'down' },
-          agentUtilization: { value: 23.1, direction: 'up' },
-          errorRate: { value: -12.4, direction: 'down' }
-        }
-      }
-    },
+    queryFn: () => apiClient.getAnalyticsMetrics(dateRange),
+    refetchInterval: 30000
+  })
+
+  const generateAIInsights = async () => {
+    if (!metrics) return 'No data available for insights'
+    
+    // In a real implementation, this would call an AI service
+    const insights = []
+    
+    // Analyze KPIs
+    if (metrics.kpis.researchEfficiency > 90) {
+      insights.push('🎯 Research efficiency is excellent at ' + metrics.kpis.researchEfficiency.toFixed(1) + '%')
+    } else if (metrics.kpis.researchEfficiency < 80) {
+      insights.push('⚠️ Research efficiency needs improvement at ' + metrics.kpis.researchEfficiency.toFixed(1) + '%')
+    }
+    
+    if (metrics.kpis.costPerExperiment > 5000) {
+      insights.push('💰 Consider cost optimization - experiments are averaging $' + metrics.kpis.costPerExperiment.toFixed(0))
+    }
+    
+    // Analyze trends
+    const positiveMetrics = Object.entries(metrics.trends)
+      .filter(([_, trend]: [string, any]) => trend.direction === 'up' && trend.value > 10)
+      .map(([key]) => key.replace(/([A-Z])/g, ' $1').trim())
+    
+    if (positiveMetrics.length > 0) {
+      insights.push('📈 Strong growth in: ' + positiveMetrics.join(', '))
+    }
+    
+    // Add recommendations
+    insights.push('\n📊 Recommendations:')
+    insights.push('• Continue monitoring agent utilization patterns')
+    insights.push('• Review equipment maintenance schedules')
+    insights.push('• Consider scaling successful experiments')
+    
+    return insights.join('\n')
+  }
+
+  const { data: metrics, isLoading, refetch } = useQuery({
+    queryKey: ['analytics-metrics', dateRange],
+    queryFn: () => apiClient.getAnalyticsMetrics(dateRange),
     refetchInterval: 30000
   })
 
   useEffect(() => {
-    if (!performanceChartRef.current) return
+    if (!performanceChartRef.current || !metrics?.performanceData) return
     
     const chart = echarts.init(performanceChartRef.current, 'dark')
     
@@ -44,13 +70,13 @@ export default function AnalyticsPage() {
       backgroundColor: 'transparent',
       tooltip: { trigger: 'axis' },
       legend: {
-        data: ['Research Output', 'Agent Efficiency', 'Success Rate'],
+        data: metrics.performanceData.datasets.map(d => d.name),
         textStyle: { color: '#9CA3AF' }
       },
       grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
       xAxis: {
         type: 'category',
-        data: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        data: metrics.performanceData.labels,
         axisLabel: { color: '#9CA3AF' },
         axisLine: { lineStyle: { color: '#374151' } }
       },
@@ -59,29 +85,13 @@ export default function AnalyticsPage() {
         axisLabel: { color: '#9CA3AF' },
         splitLine: { lineStyle: { color: '#374151' } }
       },
-      series: [
-        {
-          name: 'Research Output',
-          type: 'line',
-          data: [82, 87, 91, 94],
-          smooth: true,
-          itemStyle: { color: '#3B82F6' }
-        },
-        {
-          name: 'Agent Efficiency',
-          type: 'line',
-          data: [75, 82, 88, 92],
-          smooth: true,
-          itemStyle: { color: '#10B981' }
-        },
-        {
-          name: 'Success Rate',
-          type: 'line',
-          data: [88, 90, 93, 95],
-          smooth: true,
-          itemStyle: { color: '#8B5CF6' }
-        }
-      ]
+      series: metrics.performanceData.datasets.map((dataset, index) => ({
+        name: dataset.name,
+        type: 'line',
+        data: dataset.data,
+        smooth: true,
+        itemStyle: { color: ['#3B82F6', '#10B981', '#8B5CF6'][index] }
+      }))
     }
     
     chart.setOption(option)
@@ -93,10 +103,10 @@ export default function AnalyticsPage() {
       window.removeEventListener('resize', handleResize)
       chart.dispose()
     }
-  }, [])
+  }, [metrics])
 
   useEffect(() => {
-    if (!costChartRef.current) return
+    if (!costChartRef.current || !metrics?.costBreakdown) return
     
     const chart = echarts.init(costChartRef.current, 'dark')
     
@@ -113,13 +123,7 @@ export default function AnalyticsPage() {
           name: 'Cost Breakdown',
           type: 'pie',
           radius: '50%',
-          data: [
-            { value: 35, name: 'Research & Development' },
-            { value: 25, name: 'Operations' },
-            { value: 20, name: 'Infrastructure' },
-            { value: 15, name: 'Quality Control' },
-            { value: 5, name: 'Other' }
-          ],
+          data: metrics.costBreakdown,
           emphasis: {
             itemStyle: {
               shadowBlur: 10,
@@ -140,10 +144,10 @@ export default function AnalyticsPage() {
       window.removeEventListener('resize', handleResize)
       chart.dispose()
     }
-  }, [])
+  }, [metrics])
 
   useEffect(() => {
-    if (!productivityChartRef.current) return
+    if (!productivityChartRef.current || !metrics?.productivityData) return
     
     const chart = echarts.init(productivityChartRef.current, 'dark')
     
@@ -157,7 +161,7 @@ export default function AnalyticsPage() {
       grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
       xAxis: {
         type: 'category',
-        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        data: metrics.productivityData.labels,
         axisLabel: { color: '#9CA3AF' },
         axisLine: { lineStyle: { color: '#374151' } }
       },
@@ -181,14 +185,14 @@ export default function AnalyticsPage() {
         {
           name: 'Experiments/Day',
           type: 'bar',
-          data: [12, 15, 18, 14, 16, 8, 6],
+          data: metrics.productivityData.experiments,
           itemStyle: { color: '#3B82F6' }
         },
         {
           name: 'Success Rate %',
           type: 'line',
           yAxisIndex: 1,
-          data: [85, 90, 88, 92, 89, 94, 91],
+          data: metrics.productivityData.successRate,
           smooth: true,
           itemStyle: { color: '#10B981' }
         }
@@ -204,7 +208,7 @@ export default function AnalyticsPage() {
       window.removeEventListener('resize', handleResize)
       chart.dispose()
     }
-  }, [])
+  }, [metrics])
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -248,10 +252,22 @@ export default function AnalyticsPage() {
             <button 
               onClick={async () => {
                 setIsExporting(true)
-                // Simulate export
-                await new Promise(resolve => setTimeout(resolve, 2000))
-                alert('Report exported successfully!')
-                setIsExporting(false)
+                try {
+                  const blob = await apiClient.exportAnalyticsReport(dateRange, 'pdf')
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `analytics-report-${dateRange}-${new Date().toISOString().split('T')[0]}.pdf`
+                  document.body.appendChild(a)
+                  a.click()
+                  document.body.removeChild(a)
+                  URL.revokeObjectURL(url)
+                } catch (error) {
+                  console.error('Export failed:', error)
+                  alert('Failed to export report')
+                } finally {
+                  setIsExporting(false)
+                }
               }}
               disabled={isExporting}
               className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
@@ -260,7 +276,10 @@ export default function AnalyticsPage() {
               <span>{isExporting ? 'Exporting...' : 'Export Report'}</span>
             </button>
             <button 
-              onClick={() => alert('AI insights generation coming soon!')}
+              onClick={async () => {
+                const insights = await generateAIInsights()
+                alert(insights)
+              }}
               className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
             >
               Generate Insights

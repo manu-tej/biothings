@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import React, { useEffect, useRef, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import * as echarts from 'echarts'
 import type { EChartsOption } from 'echarts'
 import { 
@@ -12,7 +12,8 @@ import {
   TrendingUp,
   TrendingDown
 } from 'lucide-react'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/lib/api/client'
+import { useMetricsWebSocket } from '@/lib/hooks/useWebSocket'
 
 interface MetricCardProps {
   title: string
@@ -64,15 +65,17 @@ function MetricCard({ title, value, unit, icon, trend, status = 'good' }: Metric
 export default function SystemMetrics() {
   const chartRef = useRef<HTMLDivElement>(null)
   const chartInstance = useRef<echarts.ECharts | null>(null)
+  const queryClient = useQueryClient()
+  const [metricsHistory, setMetricsHistory] = useState<any[]>([])
 
   // Fetch current metrics
   const { data: metrics, isLoading } = useQuery({
     queryKey: ['system-metrics'],
     queryFn: () => apiClient.getMetrics(),
-    refetchInterval: 5000 // Refresh every 5 seconds
+    refetchInterval: 30000 // Reduced frequency since we have WebSocket
   })
 
-  // Generate mock historical data for chart (since /history endpoint doesn't exist)
+  // Generate initial historical data for chart
   const { data: history } = useQuery({
     queryKey: ['metrics-history'],
     queryFn: async () => {
@@ -91,21 +94,58 @@ export default function SystemMetrics() {
       }
       return mockHistory
     },
-    refetchInterval: 30000 // Refresh every 30 seconds
+    refetchInterval: false // Don't refetch, we'll use WebSocket for updates
+  })
+
+  // Initialize metrics history
+  useEffect(() => {
+    if (history) {
+      setMetricsHistory(history)
+    }
+  }, [history])
+
+  // WebSocket for real-time metrics updates
+  const { isConnected, connectionState } = useMetricsWebSocket((newMetrics) => {
+    // Update current metrics
+    queryClient.setQueryData(['system-metrics'], {
+      system: newMetrics.system || newMetrics,
+      agents: newMetrics.agents || {
+        total_agents: newMetrics.total_agents || 5,
+        active_agents: newMetrics.active_agents || 5,
+        agent_types: newMetrics.agent_types || {}
+      },
+      websocket_connections: newMetrics.websocket_connections || 1,
+      timestamp: newMetrics.timestamp || new Date().toISOString()
+    })
+
+    // Update metrics history for chart
+    setMetricsHistory(prev => {
+      const newEntry = {
+        timestamp: newMetrics.timestamp || new Date().toISOString(),
+        cpu_percent: newMetrics.system?.cpu_percent || newMetrics.cpu_percent || 0,
+        memory_percent: newMetrics.system?.memory_percent || newMetrics.memory_percent || 0,
+        active_agents: newMetrics.agents?.active_agents || newMetrics.active_agents || 0,
+        active_workflows: newMetrics.active_workflows || 0
+      }
+      
+      // Keep last 30 entries
+      const updated = [...prev.slice(-29), newEntry]
+      return updated
+    })
   })
 
   useEffect(() => {
-    if (!chartRef.current || !history || !Array.isArray(history)) return
+    if (!chartRef.current || !metricsHistory || metricsHistory.length === 0) return
 
     if (!chartInstance.current) {
       chartInstance.current = echarts.init(chartRef.current, 'dark')
     }
 
-    const timestamps = history.map((item: any) => 
+    const timestamps = metricsHistory.map((item: any) => 
       new Date(item.timestamp).toLocaleTimeString()
     )
-    const cpuData = history.map((item: any) => item.cpu_percent)
-    const memoryData = history.map((item: any) => item.memory_percent)
+    const cpuData = metricsHistory.map((item: any) => item.cpu_percent)
+    const memoryData = metricsHistory.map((item: any) => item.memory_percent)
 
     const option: EChartsOption = {
       backgroundColor: 'transparent',
@@ -212,7 +252,7 @@ export default function SystemMetrics() {
     return () => {
       window.removeEventListener('resize', handleResize)
     }
-  }, [history])
+  }, [metricsHistory])
 
   if (isLoading) {
     return <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-96 rounded-lg" />
@@ -228,9 +268,23 @@ export default function SystemMetrics() {
   return (
     <div className="space-y-6">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          System Performance
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              System Performance
+            </h2>
+            {/* Connection status indicator */}
+            <div className={`w-2 h-2 rounded-full ${
+              connectionState === 'connected' ? 'bg-green-500' :
+              connectionState === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+              connectionState === 'error' ? 'bg-red-500' :
+              'bg-gray-400'
+            }`} title={`WebSocket: ${connectionState}`} />
+          </div>
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {isConnected ? 'Live' : 'Polling'}
+          </span>
+        </div>
         
         {/* Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

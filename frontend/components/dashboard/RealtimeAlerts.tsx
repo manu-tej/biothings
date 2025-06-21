@@ -11,15 +11,10 @@ import {
   Bell,
   BellOff
 } from 'lucide-react'
-import { useWebSocket } from '@/lib/hooks/useWebSocket'
-import { apiClient } from '@/lib/api-client'
+import { useAlertsWebSocket } from '@/lib/hooks/useWebSocket'
+import { apiClient, type Alert as APIAlert } from '@/lib/api/client'
 
-interface Alert {
-  id: string
-  severity: 'info' | 'warning' | 'error' | 'success'
-  type: string
-  message: string
-  timestamp: string
+interface Alert extends APIAlert {
   agent_id?: string
   acknowledged?: boolean
 }
@@ -38,6 +33,12 @@ const severityConfig = {
     borderColor: 'border-yellow-200 dark:border-yellow-800'
   },
   error: {
+    icon: <AlertCircle className="w-4 h-4" />,
+    bgColor: 'bg-red-50 dark:bg-red-900/20',
+    textColor: 'text-red-800 dark:text-red-200',
+    borderColor: 'border-red-200 dark:border-red-800'
+  },
+  critical: {
     icon: <AlertCircle className="w-4 h-4" />,
     bgColor: 'bg-red-50 dark:bg-red-900/20',
     textColor: 'text-red-800 dark:text-red-200',
@@ -112,7 +113,6 @@ function AlertItem({ alert, onDismiss }: AlertItemProps) {
 export default function RealtimeAlerts() {
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [soundEnabled, setSoundEnabled] = useState(true)
-  const { lastMessage } = useWebSocket()
 
   // Fetch initial alerts
   const { data: initialAlerts } = useQuery({
@@ -126,25 +126,27 @@ export default function RealtimeAlerts() {
     }
   }, [initialAlerts])
 
-  // Handle WebSocket alerts
-  useEffect(() => {
-    if (lastMessage && lastMessage.type === 'alert') {
-      const newAlert: Alert = {
-        id: `alert-${Date.now()}`,
-        ...lastMessage.data,
-        timestamp: new Date().toISOString()
-      }
-      
-      setAlerts(prev => [newAlert, ...prev].slice(0, 20)) // Keep last 20 alerts
-      
-      // Play sound for warning/error alerts
-      if (soundEnabled && (newAlert.severity === 'warning' || newAlert.severity === 'error')) {
-        // Play notification sound (would need audio file)
-        const audio = new Audio('/notification.mp3')
-        audio.play().catch(() => {})
-      }
+  // Handle WebSocket alerts with dedicated hook
+  const { isConnected, connectionState } = useAlertsWebSocket((alertData) => {
+    const newAlert: Alert = {
+      id: alertData.id || `alert-${Date.now()}`,
+      severity: alertData.severity || 'info',
+      type: alertData.type || 'system',
+      message: alertData.message || '',
+      timestamp: alertData.timestamp || new Date().toISOString(),
+      agent_id: alertData.agent_id,
+      acknowledged: alertData.acknowledged
     }
-  }, [lastMessage, soundEnabled])
+    
+    setAlerts(prev => [newAlert, ...prev].slice(0, 20)) // Keep last 20 alerts
+    
+    // Play sound for warning/error alerts
+    if (soundEnabled && (newAlert.severity === 'warning' || newAlert.severity === 'error' || newAlert.severity === 'critical')) {
+      // Play notification sound (would need audio file)
+      const audio = new Audio('/notification.mp3')
+      audio.play().catch(() => {})
+    }
+  })
 
   const dismissAlert = (id: string) => {
     setAlerts(prev => prev.filter(alert => alert.id !== id))
@@ -164,6 +166,13 @@ export default function RealtimeAlerts() {
               {unacknowledgedCount}
             </span>
           )}
+          {/* Connection status indicator */}
+          <div className={`w-2 h-2 rounded-full ${
+            connectionState === 'connected' ? 'bg-green-500' :
+            connectionState === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+            connectionState === 'error' ? 'bg-red-500' :
+            'bg-gray-400'
+          }`} title={`WebSocket: ${connectionState}`} />
         </div>
         <button
           onClick={() => setSoundEnabled(!soundEnabled)}

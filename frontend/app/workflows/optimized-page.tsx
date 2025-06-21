@@ -4,7 +4,7 @@ import { useMemo, useCallback, memo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import dynamic from 'next/dynamic'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
-import { optimizedApiClient } from '@/lib/optimized-api-client'
+import { optimizedApiClient } from '@/lib/api/client'
 import { Activity, Play, Pause, CheckCircle, AlertCircle, Clock, Users } from 'lucide-react'
 
 // Lazy load virtual list

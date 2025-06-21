@@ -26,6 +26,7 @@ from app.core.llm import llm_service
 from app.workflows.biotech_workflows import workflow_engine
 from app.analytics.metrics_engine import metrics_engine
 from app.workflows.advanced_biotech_workflows import advanced_workflow_engine
+from api.endpoints import laboratory
 import structlog
 import json
 
@@ -115,6 +116,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(laboratory.router, prefix="/api/laboratory", tags=["laboratory"])
 
 
 @app.get("/")

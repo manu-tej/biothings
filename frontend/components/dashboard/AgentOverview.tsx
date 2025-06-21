@@ -12,18 +12,8 @@ import {
   UserCheck,
   AlertCircle
 } from 'lucide-react'
-import { apiClient } from '@/lib/api-client'
-import { useWebSocket } from '@/hooks/useWebSocket'
-
-interface Agent {
-  id: string
-  name: string
-  agent_type: string
-  status: string
-  parent_id: string | null
-  subordinates: string[]
-  last_active: string
-}
+import { apiClient, type Agent } from '@/lib/api/client'
+import { useAgentStatusWebSocket } from '@/lib/hooks/useWebSocket'
 
 const agentIcons: Record<string, React.ReactNode> = {
   CEO: <Crown className="w-5 h-5" />,
@@ -121,27 +111,38 @@ export default function AgentOverview() {
     refetchInterval: 30000 // Reduced frequency since we have WebSocket
   })
 
-  // WebSocket for real-time updates
-  useWebSocket({
-    onMessage: (data) => {
-      if (data.type === 'agent_status_update') {
-        // Update the specific agent in the cache
-        queryClient.setQueryData(['agents'], (oldData: Agent[] | undefined) => {
-          if (!oldData) return oldData
-          return oldData.map(agent => 
-            agent.id === data.agent_id 
-              ? { ...agent, status: data.status, last_active: data.timestamp }
-              : agent
-          )
-        })
-      } else if (data.type === 'agents_update') {
-        // Full agents update
-        setRealtimeAgents(data.agents)
-        queryClient.setQueryData(['agents'], data.agents)
-      }
-    },
-    onConnect: () => {
-      console.log('WebSocket connected for agent monitoring')
+  // WebSocket for real-time agent status updates with dedicated hook
+  const { isConnected, connectionState } = useAgentStatusWebSocket((update) => {
+    if (update.agent_id && update.status) {
+      // Update the specific agent in the cache
+      queryClient.setQueryData(['agents'], (oldData: Agent[] | undefined) => {
+        if (!oldData) return oldData
+        return oldData.map(agent => 
+          agent.id === update.agent_id 
+            ? { 
+                ...agent, 
+                status: update.status, 
+                last_active: update.timestamp || new Date().toISOString(),
+                ...update // Include any other fields from the update
+              }
+            : agent
+        )
+      })
+    } else if (update.agents) {
+      // Full agents update
+      const transformedAgents = update.agents.map((agent: any) => ({
+        id: agent.agent_id || agent.id,
+        name: agent.name || `${agent.agent_type} Agent`,
+        agent_type: agent.agent_type,
+        status: agent.active ? 'active' : (agent.status || 'idle'),
+        parent_id: agent.parent_id || (agent.agent_type === 'CEO' ? null : 'ceo_agent'),
+        subordinates: agent.subordinates || [],
+        department: agent.department || agent.agent_type,
+        last_active: agent.last_active || new Date().toISOString(),
+        capabilities: agent.capabilities || []
+      }))
+      setRealtimeAgents(transformedAgents)
+      queryClient.setQueryData(['agents'], transformedAgents)
     }
   })
 
@@ -162,9 +163,18 @@ export default function AgentOverview() {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Agent Hierarchy
-        </h2>
+        <div className="flex items-center space-x-2">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Agent Hierarchy
+          </h2>
+          {/* Connection status indicator */}
+          <div className={`w-2 h-2 rounded-full ${
+            connectionState === 'connected' ? 'bg-green-500' :
+            connectionState === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+            connectionState === 'error' ? 'bg-red-500' :
+            'bg-gray-400'
+          }`} title={`WebSocket: ${connectionState}`} />
+        </div>
         <div className="flex items-center space-x-4">
           <span className="text-sm text-gray-600 dark:text-gray-400">
             {activeCount} / {totalCount} Active

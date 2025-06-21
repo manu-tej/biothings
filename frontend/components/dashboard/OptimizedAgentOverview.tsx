@@ -12,18 +12,8 @@ import {
   UserCheck,
   AlertCircle
 } from 'lucide-react'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, type Agent } from '@/lib/api/client'
 import { useWebSocket } from '@/hooks/useWebSocket'
-
-interface Agent {
-  id: string
-  name: string
-  agent_type: string
-  status: string
-  parent_id: string | null
-  subordinates: string[]
-  last_active: string
-}
 
 const agentIcons: Record<string, React.ReactNode> = {
   CEO: <Crown className="w-5 h-5" />,

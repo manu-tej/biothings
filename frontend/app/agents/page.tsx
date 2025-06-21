@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, lazy, Suspense } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import dynamic from 'next/dynamic'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { Users, Crown, Briefcase, FlaskConical, DollarSign, Cpu, UserCheck, MessageCircle, Eye } from 'lucide-react'
+import { apiClient } from '@/lib/api/client'
 
 // Lazy load heavy components
 const AgentChat = dynamic(() => import('@/components/agents/AgentChat'), {
@@ -37,20 +38,14 @@ export default function AgentsPage() {
   
   const { data: agents, isLoading } = useQuery({
     queryKey: ['agents'],
-    queryFn: async () => {
-      const response = await fetch('http://localhost:8000/api/agents')
-      return response.json()
-    },
+    queryFn: () => apiClient.getAgents(),
     refetchInterval: 30000, // Reduced frequency
     staleTime: 10000 // Consider data fresh for 10s
   })
 
   const { data: hierarchy } = useQuery({
     queryKey: ['agent-hierarchy'],
-    queryFn: async () => {
-      const response = await fetch('http://localhost:8000/api/hierarchy')
-      return response.json()
-    },
+    queryFn: () => apiClient.getAgentHierarchy(),
     refetchInterval: 60000, // Reduced frequency
     staleTime: 30000
   })

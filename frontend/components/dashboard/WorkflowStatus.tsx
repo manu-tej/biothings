@@ -14,8 +14,8 @@ import {
   Shield,
   BarChart
 } from 'lucide-react'
-import { apiClient } from '@/lib/api-client'
-import { useWebSocket } from '@/hooks/useWebSocket'
+import { apiClient } from '@/lib/api/client'
+import { useWorkflowWebSocket } from '@/lib/hooks/useWebSocket'
 
 interface Workflow {
   id: string
@@ -122,36 +122,31 @@ export default function WorkflowStatus() {
     refetchInterval: 30000 // Reduced frequency since we have WebSocket
   })
 
-  // WebSocket for real-time workflow updates
-  useWebSocket({
-    onMessage: (data) => {
-      if (data.type === 'workflow_update') {
-        // Update specific workflow
-        queryClient.setQueryData(['workflows'], (oldData: Workflow[] | undefined) => {
-          if (!oldData) return oldData
-          return oldData.map(workflow => 
-            workflow.id === data.workflow_id 
-              ? { ...workflow, ...data.workflow }
-              : workflow
-          )
-        })
-      } else if (data.type === 'workflow_progress') {
-        // Update workflow progress
-        queryClient.setQueryData(['workflows'], (oldData: Workflow[] | undefined) => {
-          if (!oldData) return oldData
-          return oldData.map(workflow => 
-            workflow.id === data.workflow_id 
-              ? { ...workflow, progress: data.progress, status: data.status }
-              : workflow
-          )
-        })
-      } else if (data.type === 'workflows_update') {
-        // Full workflows update
-        queryClient.setQueryData(['workflows'], data.workflows)
-      }
-    },
-    onConnect: () => {
-      console.log('WebSocket connected for workflow monitoring')
+  // WebSocket for real-time workflow updates with dedicated hook
+  const { isConnected, connectionState } = useWorkflowWebSocket((update) => {
+    if (update.type === 'workflow_update' && update.workflow_id) {
+      // Update specific workflow
+      queryClient.setQueryData(['workflows'], (oldData: Workflow[] | undefined) => {
+        if (!oldData) return oldData
+        return oldData.map(workflow => 
+          workflow.id === update.workflow_id 
+            ? { ...workflow, ...update.data }
+            : workflow
+        )
+      })
+    } else if (update.type === 'workflow_progress' && update.workflow_id) {
+      // Update workflow progress
+      queryClient.setQueryData(['workflows'], (oldData: Workflow[] | undefined) => {
+        if (!oldData) return oldData
+        return oldData.map(workflow => 
+          workflow.id === update.workflow_id 
+            ? { ...workflow, progress: update.data.progress, status: update.data.status }
+            : workflow
+        )
+      })
+    } else if (update.type === 'workflows_update') {
+      // Full workflows update
+      queryClient.setQueryData(['workflows'], update.data)
     }
   })
 
@@ -177,9 +172,18 @@ export default function WorkflowStatus() {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Active Workflows
-        </h2>
+        <div className="flex items-center space-x-2">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Active Workflows
+          </h2>
+          {/* Connection status indicator */}
+          <div className={`w-2 h-2 rounded-full ${
+            connectionState === 'connected' ? 'bg-green-500' :
+            connectionState === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+            connectionState === 'error' ? 'bg-red-500' :
+            'bg-gray-400'
+          }`} title={`WebSocket: ${connectionState}`} />
+        </div>
         <button className="text-sm text-primary-600 dark:text-primary-400 hover:underline">
           View All
         </button>
