@@ -13,7 +13,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { apiClient, type Agent } from '@/lib/api/client'
-import { useWebSocket } from '@/hooks/useWebSocket'
+import { useWebSocket } from '@/lib/hooks/useWebSocket'
 
 const agentIcons: Record<string, React.ReactNode> = {
   CEO: <Crown className="w-5 h-5" />,

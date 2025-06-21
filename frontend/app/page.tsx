@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
-import { useWebSocket } from '@/hooks/useWebSocket'
+import { useWebSocket } from '@/lib/hooks/useWebSocket'
 
 // Dynamic imports with loading states
 const SystemMetrics = dynamic(() => import('@/components/dashboard/SystemMetrics'), {

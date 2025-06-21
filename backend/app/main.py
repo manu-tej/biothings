@@ -26,7 +26,7 @@ from app.core.llm import llm_service
 from app.workflows.biotech_workflows import workflow_engine
 from app.analytics.metrics_engine import metrics_engine
 from app.workflows.advanced_biotech_workflows import advanced_workflow_engine
-from api.endpoints import laboratory
+from api.endpoints import laboratory, agents, monitoring, workflows
 import structlog
 import json
 
@@ -119,6 +119,9 @@ app.add_middleware(
 
 # Include routers
 app.include_router(laboratory.router, prefix="/api/laboratory", tags=["laboratory"])
+app.include_router(agents.router, prefix="/api", tags=["agents"])
+app.include_router(monitoring.router, prefix="/api/monitoring", tags=["monitoring"])
+app.include_router(workflows.router, prefix="/api", tags=["workflows"])
 
 
 @app.get("/")

@@ -55,13 +55,7 @@ export default function WorkflowsPage() {
 
   const updateWorkflowStatus = useMutation({
     mutationFn: async ({ workflowId, status }: { workflowId: string; status: string }) => {
-      const response = await fetch(`${apiClient['apiBaseUrl']}/api/workflows/${workflowId}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      })
-      if (!response.ok) throw new Error('Failed to update workflow status')
-      return response.json()
+      return await apiClient.updateWorkflowStatus(workflowId, status)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workflows'] })

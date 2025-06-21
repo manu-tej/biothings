@@ -110,3 +110,73 @@ async def delete_agent(agent_id: str):
         "status": "success",
         "message": f"Agent {agent_id} deleted successfully"
     }
+
+
+@router.get("/hierarchy")
+async def get_agent_hierarchy():
+    """Get agent hierarchy structure"""
+    # TODO: Implement actual hierarchy retrieval
+    return {
+        "id": "ceo-001",
+        "name": "CEO Agent",
+        "type": "CEO",
+        "status": "active",
+        "children": [
+            {
+                "id": "coo-001",
+                "name": "COO Agent",
+                "type": "COO",
+                "status": "active",
+                "children": []
+            },
+            {
+                "id": "cso-001",
+                "name": "CSO Agent",
+                "type": "CSO",
+                "status": "active",
+                "children": []
+            },
+            {
+                "id": "cfo-001",
+                "name": "CFO Agent",
+                "type": "CFO",
+                "status": "active",
+                "children": []
+            },
+            {
+                "id": "cto-001",
+                "name": "CTO Agent",
+                "type": "CTO",
+                "status": "active",
+                "children": []
+            }
+        ]
+    }
+
+
+@router.get("/messages/history")
+async def get_message_history(agent_id: str = None, limit: int = 100):
+    """Get message history"""
+    # TODO: Implement actual message history retrieval
+    return {
+        "messages": [
+            {
+                "id": "msg-001",
+                "sender": "CEO Agent",
+                "receiver": "COO Agent",
+                "content": "Please prepare Q4 operations report",
+                "timestamp": datetime.utcnow().isoformat(),
+                "type": "task_assignment"
+            },
+            {
+                "id": "msg-002",
+                "sender": "COO Agent",
+                "receiver": "CEO Agent",
+                "content": "Q4 operations report is ready for review",
+                "timestamp": datetime.utcnow().isoformat(),
+                "type": "task_completion"
+            }
+        ],
+        "total": 2,
+        "limit": limit
+    }

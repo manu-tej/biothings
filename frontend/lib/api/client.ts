@@ -387,6 +387,13 @@ class UnifiedApiClient {
     }, 0)
   }
 
+  async updateWorkflowStatus(workflowId: string, status: string): Promise<any> {
+    return this.fetchWithCache(`/api/workflows/${workflowId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }, 0)
+  }
+
   // Message History
   async getMessageHistory(limit: number = 50): Promise<Message[]> {
     return this.fetchWithCache<Message[]>(`/api/messages/history?limit=${limit}`)

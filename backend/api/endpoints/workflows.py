@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Body
 from typing import List, Dict, Any
 from pydantic import BaseModel
 from datetime import datetime
@@ -183,4 +183,34 @@ async def cancel_workflow(workflow_id: str):
         "status": "success",
         "workflow_id": workflow_id,
         "message": "Workflow cancellation initiated"
+    }
+
+
+@router.post("/simulate")
+async def simulate_workflow(simulation_request: Dict[str, Any]):
+    """Simulate a workflow execution"""
+    # TODO: Implement actual workflow simulation
+    logger.info(f"Simulating workflow: {simulation_request.get('name', 'Unknown')}")
+    
+    return {
+        "simulation_id": f"sim-{datetime.utcnow().timestamp()}",
+        "status": "completed",
+        "results": {
+            "estimated_duration": "2.5 hours",
+            "success_probability": 0.92,
+            "resource_requirements": {
+                "agents": ["lab-tech-001", "qc-001"],
+                "equipment": ["PCR Machine", "Centrifuge"],
+                "consumables": {
+                    "primers": "2 μL",
+                    "polymerase": "1 unit",
+                    "buffer": "50 μL"
+                }
+            },
+            "optimization_suggestions": [
+                "Consider running parallel reactions to reduce time",
+                "Pre-warm equipment to improve efficiency"
+            ]
+        },
+        "timestamp": datetime.utcnow().isoformat()
     }

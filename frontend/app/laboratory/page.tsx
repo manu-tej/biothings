@@ -216,7 +216,7 @@ export default function LaboratoryPage() {
             ) : (
               equipment?.map((equip) => (
               <div
-                key={equipment.id}
+                key={equip.id}
                 className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
               >
                 <div className="flex items-center space-x-4">
@@ -225,10 +225,10 @@ export default function LaboratoryPage() {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900 dark:text-white">
-                      {equipment.name}
+                      {equip.name}
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {equipment.type} • ID: {equipment.id}
+                      {equip.type} • ID: {equip.id}
                     </p>
                   </div>
                 </div>
