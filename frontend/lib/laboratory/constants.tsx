@@ -2,6 +2,7 @@
  * Laboratory Constants
  */
 
+import React from 'react'
 import { 
   Activity, 
   Beaker, 

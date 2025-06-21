@@ -4,8 +4,8 @@
  * Optimized for M1 MacBook performance
  */
 
-type MessageHandler = (data: any) => void;
-type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'error';
+export type MessageHandler = (data: any) => void;
+export type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'error';
 
 interface WebSocketConfig {
   url?: string;
