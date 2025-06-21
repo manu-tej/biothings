@@ -51,21 +51,21 @@ export default function LaboratoryPage() {
   const { data: equipment, isLoading: equipmentLoading } = useQuery({
     queryKey: ['equipment'],
     queryFn: () => apiClient.getEquipment(),
-    refetchInterval: 5000 // Refresh every 5 seconds for real-time updates
+    refetchInterval: 300000 // 5 minutes - rely on WebSocket for real-time updates
   })
 
   // Fetch experiments data
   const { data: experiments, isLoading: experimentsLoading } = useQuery({
     queryKey: ['experiments'],
     queryFn: () => apiClient.getExperiments(),
-    refetchInterval: 5000
+    refetchInterval: 300000 // 5 minutes
   })
 
   // Fetch laboratory status
   const { data: labStatus } = useQuery({
     queryKey: ['lab-status'],
     queryFn: () => apiClient.getLaboratoryStatus(),
-    refetchInterval: 10000
+    refetchInterval: 300000 // 5 minutes
   })
 
   // WebSocket connection for real-time updates

@@ -122,8 +122,8 @@ export default function OptimizedWorkflowsPage() {
   const { data: workflows, isLoading } = useQuery({
     queryKey: ['workflows'],
     queryFn: () => optimizedApiClient.getWorkflows(),
-    refetchInterval: 60000, // Reduced frequency
-    staleTime: 30000
+    refetchInterval: 300000, // 5 minutes - reduced frequency
+    staleTime: 300000 // Consider data fresh for 5 minutes
   })
 
   // Memoize stats calculation

@@ -11,7 +11,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 30 * 1000, // 30 seconds
+            staleTime: 5 * 60 * 1000, // 5 minutes
             gcTime: 5 * 60 * 1000, // 5 minutes garbage collection time
             refetchInterval: false, // Disable automatic refetch by default
             refetchOnWindowFocus: false, // Don't refetch on window focus

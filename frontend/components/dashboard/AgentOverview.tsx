@@ -38,8 +38,8 @@ interface AgentCardProps {
   isExecutive?: boolean
 }
 
-function AgentCard({ agent, isExecutive }: AgentCardProps) {
-  const timeSinceActive = () => {
+const AgentCard = React.memo(({ agent, isExecutive }: AgentCardProps) => {
+  const timeSinceActive = React.useMemo(() => {
     const lastActive = new Date(agent.last_active)
     const now = new Date()
     const diffMinutes = Math.floor((now.getTime() - lastActive.getTime()) / 60000)
@@ -49,7 +49,7 @@ function AgentCard({ agent, isExecutive }: AgentCardProps) {
     const diffHours = Math.floor(diffMinutes / 60)
     if (diffHours < 24) return `${diffHours}h ago`
     return `${Math.floor(diffHours / 24)}d ago`
-  }
+  }, [agent.last_active])
 
   return (
     <div className={`
@@ -89,7 +89,7 @@ function AgentCard({ agent, isExecutive }: AgentCardProps) {
       
       <div className="flex items-center justify-between text-sm">
         <span className="text-gray-500 dark:text-gray-400">
-          Last active: {timeSinceActive()}
+          Last active: {timeSinceActive}
         </span>
         {agent.subordinates.length > 0 && (
           <span className="text-gray-600 dark:text-gray-300">
@@ -99,7 +99,14 @@ function AgentCard({ agent, isExecutive }: AgentCardProps) {
       </div>
     </div>
   )
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison function - only re-render if these props actually change
+  return prevProps.agent.id === nextProps.agent.id &&
+         prevProps.agent.status === nextProps.agent.status &&
+         prevProps.agent.last_active === nextProps.agent.last_active &&
+         prevProps.agent.subordinates.length === nextProps.agent.subordinates.length &&
+         prevProps.isExecutive === nextProps.isExecutive
+})
 
 export default function AgentOverview() {
   const queryClient = useQueryClient()
@@ -108,7 +115,7 @@ export default function AgentOverview() {
   const { data: agents, isLoading } = useQuery({
     queryKey: ['agents'],
     queryFn: () => apiClient.getAgents(),
-    refetchInterval: 30000 // Reduced frequency since we have WebSocket
+    refetchInterval: 300000 // 5 minutes - reduced frequency since we have WebSocket
   })
 
   // WebSocket for real-time agent status updates with dedicated hook

@@ -47,8 +47,8 @@ interface WorkflowItemProps {
   workflow: Workflow
 }
 
-function WorkflowItem({ workflow }: WorkflowItemProps) {
-  const duration = () => {
+const WorkflowItem = React.memo(({ workflow }: WorkflowItemProps) => {
+  const duration = React.useMemo(() => {
     const created = new Date(workflow.created_at)
     const updated = new Date(workflow.updated_at)
     const diffMinutes = Math.floor((updated.getTime() - created.getTime()) / 60000)
@@ -57,7 +57,7 @@ function WorkflowItem({ workflow }: WorkflowItemProps) {
     const diffHours = Math.floor(diffMinutes / 60)
     if (diffHours < 24) return `${diffHours}h ${diffMinutes % 60}m`
     return `${Math.floor(diffHours / 24)}d`
-  }
+  }, [workflow.created_at, workflow.updated_at])
 
   return (
     <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer">
@@ -103,7 +103,7 @@ function WorkflowItem({ workflow }: WorkflowItemProps) {
 
       <div className="flex items-center justify-between text-sm">
         <span className="text-gray-500 dark:text-gray-400">
-          Duration: {duration()}
+          Duration: {duration}
         </span>
         <span className="text-gray-600 dark:text-gray-300">
           {workflow.assigned_agents.length} agents
@@ -111,7 +111,14 @@ function WorkflowItem({ workflow }: WorkflowItemProps) {
       </div>
     </div>
   )
-}
+}, (prevProps, nextProps) => {
+  // Only re-render if important workflow data changes
+  return prevProps.workflow.id === nextProps.workflow.id &&
+         prevProps.workflow.status === nextProps.workflow.status &&
+         prevProps.workflow.progress === nextProps.workflow.progress &&
+         prevProps.workflow.updated_at === nextProps.workflow.updated_at &&
+         prevProps.workflow.assigned_agents.length === nextProps.workflow.assigned_agents.length
+})
 
 export default function WorkflowStatus() {
   const queryClient = useQueryClient()
@@ -119,7 +126,7 @@ export default function WorkflowStatus() {
   const { data: workflows, isLoading } = useQuery({
     queryKey: ['workflows'],
     queryFn: () => apiClient.getWorkflows(),
-    refetchInterval: 30000 // Reduced frequency since we have WebSocket
+    refetchInterval: 300000 // 5 minutes - reduced frequency since we have WebSocket
   })
 
   // WebSocket for real-time workflow updates with dedicated hook

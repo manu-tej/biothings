@@ -57,9 +57,9 @@ interface AlertItemProps {
   onDismiss: (id: string) => void
 }
 
-function AlertItem({ alert, onDismiss }: AlertItemProps) {
+const AlertItem = React.memo(({ alert, onDismiss }: AlertItemProps) => {
   const config = severityConfig[alert.severity]
-  const timeAgo = () => {
+  const timeAgo = React.useMemo(() => {
     const alertTime = new Date(alert.timestamp)
     const now = new Date()
     const diffSeconds = Math.floor((now.getTime() - alertTime.getTime()) / 1000)
@@ -69,7 +69,11 @@ function AlertItem({ alert, onDismiss }: AlertItemProps) {
     if (diffMinutes < 60) return `${diffMinutes}m ago`
     const diffHours = Math.floor(diffMinutes / 60)
     return `${diffHours}h ago`
-  }
+  }, [alert.timestamp])
+  
+  const handleDismiss = React.useCallback(() => {
+    onDismiss(alert.id)
+  }, [alert.id, onDismiss])
 
   return (
     <div className={`
@@ -97,18 +101,23 @@ function AlertItem({ alert, onDismiss }: AlertItemProps) {
           </div>
         </div>
         <button
-          onClick={() => onDismiss(alert.id)}
+          onClick={handleDismiss}
           className="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
       <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-        {timeAgo()}
+        {timeAgo}
       </p>
     </div>
   )
-}
+}, (prevProps, nextProps) => {
+  // Only re-render if the alert data changes
+  return prevProps.alert.id === nextProps.alert.id &&
+         prevProps.alert.acknowledged === nextProps.alert.acknowledged &&
+         prevProps.onDismiss === nextProps.onDismiss
+})
 
 export default function RealtimeAlerts() {
   const [alerts, setAlerts] = useState<Alert[]>([])
@@ -148,9 +157,9 @@ export default function RealtimeAlerts() {
     }
   })
 
-  const dismissAlert = (id: string) => {
+  const dismissAlert = React.useCallback((id: string) => {
     setAlerts(prev => prev.filter(alert => alert.id !== id))
-  }
+  }, [])
 
   const unacknowledgedCount = alerts.filter(a => !a.acknowledged).length
 

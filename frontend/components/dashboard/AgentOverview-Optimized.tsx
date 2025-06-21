@@ -1,6 +1,6 @@
 'use client'
 
-import React, { memo, useCallback, useMemo } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { 
   Users, 
@@ -13,7 +13,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { apiClient, type Agent } from '@/lib/api/client'
-import { useWebSocket } from '@/hooks/useWebSocket'
+import { useAgentStatusWebSocket } from '@/lib/websocket/hooks'
 
 const agentIcons: Record<string, React.ReactNode> = {
   CEO: <Crown className="w-5 h-5" />,
@@ -33,9 +33,13 @@ const statusColors: Record<string, string> = {
   error: 'bg-red-500'
 }
 
-// Memoized Agent Card Component
-const AgentCard = memo(({ agent, isExecutive }: { agent: Agent; isExecutive?: boolean }) => {
-  const timeSinceActive = useMemo(() => {
+interface AgentCardProps {
+  agent: Agent
+  isExecutive?: boolean
+}
+
+const AgentCard = React.memo(({ agent, isExecutive }: AgentCardProps) => {
+  const timeSinceActive = React.useMemo(() => {
     const lastActive = new Date(agent.last_active)
     const now = new Date()
     const diffMinutes = Math.floor((now.getTime() - lastActive.getTime()) / 60000)
@@ -49,7 +53,7 @@ const AgentCard = memo(({ agent, isExecutive }: { agent: Agent; isExecutive?: bo
 
   return (
     <div className={`
-      bg-white dark:bg-gray-800 rounded-lg p-4 border transition-shadow
+      bg-white dark:bg-gray-800 rounded-lg p-4 border 
       ${isExecutive 
         ? 'border-primary-200 dark:border-primary-700' 
         : 'border-gray-200 dark:border-gray-700'
@@ -95,79 +99,101 @@ const AgentCard = memo(({ agent, isExecutive }: { agent: Agent; isExecutive?: bo
       </div>
     </div>
   )
+}, (prevProps, nextProps) => {
+  // Custom comparison function - only re-render if these props actually change
+  return prevProps.agent.id === nextProps.agent.id &&
+         prevProps.agent.status === nextProps.agent.status &&
+         prevProps.agent.last_active === nextProps.agent.last_active &&
+         prevProps.agent.subordinates.length === nextProps.agent.subordinates.length &&
+         prevProps.isExecutive === nextProps.isExecutive
 })
 
-AgentCard.displayName = 'AgentCard'
-
-export default function OptimizedAgentOverview() {
+export default function AgentOverviewOptimized() {
   const queryClient = useQueryClient()
+  const [realtimeAgents, setRealtimeAgents] = useState<Agent[]>([])
   
   const { data: agents, isLoading } = useQuery({
     queryKey: ['agents'],
     queryFn: () => apiClient.getAgents(),
-    refetchInterval: 300000, // 5 minutes - refresh interval
-    staleTime: 300000 // Data is fresh for 5 minutes
+    refetchInterval: 300000, // 5 minutes
+    staleTime: 300000 // Data considered fresh for 5 minutes
   })
 
-  // Optimized WebSocket message handler
-  const handleWebSocketMessage = useCallback((data: any) => {
-    if (data.type === 'agent_status_update') {
+  // Use the new optimized WebSocket hook
+  const { isConnected, connectionState, lastMessage } = useAgentStatusWebSocket((update) => {
+    if (update.agent_id && update.status) {
+      // Update specific agent in cache
       queryClient.setQueryData(['agents'], (oldData: Agent[] | undefined) => {
         if (!oldData) return oldData
         return oldData.map(agent => 
-          agent.id === data.agent_id 
-            ? { ...agent, status: data.status, last_active: data.timestamp }
+          agent.id === update.agent_id 
+            ? { 
+                ...agent, 
+                status: update.status, 
+                last_active: update.timestamp || new Date().toISOString(),
+                ...update // Include any other fields from the update
+              }
             : agent
         )
       })
-    } else if (data.type === 'agents_update') {
-      queryClient.setQueryData(['agents'], data.agents)
+    } else if (update.agents) {
+      // Full agents update
+      const transformedAgents = update.agents.map((agent: any) => ({
+        id: agent.agent_id || agent.id,
+        name: agent.name || `${agent.agent_type} Agent`,
+        agent_type: agent.agent_type,
+        status: agent.active ? 'active' : (agent.status || 'idle'),
+        parent_id: agent.parent_id || (agent.agent_type === 'CEO' ? null : 'ceo_agent'),
+        subordinates: agent.subordinates || [],
+        department: agent.department || agent.agent_type,
+        last_active: agent.last_active || new Date().toISOString(),
+        capabilities: agent.capabilities || []
+      }))
+      setRealtimeAgents(transformedAgents)
+      queryClient.setQueryData(['agents'], transformedAgents)
     }
-  }, [queryClient])
-
-  // WebSocket connection
-  useWebSocket({
-    onMessage: handleWebSocketMessage,
-    onConnect: () => {
-      console.log('WebSocket connected for agent monitoring')
-    }
+  }, {
+    onConnect: () => console.log('Agent status WebSocket connected'),
+    onDisconnect: () => console.log('Agent status WebSocket disconnected'),
+    onError: (error) => console.error('Agent status WebSocket error:', error)
   })
 
-  // Memoized agent categorization
-  const { executives, managers, workers, activeCount, totalCount } = useMemo(() => {
-    if (!agents) return { executives: [], managers: [], workers: [], activeCount: 0, totalCount: 0 }
-    
-    const agentsList: Agent[] = agents
-    return {
-      executives: agentsList.filter(a => ['CEO', 'COO', 'CSO', 'CFO', 'CTO'].includes(a.agent_type)),
-      managers: agentsList.filter(a => a.agent_type === 'Manager'),
-      workers: agentsList.filter(a => a.agent_type === 'Worker'),
-      activeCount: agentsList.filter(a => a.status === 'active').length,
-      totalCount: agentsList.length
+  // Show connection status in development
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Agent WebSocket state:', connectionState)
     }
-  }, [agents])
+  }, [connectionState])
 
   if (isLoading) {
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
+    return <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-96 rounded-lg" />
   }
+
+  // Use the transformed agents data
+  const agentsList: Agent[] = agents || []
+
+  const executives = agentsList.filter(a => ['CEO', 'COO', 'CSO', 'CFO', 'CTO'].includes(a.agent_type))
+  const managers = agentsList.filter(a => a.agent_type === 'Manager')
+  const workers = agentsList.filter(a => a.agent_type === 'Worker')
+
+  const activeCount = agentsList.filter(a => a.status === 'active').length
+  const totalCount = agentsList.length
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Agent Hierarchy
-        </h2>
+        <div className="flex items-center space-x-2">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Agent Hierarchy
+          </h2>
+          {/* Connection status indicator */}
+          <div className={`w-2 h-2 rounded-full ${
+            connectionState === 'connected' ? 'bg-green-500' :
+            connectionState === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+            connectionState === 'error' ? 'bg-red-500' :
+            'bg-gray-400'
+          }`} title={`WebSocket: ${connectionState}`} />
+        </div>
         <div className="flex items-center space-x-4">
           <span className="text-sm text-gray-600 dark:text-gray-400">
             {activeCount} / {totalCount} Active

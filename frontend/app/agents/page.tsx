@@ -39,15 +39,15 @@ export default function AgentsPage() {
   const { data: agents, isLoading } = useQuery({
     queryKey: ['agents'],
     queryFn: () => apiClient.getAgents(),
-    refetchInterval: 30000, // Reduced frequency
-    staleTime: 10000 // Consider data fresh for 10s
+    refetchInterval: 300000, // 5 minutes - reduced frequency
+    staleTime: 300000 // Consider data fresh for 5 minutes
   })
 
   const { data: hierarchy } = useQuery({
     queryKey: ['agent-hierarchy'],
     queryFn: () => apiClient.getAgentHierarchy(),
-    refetchInterval: 60000, // Reduced frequency
-    staleTime: 30000
+    refetchInterval: 300000, // 5 minutes - reduced frequency
+    staleTime: 300000 // Consider data fresh for 5 minutes
   })
 
   if (isLoading) {

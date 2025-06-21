@@ -72,7 +72,7 @@ export default function SystemMetrics() {
   const { data: metrics, isLoading } = useQuery({
     queryKey: ['system-metrics'],
     queryFn: () => apiClient.getMetrics(),
-    refetchInterval: 30000 // Reduced frequency since we have WebSocket
+    refetchInterval: 300000 // 5 minutes - reduced frequency since we have WebSocket
   })
 
   // Generate initial historical data for chart

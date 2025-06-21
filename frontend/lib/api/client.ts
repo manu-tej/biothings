@@ -132,7 +132,7 @@ interface CacheEntry {
 class UnifiedApiClient {
   private cache = new Map<string, CacheEntry>()
   private pendingRequests = new Map<string, Promise<any>>()
-  private cacheTimeout = 30000 // 30 seconds default cache
+  private cacheTimeout = 300000 // 5 minutes default cache
   private wsConnection: WebSocket | null = null
   private wsCallbacks: Map<string, (data: any) => void> = new Map()
   private reconnectAttempts = 0

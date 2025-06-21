@@ -1,23 +1,45 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState, Suspense, lazy } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import * as echarts from 'echarts'
+import dynamic from 'next/dynamic'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { TrendingUp, TrendingDown, BarChart3, PieChart, Activity, DollarSign, Download, Calendar, RefreshCw } from 'lucide-react'
 import { apiClient } from '@/lib/api/client'
 
+// Lazy load chart components
+const PerformanceChart = dynamic(
+  () => import('@/components/charts/AnalyticsCharts').then(mod => ({ default: mod.PerformanceChart })),
+  { 
+    loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-700 animate-pulse rounded" />,
+    ssr: false 
+  }
+)
+
+const CostBreakdownChart = dynamic(
+  () => import('@/components/charts/AnalyticsCharts').then(mod => ({ default: mod.CostBreakdownChart })),
+  { 
+    loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-700 animate-pulse rounded" />,
+    ssr: false 
+  }
+)
+
+const ProductivityChart = dynamic(
+  () => import('@/components/charts/AnalyticsCharts').then(mod => ({ default: mod.ProductivityChart })),
+  { 
+    loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-700 animate-pulse rounded" />,
+    ssr: false 
+  }
+)
+
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState('week')
   const [isExporting, setIsExporting] = useState(false)
-  const performanceChartRef = useRef<HTMLDivElement>(null)
-  const costChartRef = useRef<HTMLDivElement>(null)
-  const productivityChartRef = useRef<HTMLDivElement>(null)
 
   const { data: metrics, isLoading, refetch } = useQuery({
     queryKey: ['analytics-metrics', dateRange],
     queryFn: () => apiClient.getAnalyticsMetrics(dateRange),
-    refetchInterval: 30000
+    refetchInterval: 300000 // 5 minutes
   })
 
   const generateAIInsights = async () => {
@@ -54,161 +76,6 @@ export default function AnalyticsPage() {
     
     return insights.join('\n')
   }
-
-  const { data: metrics, isLoading, refetch } = useQuery({
-    queryKey: ['analytics-metrics', dateRange],
-    queryFn: () => apiClient.getAnalyticsMetrics(dateRange),
-    refetchInterval: 30000
-  })
-
-  useEffect(() => {
-    if (!performanceChartRef.current || !metrics?.performanceData) return
-    
-    const chart = echarts.init(performanceChartRef.current, 'dark')
-    
-    const option = {
-      backgroundColor: 'transparent',
-      tooltip: { trigger: 'axis' },
-      legend: {
-        data: metrics.performanceData.datasets.map(d => d.name),
-        textStyle: { color: '#9CA3AF' }
-      },
-      grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-      xAxis: {
-        type: 'category',
-        data: metrics.performanceData.labels,
-        axisLabel: { color: '#9CA3AF' },
-        axisLine: { lineStyle: { color: '#374151' } }
-      },
-      yAxis: {
-        type: 'value',
-        axisLabel: { color: '#9CA3AF' },
-        splitLine: { lineStyle: { color: '#374151' } }
-      },
-      series: metrics.performanceData.datasets.map((dataset, index) => ({
-        name: dataset.name,
-        type: 'line',
-        data: dataset.data,
-        smooth: true,
-        itemStyle: { color: ['#3B82F6', '#10B981', '#8B5CF6'][index] }
-      }))
-    }
-    
-    chart.setOption(option)
-    
-    const handleResize = () => chart.resize()
-    window.addEventListener('resize', handleResize)
-    
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      chart.dispose()
-    }
-  }, [metrics])
-
-  useEffect(() => {
-    if (!costChartRef.current || !metrics?.costBreakdown) return
-    
-    const chart = echarts.init(costChartRef.current, 'dark')
-    
-    const option = {
-      backgroundColor: 'transparent',
-      tooltip: { trigger: 'item' },
-      legend: {
-        orient: 'vertical',
-        left: 'left',
-        textStyle: { color: '#9CA3AF' }
-      },
-      series: [
-        {
-          name: 'Cost Breakdown',
-          type: 'pie',
-          radius: '50%',
-          data: metrics.costBreakdown,
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)'
-            }
-          }
-        }
-      ]
-    }
-    
-    chart.setOption(option)
-    
-    const handleResize = () => chart.resize()
-    window.addEventListener('resize', handleResize)
-    
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      chart.dispose()
-    }
-  }, [metrics])
-
-  useEffect(() => {
-    if (!productivityChartRef.current || !metrics?.productivityData) return
-    
-    const chart = echarts.init(productivityChartRef.current, 'dark')
-    
-    const option = {
-      backgroundColor: 'transparent',
-      tooltip: { trigger: 'axis' },
-      legend: {
-        data: ['Experiments/Day', 'Success Rate %'],
-        textStyle: { color: '#9CA3AF' }
-      },
-      grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-      xAxis: {
-        type: 'category',
-        data: metrics.productivityData.labels,
-        axisLabel: { color: '#9CA3AF' },
-        axisLine: { lineStyle: { color: '#374151' } }
-      },
-      yAxis: [
-        {
-          type: 'value',
-          name: 'Experiments',
-          position: 'left',
-          axisLabel: { color: '#9CA3AF' },
-          splitLine: { lineStyle: { color: '#374151' } }
-        },
-        {
-          type: 'value',
-          name: 'Success Rate (%)',
-          position: 'right',
-          axisLabel: { color: '#9CA3AF' },
-          splitLine: { show: false }
-        }
-      ],
-      series: [
-        {
-          name: 'Experiments/Day',
-          type: 'bar',
-          data: metrics.productivityData.experiments,
-          itemStyle: { color: '#3B82F6' }
-        },
-        {
-          name: 'Success Rate %',
-          type: 'line',
-          yAxisIndex: 1,
-          data: metrics.productivityData.successRate,
-          smooth: true,
-          itemStyle: { color: '#10B981' }
-        }
-      ]
-    }
-    
-    chart.setOption(option)
-    
-    const handleResize = () => chart.resize()
-    window.addEventListener('resize', handleResize)
-    
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      chart.dispose()
-    }
-  }, [metrics])
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -380,7 +247,9 @@ export default function AnalyticsPage() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Performance Trends
             </h2>
-            <div className="h-64" ref={performanceChartRef} />
+            {metrics?.performanceData && (
+              <PerformanceChart data={metrics.performanceData} />
+            )}
           </div>
 
           {/* Cost Breakdown */}
@@ -388,7 +257,9 @@ export default function AnalyticsPage() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Cost Breakdown
             </h2>
-            <div className="h-64" ref={costChartRef} />
+            {metrics?.costBreakdown && (
+              <CostBreakdownChart data={metrics.costBreakdown} />
+            )}
           </div>
         </div>
 
@@ -397,7 +268,9 @@ export default function AnalyticsPage() {
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Daily Productivity
           </h2>
-          <div className="h-64" ref={productivityChartRef} />
+          {metrics?.productivityData && (
+            <ProductivityChart data={metrics.productivityData} />
+          )}
         </div>
       </div>
     </DashboardLayout>
