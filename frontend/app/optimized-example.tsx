@@ -3,78 +3,83 @@
  * Demonstrates all performance optimizations in action
  */
 
-'use client';
+'use client'
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react'
 
-import { 
-  withMemo, 
-  VirtualList, 
-  wsManager, 
+import {
+  withMemo,
+  VirtualList,
+  wsManager,
   apiClient,
   lazyWithPreload,
   usePreloadOnInteraction,
-  perfMonitor
-} from '@/lib/performance/optimization-toolkit';
+  perfMonitor,
+} from '@/lib/performance/optimization-toolkit'
 
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
 
 // Lazy load heavy chart component
 const AnalyticsChart = lazyWithPreload(
-  () => import('@/components/charts/AnalyticsChart').then(mod => ({ 
-    default: mod.AnalyticsChart 
-  })),
+  () =>
+    import('@/components/charts/AnalyticsChart').then((mod) => ({
+      default: mod.AnalyticsChart,
+    })),
   { fallback: () => <div className="h-64 bg-gray-100 animate-pulse rounded" /> }
-);
+)
 
 // Types
 interface Agent {
-  id: string;
-  name: string;
-  status: 'active' | 'idle' | 'error';
+  id: string
+  name: string
+  status: 'active' | 'idle' | 'error'
   metrics: {
-    cpu: number;
-    memory: number;
-    tasks: number;
-  };
-  lastUpdate: string;
+    cpu: number
+    memory: number
+    tasks: number
+  }
+  lastUpdate: string
 }
 
 interface OptimizedDashboardProps {
-  initialAgents?: Agent[];
+  initialAgents?: Agent[]
 }
 
 // Memoized Agent Card Component
 const AgentCard = withMemo<{ agent: Agent; onClick: (id: string) => void }>(
   ({ agent, onClick }) => {
-    perfMonitor.mark(`agent-card-render-${agent.id}`);
-    
+    perfMonitor.mark(`agent-card-render-${agent.id}`)
+
     // Memoize expensive calculations
     const statusColor = useMemo(() => {
       switch (agent.status) {
-        case 'active': return 'bg-green-500';
-        case 'idle': return 'bg-yellow-500';
-        case 'error': return 'bg-red-500';
-        default: return 'bg-gray-500';
+        case 'active':
+          return 'bg-green-500'
+        case 'idle':
+          return 'bg-yellow-500'
+        case 'error':
+          return 'bg-red-500'
+        default:
+          return 'bg-gray-500'
       }
-    }, [agent.status]);
-    
-    const formattedMetrics = useMemo(() => ({
-      cpu: `${agent.metrics.cpu.toFixed(1)}%`,
-      memory: `${agent.metrics.memory.toFixed(1)}%`,
-      tasks: agent.metrics.tasks.toString()
-    }), [agent.metrics]);
-    
+    }, [agent.status])
+
+    const formattedMetrics = useMemo(
+      () => ({
+        cpu: `${agent.metrics.cpu.toFixed(1)}%`,
+        memory: `${agent.metrics.memory.toFixed(1)}%`,
+        tasks: agent.metrics.tasks.toString(),
+      }),
+      [agent.metrics]
+    )
+
     React.useEffect(() => {
-      perfMonitor.measure(
-        `agent-card-render-time-${agent.id}`,
-        `agent-card-render-${agent.id}`
-      );
-    });
-    
+      perfMonitor.measure(`agent-card-render-time-${agent.id}`, `agent-card-render-${agent.id}`)
+    })
+
     return (
-      <Card 
+      <Card
         className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
         onClick={() => onClick(agent.id)}
       >
@@ -82,7 +87,7 @@ const AgentCard = withMemo<{ agent: Agent; onClick: (id: string) => void }>(
           <h3 className="font-semibold">{agent.name}</h3>
           <Badge className={statusColor}>{agent.status}</Badge>
         </div>
-        
+
         <div className="grid grid-cols-3 gap-2 text-sm">
           <div>
             <span className="text-gray-500">CPU:</span>
@@ -97,83 +102,88 @@ const AgentCard = withMemo<{ agent: Agent; onClick: (id: string) => void }>(
             <span className="ml-1 font-medium">{formattedMetrics.tasks}</span>
           </div>
         </div>
-        
+
         <div className="mt-2 text-xs text-gray-400">
           Last update: {new Date(agent.lastUpdate).toLocaleTimeString()}
         </div>
       </Card>
-    );
+    )
   },
   // Custom comparison function - only re-render if data actually changed
-  (prevProps, nextProps) => 
+  (prevProps, nextProps) =>
     prevProps.agent.id === nextProps.agent.id &&
     prevProps.agent.status === nextProps.agent.status &&
     prevProps.agent.lastUpdate === nextProps.agent.lastUpdate &&
     JSON.stringify(prevProps.agent.metrics) === JSON.stringify(nextProps.agent.metrics)
-);
+)
 
 // Main Optimized Dashboard Component
 export default function OptimizedDashboard({ initialAgents = [] }: OptimizedDashboardProps) {
-  const [agents, setAgents] = useState<Agent[]>(initialAgents);
-  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
-  const [showChart, setShowChart] = useState(false);
-  
+  const [agents, setAgents] = useState<Agent[]>(initialAgents)
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(null)
+  const [showChart, setShowChart] = useState(false)
+
   // WebSocket subscription for real-time updates
   React.useEffect(() => {
-    perfMonitor.mark('websocket-setup-start');
-    
+    perfMonitor.mark('websocket-setup-start')
+
     const unsubscribe = wsManager.subscribe('agent-updates', (data) => {
       if (data.type === 'agent-update') {
-        setAgents(prev => prev.map(agent => 
-          agent.id === data.agentId 
-            ? { ...agent, ...data.updates, lastUpdate: new Date().toISOString() }
-            : agent
-        ));
+        setAgents((prev) =>
+          prev.map((agent) =>
+            agent.id === data.agentId
+              ? { ...agent, ...data.updates, lastUpdate: new Date().toISOString() }
+              : agent
+          )
+        )
       }
-    });
-    
-    perfMonitor.measure('websocket-setup', 'websocket-setup-start');
-    
-    return unsubscribe;
-  }, []);
-  
+    })
+
+    perfMonitor.measure('websocket-setup', 'websocket-setup-start')
+
+    return unsubscribe
+  }, [])
+
   // Fetch initial data with optimized API client
   React.useEffect(() => {
-    perfMonitor.mark('initial-fetch-start');
-    
-    apiClient.get<Agent[]>('/api/agents', { 
-      cache: true, 
-      cacheTTL: 5 * 60 * 1000 // 5 minutes
-    }).then(data => {
-      setAgents(data);
-      perfMonitor.measure('initial-fetch', 'initial-fetch-start');
-    });
-  }, []);
-  
+    perfMonitor.mark('initial-fetch-start')
+
+    apiClient
+      .get<Agent[]>('/api/agents', {
+        cache: true,
+        cacheTTL: 5 * 60 * 1000, // 5 minutes
+      })
+      .then((data) => {
+        setAgents(data)
+        perfMonitor.measure('initial-fetch', 'initial-fetch-start')
+      })
+  }, [])
+
   // Memoized callbacks
   const handleAgentClick = useCallback((agentId: string) => {
-    setSelectedAgent(agentId);
-  }, []);
-  
+    setSelectedAgent(agentId)
+  }, [])
+
   const handleShowChart = useCallback(() => {
-    setShowChart(true);
-  }, []);
-  
+    setShowChart(true)
+  }, [])
+
   // Preload chart on button hover
-  const chartButtonProps = usePreloadOnInteraction(AnalyticsChart);
-  
+  const chartButtonProps = usePreloadOnInteraction(AnalyticsChart)
+
   // Filter and sort agents
-  const sortedAgents = useMemo(() => 
-    [...agents].sort((a, b) => {
-      // Active agents first
-      if (a.status === 'active' && b.status !== 'active') return -1;
-      if (a.status !== 'active' && b.status === 'active') return 1;
-      // Then by CPU usage
-      return b.metrics.cpu - a.metrics.cpu;
-    }),
+  const sortedAgents = useMemo(
+    () =>
+      [...agents].sort((a, b) => {
+        // Active agents first
+        if (a.status === 'active' && b.status !== 'active') return -1
+        if (a.status !== 'active' && b.status === 'active') return 1
+        // Then by CPU usage
+        return b.metrics.cpu - a.metrics.cpu
+      }),
     [agents]
-  );
-  
+  )
+
   return (
     <div className="p-6">
       <div className="mb-6">
@@ -182,7 +192,7 @@ export default function OptimizedDashboard({ initialAgents = [] }: OptimizedDash
           Demonstrating performance optimizations: memoization, virtualization, lazy loading
         </p>
       </div>
-      
+
       {/* Performance Stats */}
       <div className="mb-6 p-4 bg-gray-100 rounded">
         <h2 className="font-semibold mb-2">Performance Metrics</h2>
@@ -194,7 +204,7 @@ export default function OptimizedDashboard({ initialAgents = [] }: OptimizedDash
           <div>
             <span className="text-gray-500">Active:</span>
             <span className="ml-2 font-medium">
-              {agents.filter(a => a.status === 'active').length}
+              {agents.filter((a) => a.status === 'active').length}
             </span>
           </div>
           <div>
@@ -214,7 +224,7 @@ export default function OptimizedDashboard({ initialAgents = [] }: OptimizedDash
           </div>
         </div>
       </div>
-      
+
       {/* Virtualized Agent List */}
       <div className="mb-6">
         <h2 className="font-semibold mb-4">Agents (Virtualized List)</h2>
@@ -231,7 +241,7 @@ export default function OptimizedDashboard({ initialAgents = [] }: OptimizedDash
           )}
         />
       </div>
-      
+
       {/* Lazy Loaded Chart */}
       {showChart && (
         <div className="mb-6">
@@ -241,12 +251,12 @@ export default function OptimizedDashboard({ initialAgents = [] }: OptimizedDash
           </React.Suspense>
         </div>
       )}
-      
+
       {/* Selected Agent Details */}
       {selectedAgent && (
         <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-lg p-6 overflow-y-auto">
           <h2 className="text-xl font-semibold mb-4">
-            Agent Details: {agents.find(a => a.id === selectedAgent)?.name}
+            Agent Details: {agents.find((a) => a.id === selectedAgent)?.name}
           </h2>
           <button
             onClick={() => setSelectedAgent(null)}
@@ -258,16 +268,16 @@ export default function OptimizedDashboard({ initialAgents = [] }: OptimizedDash
         </div>
       )}
     </div>
-  );
+  )
 }
 
 // Performance measurement hook
 function usePerformanceTracking(componentName: string) {
   React.useEffect(() => {
-    perfMonitor.mark(`${componentName}-mount`);
-    
+    perfMonitor.mark(`${componentName}-mount`)
+
     return () => {
-      perfMonitor.measure(`${componentName}-lifecycle`, `${componentName}-mount`);
-    };
-  }, [componentName]);
+      perfMonitor.measure(`${componentName}-lifecycle`, `${componentName}-mount`)
+    }
+  }, [componentName])
 }

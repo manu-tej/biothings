@@ -1,89 +1,92 @@
-'use client';
+'use client'
 
-import { Download, RefreshCw, Calendar, TrendingUp, BarChart3 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { Download, RefreshCw, Calendar, TrendingUp, BarChart3 } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
 
-import { Badge } from '@/components/ui/atoms/Badge';
-import { Button } from '@/components/ui/atoms/Button';
-import { Card } from '@/components/ui/atoms/Card';
-import { Select } from '@/components/ui/atoms/Select';
-import { DataTable } from '@/components/ui/molecules/DataTable';
-import { MetricChart } from '@/components/ui/molecules/MetricChart';
-import { StatCard } from '@/components/ui/molecules/StatCard';
-import { useDashboardStore } from '@/lib/stores/dashboardStore';
-import { useWebSocketStore } from '@/lib/stores/websocketStore';
+import { Badge } from '@/components/ui/atoms/Badge'
+import { Button } from '@/components/ui/atoms/Button'
+import { Card } from '@/components/ui/atoms/Card'
+import { Select } from '@/components/ui/atoms/Select'
+import { DataTable } from '@/components/ui/molecules/DataTable'
+import { MetricChart } from '@/components/ui/molecules/MetricChart'
+import { StatCard } from '@/components/ui/molecules/StatCard'
+import { useDashboardStore } from '@/lib/stores/dashboardStore'
+import { useWebSocketStore } from '@/lib/stores/websocketStore'
 
-// Chart series interface for MetricChart  
+// Chart series interface for MetricChart
 interface ChartDataPoint {
-  x: any;
-  y: number;
-  label?: string;
-  color?: string;
+  x: any
+  y: number
+  label?: string
+  color?: string
 }
 
 interface ChartSeries {
-  id: string;
-  name: string;
-  data: ChartDataPoint[];
-  color?: string;
-  type?: 'line' | 'bar' | 'area';
+  id: string
+  name: string
+  data: ChartDataPoint[]
+  color?: string
+  type?: 'line' | 'bar' | 'area'
 }
 
 export default function AnalyticsPage() {
-  const {
-    agents,
-    workflows,
-    systemHealth: _systemHealth,
-  } = useDashboardStore();
+  const { agents, workflows, systemHealth: _systemHealth } = useDashboardStore()
 
-  const { connect, disconnect, getConnectionStatus } = useWebSocketStore();
-  const [isLoading, setIsLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState('7d');
-  const [selectedMetric, setSelectedMetric] = useState('performance');
+  const { connect, disconnect, getConnectionStatus } = useWebSocketStore()
+  const [isLoading, setIsLoading] = useState(true)
+  const [timeRange, setTimeRange] = useState('7d')
+  const [selectedMetric, setSelectedMetric] = useState('performance')
 
   useEffect(() => {
     const initializeAnalyticsPage = async () => {
       try {
         // Connect to analytics WebSocket channel
-        const connectionStatus = getConnectionStatus('analytics');
+        const connectionStatus = getConnectionStatus('analytics')
         if (!connectionStatus || connectionStatus === 'disconnected') {
-          connect('analytics', process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws');
+          connect('analytics', process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws')
         }
       } catch (_error) {
         // Handle initialization error silently
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    initializeAnalyticsPage();
+    initializeAnalyticsPage()
 
     return () => {
-      disconnect('analytics');
-    };
-  }, [connect, disconnect, getConnectionStatus]);
+      disconnect('analytics')
+    }
+  }, [connect, disconnect, getConnectionStatus])
 
   // Convert Maps to arrays for calculations
-  const agentsArray = Array.from(agents.values());
-  const _workflowsArray = Array.from(workflows.values());
+  const agentsArray = Array.from(agents.values())
+  const _workflowsArray = Array.from(workflows.values())
 
   // Calculate analytics metrics
-  const totalTasks = agentsArray.reduce((sum, agent) => sum + (agent.metrics.tasksCompleted || 0), 0);
-  const avgResponseTime = agentsArray.length > 0 
-    ? agentsArray.reduce((sum, agent) => sum + (agent.metrics.averageResponseTime || 0), 0) / agentsArray.length 
-    : 0;
-  const successRate = agentsArray.length > 0
-    ? agentsArray.reduce((sum, agent) => sum + (agent.metrics.successRate || 0), 0) / agentsArray.length
-    : 0;
-  const activeAgents = agentsArray.filter(agent => agent.status === 'active').length;
+  const totalTasks = agentsArray.reduce(
+    (sum, agent) => sum + (agent.metrics.tasksCompleted || 0),
+    0
+  )
+  const avgResponseTime =
+    agentsArray.length > 0
+      ? agentsArray.reduce((sum, agent) => sum + (agent.metrics.averageResponseTime || 0), 0) /
+        agentsArray.length
+      : 0
+  const successRate =
+    agentsArray.length > 0
+      ? agentsArray.reduce((sum, agent) => sum + (agent.metrics.successRate || 0), 0) /
+        agentsArray.length
+      : 0
+  const activeAgents = agentsArray.filter((agent) => agent.status === 'active').length
 
   // Mock time-series data (in real app, this would come from API based on timeRange)
   const generateTimeSeriesData = (baseValue: number, variance: number, points: number) => {
     return Array.from({ length: points }, (_, i) => ({
       x: i,
       y: Math.max(0, baseValue + (Math.random() - 0.5) * variance),
-    }));
-  };
+    }))
+  }
 
   const performanceMetrics: ChartSeries[] = [
     {
@@ -104,7 +107,7 @@ export default function AnalyticsPage() {
       data: generateTimeSeriesData(120, 40, 24),
       color: '#f59e0b',
     },
-  ];
+  ]
 
   const agentUtilization: ChartSeries[] = [
     {
@@ -119,7 +122,7 @@ export default function AnalyticsPage() {
       data: generateTimeSeriesData(45, 15, 24),
       color: '#ef4444',
     },
-  ];
+  ]
 
   const workflowAnalytics: ChartSeries[] = [
     {
@@ -134,7 +137,7 @@ export default function AnalyticsPage() {
       data: generateTimeSeriesData(3, 2, 24),
       color: '#ef4444',
     },
-  ];
+  ]
 
   // Table data for top performing agents
   const topAgentsData = agentsArray
@@ -148,49 +151,83 @@ export default function AnalyticsPage() {
       successRate: `${(agent.metrics.successRate || 0).toFixed(1)}%`,
       avgResponseTime: `${(agent.metrics.averageResponseTime || 0).toFixed(0)}ms`,
       status: agent.status,
-    }));
+    }))
 
   const tableColumns = [
-    { id: 'rank', header: 'Rank', accessorKey: 'rank' as keyof typeof topAgentsData[0], sortable: true },
-    { id: 'name', header: 'Agent Name', accessorKey: 'name' as keyof typeof topAgentsData[0], sortable: true },
-    { id: 'type', header: 'Type', accessorKey: 'type' as keyof typeof topAgentsData[0], sortable: true },
-    { id: 'tasksCompleted', header: 'Tasks', accessorKey: 'tasksCompleted' as keyof typeof topAgentsData[0], sortable: true },
-    { id: 'successRate', header: 'Success Rate', accessorKey: 'successRate' as keyof typeof topAgentsData[0], sortable: true },
-    { id: 'avgResponseTime', header: 'Avg Response', accessorKey: 'avgResponseTime' as keyof typeof topAgentsData[0], sortable: true },
+    {
+      id: 'rank',
+      header: 'Rank',
+      accessorKey: 'rank' as keyof (typeof topAgentsData)[0],
+      sortable: true,
+    },
+    {
+      id: 'name',
+      header: 'Agent Name',
+      accessorKey: 'name' as keyof (typeof topAgentsData)[0],
+      sortable: true,
+    },
+    {
+      id: 'type',
+      header: 'Type',
+      accessorKey: 'type' as keyof (typeof topAgentsData)[0],
+      sortable: true,
+    },
+    {
+      id: 'tasksCompleted',
+      header: 'Tasks',
+      accessorKey: 'tasksCompleted' as keyof (typeof topAgentsData)[0],
+      sortable: true,
+    },
+    {
+      id: 'successRate',
+      header: 'Success Rate',
+      accessorKey: 'successRate' as keyof (typeof topAgentsData)[0],
+      sortable: true,
+    },
+    {
+      id: 'avgResponseTime',
+      header: 'Avg Response',
+      accessorKey: 'avgResponseTime' as keyof (typeof topAgentsData)[0],
+      sortable: true,
+    },
     {
       id: 'status',
       header: 'Status',
-      accessorKey: 'status' as keyof typeof topAgentsData[0],
+      accessorKey: 'status' as keyof (typeof topAgentsData)[0],
       sortable: true,
       cell: (value: string) => (
         <Badge
           variant={
-            value === 'active' ? 'success' :
-            value === 'error' ? 'danger' :
-            value === 'idle' ? 'warning' : 'secondary'
+            value === 'active'
+              ? 'success'
+              : value === 'error'
+                ? 'danger'
+                : value === 'idle'
+                  ? 'warning'
+                  : 'secondary'
           }
           size="xs"
         >
           {value}
         </Badge>
-      )
+      ),
     },
-  ];
+  ]
 
   const handleExportAnalytics = () => {
     // TODO: Implement export analytics functionality
-  };
+  }
 
   const handleRefresh = () => {
     // TODO: Implement refresh analytics functionality
-  };
+  }
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
-    );
+    )
   }
 
   return (
@@ -198,34 +235,22 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Analytics & Insights
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Analytics & Insights</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Performance metrics and trends across your BioThings ecosystem
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Badge 
+          <Badge
             variant={getConnectionStatus('analytics') === 'connected' ? 'success' : 'danger'}
             className="capitalize"
           >
             {getConnectionStatus('analytics') === 'connected' ? 'Connected' : 'Disconnected'}
           </Badge>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleRefresh}
-            icon={<RefreshCw />}
-          >
+          <Button variant="outline" size="sm" onClick={handleRefresh} icon={<RefreshCw />}>
             Refresh
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleExportAnalytics}
-            icon={<Download />}
-          >
+          <Button variant="outline" size="sm" onClick={handleExportAnalytics} icon={<Download />}>
             Export
           </Button>
         </div>
@@ -272,12 +297,12 @@ export default function AnalyticsPage() {
           trend={{
             value: totalTasks,
             percentage: 12,
-            direction: 'up'
+            direction: 'up',
           }}
           variant="default"
           icon={<TrendingUp />}
         />
-        
+
         <StatCard
           title="Avg Response Time"
           value={`${avgResponseTime.toFixed(0)}ms`}
@@ -285,11 +310,11 @@ export default function AnalyticsPage() {
           trend={{
             value: avgResponseTime,
             percentage: 5,
-            direction: 'down'
+            direction: 'down',
           }}
           variant="default"
         />
-        
+
         <StatCard
           title="Success Rate"
           value={`${successRate.toFixed(1)}%`}
@@ -297,19 +322,20 @@ export default function AnalyticsPage() {
           trend={{
             value: successRate,
             percentage: 2,
-            direction: 'up'
+            direction: 'up',
           }}
           variant="default"
         />
-        
+
         <StatCard
           title="Active Agents"
           value={activeAgents.toString()}
           subtitle={`of ${agentsArray.length} total`}
           trend={{
             value: activeAgents,
-            percentage: agentsArray.length > 0 ? Math.round((activeAgents / agentsArray.length) * 100) : 0,
-            direction: 'up'
+            percentage:
+              agentsArray.length > 0 ? Math.round((activeAgents / agentsArray.length) * 100) : 0,
+            direction: 'up',
           }}
           variant="default"
         />
@@ -364,7 +390,7 @@ export default function AnalyticsPage() {
                     name: 'Throughput (MB/s)',
                     data: generateTimeSeriesData(45, 15, 24),
                     color: '#06b6d4',
-                  }
+                  },
                 ]}
                 height={350}
                 showLegend={true}
@@ -396,7 +422,7 @@ export default function AnalyticsPage() {
                     name: 'Avg Duration (min)',
                     data: generateTimeSeriesData(15, 5, 24),
                     color: '#8b5cf6',
-                  }
+                  },
                 ]}
                 height={350}
                 showLegend={true}
@@ -426,5 +452,5 @@ export default function AnalyticsPage() {
         />
       </Card>
     </div>
-  );
+  )
 }

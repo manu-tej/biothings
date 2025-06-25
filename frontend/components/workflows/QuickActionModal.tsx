@@ -21,9 +21,9 @@ const actionConfigs = {
       compound_library_size: 10000,
       screening_method: 'high_throughput',
       target_protein: '',
-      assay_type: 'binding_affinity'
+      assay_type: 'binding_affinity',
     },
-    agents: ['cso_agent', 'research_manager', 'lab_tech_worker_1']
+    agents: ['cso_agent', 'research_manager', 'lab_tech_worker_1'],
   },
   production_scaleup: {
     title: 'Production Scale-up',
@@ -33,9 +33,9 @@ const actionConfigs = {
       batch_size: '100L',
       target_yield: 85,
       production_line: 'Line_A',
-      quality_checkpoints: 5
+      quality_checkpoints: 5,
     },
-    agents: ['coo_agent', 'quality_control_1']
+    agents: ['coo_agent', 'quality_control_1'],
   },
   quality_control: {
     title: 'Quality Control Protocol',
@@ -45,16 +45,16 @@ const actionConfigs = {
       test_battery: 'full',
       sample_size: 50,
       acceptance_criteria: 'USP',
-      documentation_level: 'GMP'
+      documentation_level: 'GMP',
     },
-    agents: ['quality_control_1', 'lab_tech_worker_2']
-  }
+    agents: ['quality_control_1', 'lab_tech_worker_2'],
+  },
 }
 
 export default function QuickActionModal({ isOpen, onClose, actionType }: QuickActionModalProps) {
   const queryClient = useQueryClient()
   const config = actionType ? actionConfigs[actionType] : null
-  
+
   const [parameters, setParameters] = useState(config?.defaultParams || {})
   const [workflowName, setWorkflowName] = useState('')
 
@@ -63,7 +63,7 @@ export default function QuickActionModal({ isOpen, onClose, actionType }: QuickA
       const response = await fetch(`${apiClient['apiBaseUrl']}/api/workflows`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       })
       if (!response.ok) throw new Error('Failed to create workflow')
       return response.json()
@@ -79,7 +79,7 @@ export default function QuickActionModal({ isOpen, onClose, actionType }: QuickA
     onError: (error) => {
       console.error('Failed to create workflow:', error)
       alert('Failed to create workflow. Please try again.')
-    }
+    },
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -91,12 +91,12 @@ export default function QuickActionModal({ isOpen, onClose, actionType }: QuickA
       workflow_type: config.workflow_type,
       description: config.description,
       parameters,
-      assigned_agents: config.agents
+      assigned_agents: config.agents,
     })
   }
 
   const updateParameter = (key: string, value: any) => {
-    setParameters(prev => ({ ...prev, [key]: value }))
+    setParameters((prev) => ({ ...prev, [key]: value }))
   }
 
   if (!isOpen || !config) return null
@@ -109,9 +109,7 @@ export default function QuickActionModal({ isOpen, onClose, actionType }: QuickA
             <div className="p-2 rounded-lg bg-primary-50 dark:bg-primary-900/20">
               <Activity className="w-6 h-6 text-primary-600 dark:text-primary-400" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {config.title}
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{config.title}</h2>
           </div>
           <button
             onClick={onClose}
@@ -121,9 +119,7 @@ export default function QuickActionModal({ isOpen, onClose, actionType }: QuickA
           </button>
         </div>
 
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
-          {config.description}
-        </p>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">{config.description}</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -142,11 +138,14 @@ export default function QuickActionModal({ isOpen, onClose, actionType }: QuickA
 
           <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">Parameters</h3>
-            
+
             {Object.entries(parameters).map(([key, value]) => (
               <div key={key}>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                  {key
+                    .split('_')
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ')}
                 </label>
                 {typeof value === 'number' ? (
                   <input
@@ -168,14 +167,16 @@ export default function QuickActionModal({ isOpen, onClose, actionType }: QuickA
           </div>
 
           <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Assigned Agents</h3>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+              Assigned Agents
+            </h3>
             <div className="flex flex-wrap gap-2">
-              {config.agents.map(agent => (
+              {config.agents.map((agent) => (
                 <span
                   key={agent}
                   className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm"
                 >
-                  {agent.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  {agent.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
                 </span>
               ))}
             </div>

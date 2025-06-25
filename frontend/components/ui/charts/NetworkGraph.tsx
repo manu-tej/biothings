@@ -1,37 +1,37 @@
-'use client';
+'use client'
 
-import ReactECharts from 'echarts-for-react';
-import React from 'react';
+import ReactECharts from 'echarts-for-react'
+import React from 'react'
 
-import { withErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { withErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 export interface NetworkNode {
-  id: string;
-  name: string;
-  category?: string;
-  value?: number;
-  symbolSize?: number;
+  id: string
+  name: string
+  category?: string
+  value?: number
+  symbolSize?: number
 }
 
 export interface NetworkLink {
-  source: string;
-  target: string;
-  value?: number;
+  source: string
+  target: string
+  value?: number
 }
 
 export interface NetworkData {
-  nodes: NetworkNode[];
-  links: NetworkLink[];
+  nodes: NetworkNode[]
+  links: NetworkLink[]
 }
 
 interface NetworkGraphProps {
-  data: NetworkData;
-  width?: number;
-  height?: number;
-  className?: string;
-  layout?: 'force' | 'circular' | 'none';
-  onNodeClick?: (node: NetworkNode) => void;
-  onLinkClick?: (link: NetworkLink) => void;
+  data: NetworkData
+  width?: number
+  height?: number
+  className?: string
+  layout?: 'force' | 'circular' | 'none'
+  onNodeClick?: (node: NetworkNode) => void
+  onLinkClick?: (link: NetworkLink) => void
 }
 
 export const NetworkGraph: React.FC<NetworkGraphProps> = ({
@@ -54,13 +54,13 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
     },
     tooltip: {
       trigger: 'item',
-      formatter: function(params: any) {
+      formatter: function (params: any) {
         if (params.dataType === 'node') {
-          return `${params.data.name}<br/>Category: ${params.data.category || 'Unknown'}<br/>Value: ${params.data.value || 0}`;
+          return `${params.data.name}<br/>Category: ${params.data.category || 'Unknown'}<br/>Value: ${params.data.value || 0}`
         } else if (params.dataType === 'edge') {
-          return `${params.data.source} → ${params.data.target}${params.data.value ? `<br/>Weight: ${params.data.value}` : ''}`;
+          return `${params.data.source} → ${params.data.target}${params.data.value ? `<br/>Weight: ${params.data.value}` : ''}`
         }
-        return '';
+        return ''
       },
     },
     legend: {
@@ -73,7 +73,7 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
         name: 'Agent Network',
         type: 'graph',
         layout: layout,
-        data: data.nodes.map(node => ({
+        data: data.nodes.map((node) => ({
           id: node.id,
           name: node.name,
           category: node.category,
@@ -89,7 +89,7 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
             color: '#333',
           },
         })),
-        links: data.links.map(link => ({
+        links: data.links.map((link) => ({
           source: link.source,
           target: link.target,
           value: link.value,
@@ -109,12 +109,15 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
         ],
         roam: true,
         focusNodeAdjacency: true,
-        force: layout === 'force' ? {
-          repulsion: 1000,
-          gravity: 0.1,
-          edgeLength: 150,
-          layoutAnimation: true,
-        } : undefined,
+        force:
+          layout === 'force'
+            ? {
+                repulsion: 1000,
+                gravity: 0.1,
+                edgeLength: 150,
+                layoutAnimation: true,
+              }
+            : undefined,
         emphasis: {
           focus: 'adjacency',
           lineStyle: {
@@ -125,25 +128,25 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
         animationEasingUpdate: 'quinticInOut',
       },
     ],
-  };
+  }
 
   const handleEvents = {
     click: (params: any) => {
       if (params.dataType === 'node' && onNodeClick) {
-        const originalNode = data.nodes.find(node => node.id === params.data.id);
+        const originalNode = data.nodes.find((node) => node.id === params.data.id)
         if (originalNode) {
-          onNodeClick(originalNode);
+          onNodeClick(originalNode)
         }
       } else if (params.dataType === 'edge' && onLinkClick) {
         const originalLink = data.links.find(
-          link => link.source === params.data.source && link.target === params.data.target
-        );
+          (link) => link.source === params.data.source && link.target === params.data.target
+        )
         if (originalLink) {
-          onLinkClick(originalLink);
+          onLinkClick(originalLink)
         }
       }
     },
-  };
+  }
 
   return (
     <div className={`network-graph ${className}`}>
@@ -154,8 +157,8 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
         opts={{ renderer: 'canvas' }}
       />
     </div>
-  );
-};
+  )
+}
 
 function getCategoryColor(category?: string): string {
   const colors: Record<string, string> = {
@@ -166,45 +169,45 @@ function getCategoryColor(category?: string): string {
     coordinator: '#2ecc71',
     specialist: '#e67e22',
     default: '#95a5a6',
-  };
-  
-  return colors[category || 'default'] || colors.default;
+  }
+
+  return colors[category || 'default'] || colors.default
 }
 
 // Helper function to generate sample agent network data
 export const generateAgentNetworkData = (agents: any[]): NetworkData => {
-  const nodes: NetworkNode[] = agents.map(agent => ({
+  const nodes: NetworkNode[] = agents.map((agent) => ({
     id: agent.id,
     name: agent.name,
     category: agent.type,
     value: agent.metrics?.tasksCompleted || Math.floor(Math.random() * 100),
     symbolSize: 20 + (agent.metrics?.tasksCompleted || 0) / 5,
-  }));
+  }))
 
-  const links: NetworkLink[] = [];
-  
+  const links: NetworkLink[] = []
+
   // Generate realistic relationships
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
-      const node1 = nodes[i];
-      const node2 = nodes[j];
-      
+      const node1 = nodes[i]
+      const node2 = nodes[j]
+
       // Create connections based on categories and random factors
-      const connectionProbability = getConnectionProbability(node1.category, node2.category);
-      
+      const connectionProbability = getConnectionProbability(node1.category, node2.category)
+
       if (Math.random() < connectionProbability) {
-        const strength = Math.floor(Math.random() * 10) + 1;
+        const strength = Math.floor(Math.random() * 10) + 1
         links.push({
           source: node1.id,
           target: node2.id,
           value: strength,
-        });
+        })
       }
     }
   }
 
-  return { nodes, links };
-};
+  return { nodes, links }
+}
 
 function getConnectionProbability(category1?: string, category2?: string): number {
   const connections: Record<string, Record<string, number>> = {
@@ -214,12 +217,12 @@ function getConnectionProbability(category1?: string, category2?: string): numbe
     worker: { manager: 0.9, coordinator: 0.8, worker: 0.4, analyzer: 0.3, specialist: 0.2 },
     analyzer: { executive: 0.4, manager: 0.5, coordinator: 0.6, worker: 0.3, specialist: 0.7 },
     specialist: { executive: 0.2, manager: 0.4, coordinator: 0.5, analyzer: 0.7, specialist: 0.3 },
-  };
+  }
 
-  const cat1 = category1 || 'worker';
-  const cat2 = category2 || 'worker';
-  
-  return connections[cat1]?.[cat2] || connections[cat2]?.[cat1] || 0.2;
+  const cat1 = category1 || 'worker'
+  const cat2 = category2 || 'worker'
+
+  return connections[cat1]?.[cat2] || connections[cat2]?.[cat1] || 0.2
 }
 
 // Wrap with error boundary for resilience
@@ -229,12 +232,14 @@ export default withErrorBoundary(NetworkGraph, {
     <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-800 rounded-lg p-8">
       <div className="text-center">
         <p className="text-gray-600 dark:text-gray-400 mb-2">Unable to render network graph</p>
-        <p className="text-sm text-gray-500 dark:text-gray-500">Please try refreshing the component</p>
+        <p className="text-sm text-gray-500 dark:text-gray-500">
+          Please try refreshing the component
+        </p>
       </div>
     </div>
   ),
   onError: (error) => {
-    console.error('NetworkGraph component error:', error);
+    console.error('NetworkGraph component error:', error)
     // TODO: Send to monitoring service
   },
-});
+})

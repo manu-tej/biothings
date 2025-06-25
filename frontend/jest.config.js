@@ -15,19 +15,22 @@ const config = {
     '^msw(.*)$': '<rootDir>/node_modules/msw$1',
   },
   transform: {
-    '^.+\\.(js|jsx|ts|tsx|mjs)$': ['@swc/jest', {
-      jsc: {
-        parser: {
-          syntax: 'typescript',
-          tsx: true,
-        },
-        transform: {
-          react: {
-            runtime: 'automatic',
+    '^.+\\.(js|jsx|ts|tsx|mjs)$': [
+      '@swc/jest',
+      {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            tsx: true,
+          },
+          transform: {
+            react: {
+              runtime: 'automatic',
+            },
           },
         },
       },
-    }],
+    ],
   },
   transformIgnorePatterns: [
     '/node_modules/(?!(msw|@mswjs|@bundled-es-modules|@open-draft|cookie|headers-polyfill|outvariant|strict-event-emitter)/)',
@@ -63,12 +66,9 @@ const config = {
     '**/__tests__/**/*.(test|spec).(js|jsx|ts|tsx|mjs)',
     '**/?(*.)(test|spec).(js|jsx|ts|tsx|mjs)',
   ],
-  watchPlugins: [
-    'jest-watch-typeahead/filename',
-    'jest-watch-typeahead/testname',
-  ],
+  watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
   testTimeout: 10000,
   maxWorkers: '50%',
-};
+}
 
-module.exports = config;
+module.exports = config

@@ -1,24 +1,24 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import React from 'react';
+import { clsx } from 'clsx'
+import React from 'react'
 
-import { Badge } from '@/components/ui/atoms/Badge';
+import { Badge } from '@/components/ui/atoms/Badge'
 
 export interface ActivityItem {
-  id: string;
-  title: string;
-  description: string;
-  timestamp: Date;
-  type: 'agent' | 'workflow' | 'system' | 'user';
-  priority: 'low' | 'medium' | 'high';
+  id: string
+  title: string
+  description: string
+  timestamp: Date
+  type: 'agent' | 'workflow' | 'system' | 'user'
+  priority: 'low' | 'medium' | 'high'
 }
 
 export interface ActivityFeedProps {
-  activities: ActivityItem[];
-  maxItems?: number;
-  showTimestamp?: boolean;
-  className?: string;
+  activities: ActivityItem[]
+  maxItems?: number
+  showTimestamp?: boolean
+  className?: string
 }
 
 const typeColors = {
@@ -26,13 +26,13 @@ const typeColors = {
   workflow: 'success',
   system: 'warning',
   user: 'info',
-} as const;
+} as const
 
 const priorityStyles = {
   low: 'border-l-2 border-l-gray-300',
   medium: 'border-l-2 border-l-yellow-400',
   high: 'border-l-2 border-l-red-400',
-};
+}
 
 export const ActivityFeed: React.FC<ActivityFeedProps> = ({
   activities,
@@ -40,28 +40,28 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
   showTimestamp = true,
   className,
 }) => {
-  const displayActivities = activities.slice(0, maxItems);
+  const displayActivities = activities.slice(0, maxItems)
 
   const formatTimestamp = (timestamp: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - timestamp.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
+    const now = new Date()
+    const diff = now.getTime() - timestamp.getTime()
+    const minutes = Math.floor(diff / 60000)
+    const hours = Math.floor(diff / 3600000)
+    const days = Math.floor(diff / 86400000)
 
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-    return timestamp.toLocaleDateString();
-  };
+    if (minutes < 1) return 'Just now'
+    if (minutes < 60) return `${minutes}m ago`
+    if (hours < 24) return `${hours}h ago`
+    if (days < 7) return `${days}d ago`
+    return timestamp.toLocaleDateString()
+  }
 
   if (displayActivities.length === 0) {
     return (
       <div className={clsx('text-center py-8', className)}>
         <p className="text-gray-500 dark:text-gray-400">No recent activity</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -77,11 +77,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <Badge 
-                  variant={typeColors[activity.type]} 
-                  size="xs"
-                  className="capitalize"
-                >
+                <Badge variant={typeColors[activity.type]} size="xs" className="capitalize">
                   {activity.type}
                 </Badge>
                 {showTimestamp && (
@@ -101,7 +97,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
         </div>
       ))}
     </div>
-  );
-};
+  )
+}
 
-export default ActivityFeed;
+export default ActivityFeed

@@ -1,63 +1,57 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  ChevronDown, 
-  ChevronUp,
-  LogOut
-} from 'lucide-react';
-import React, { forwardRef, useState } from 'react';
+import { clsx } from 'clsx'
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, LogOut } from 'lucide-react'
+import React, { forwardRef, useState } from 'react'
 
-import { Avatar } from '../atoms/Avatar';
-import { Badge } from '../atoms/Badge';
-import { Button } from '../atoms/Button';
-import { Tooltip } from '../atoms/Tooltip';
+import { Avatar } from '../atoms/Avatar'
+import { Badge } from '../atoms/Badge'
+import { Button } from '../atoms/Button'
+import { Tooltip } from '../atoms/Tooltip'
 
 export interface SidebarItem {
-  id: string;
-  label: string;
-  icon?: React.ComponentType<{ className?: string }>;
-  href?: string;
-  onClick?: () => void;
-  badge?: string | number;
-  active?: boolean;
-  disabled?: boolean;
-  children?: SidebarItem[];
-  collapsible?: boolean;
-  collapsed?: boolean;
+  id: string
+  label: string
+  icon?: React.ComponentType<{ className?: string }>
+  href?: string
+  onClick?: () => void
+  badge?: string | number
+  active?: boolean
+  disabled?: boolean
+  children?: SidebarItem[]
+  collapsible?: boolean
+  collapsed?: boolean
 }
 
 export interface SidebarSection {
-  id: string;
-  title?: string;
-  items: SidebarItem[];
-  collapsible?: boolean;
-  collapsed?: boolean;
+  id: string
+  title?: string
+  items: SidebarItem[]
+  collapsible?: boolean
+  collapsed?: boolean
 }
 
 export interface SidebarProps {
-  sections: SidebarSection[];
-  onItemClick?: (item: SidebarItem) => void;
-  onSectionToggle?: (sectionId: string) => void;
-  collapsed?: boolean;
-  onCollapsedChange?: (collapsed: boolean) => void;
-  width?: number;
-  collapsedWidth?: number;
-  showToggle?: boolean;
-  showProfile?: boolean;
-  profileName?: string;
-  profileAvatar?: string;
-  profileStatus?: 'online' | 'offline' | 'away' | 'busy';
-  onProfileClick?: () => void;
-  onLogout?: () => void;
-  variant?: 'default' | 'compact' | 'floating';
-  position?: 'fixed' | 'sticky' | 'static';
-  overlay?: boolean;
-  onOverlayClick?: () => void;
-  className?: string;
-  testId?: string;
+  sections: SidebarSection[]
+  onItemClick?: (item: SidebarItem) => void
+  onSectionToggle?: (sectionId: string) => void
+  collapsed?: boolean
+  onCollapsedChange?: (collapsed: boolean) => void
+  width?: number
+  collapsedWidth?: number
+  showToggle?: boolean
+  showProfile?: boolean
+  profileName?: string
+  profileAvatar?: string
+  profileStatus?: 'online' | 'offline' | 'away' | 'busy'
+  onProfileClick?: () => void
+  onLogout?: () => void
+  variant?: 'default' | 'compact' | 'floating'
+  position?: 'fixed' | 'sticky' | 'static'
+  overlay?: boolean
+  onOverlayClick?: () => void
+  className?: string
+  testId?: string
 }
 
 export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
@@ -86,50 +80,50 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
     },
     ref
   ) => {
-    const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-    const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+    const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
+    const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
 
     const handleToggleCollapse = () => {
-      onCollapsedChange?.(!collapsed);
-    };
+      onCollapsedChange?.(!collapsed)
+    }
 
     const handleSectionToggle = (sectionId: string) => {
-      const newExpanded = new Set(expandedSections);
+      const newExpanded = new Set(expandedSections)
       if (newExpanded.has(sectionId)) {
-        newExpanded.delete(sectionId);
+        newExpanded.delete(sectionId)
       } else {
-        newExpanded.add(sectionId);
+        newExpanded.add(sectionId)
       }
-      setExpandedSections(newExpanded);
-      onSectionToggle?.(sectionId);
-    };
+      setExpandedSections(newExpanded)
+      onSectionToggle?.(sectionId)
+    }
 
     const handleItemToggle = (itemId: string) => {
-      const newExpanded = new Set(expandedItems);
+      const newExpanded = new Set(expandedItems)
       if (newExpanded.has(itemId)) {
-        newExpanded.delete(itemId);
+        newExpanded.delete(itemId)
       } else {
-        newExpanded.add(itemId);
+        newExpanded.add(itemId)
       }
-      setExpandedItems(newExpanded);
-    };
+      setExpandedItems(newExpanded)
+    }
 
     const handleItemClick = (item: SidebarItem) => {
-      if (item.disabled) return;
-      
+      if (item.disabled) return
+
       if (item.children && item.children.length > 0) {
-        handleItemToggle(item.id);
+        handleItemToggle(item.id)
       } else {
-        onItemClick?.(item);
-        item.onClick?.();
+        onItemClick?.(item)
+        item.onClick?.()
       }
-    };
+    }
 
     const renderItem = (item: SidebarItem, level = 0, parentCollapsed = false) => {
-      const hasChildren = item.children && item.children.length > 0;
-      const isExpanded = expandedItems.has(item.id);
-      const showChildren = hasChildren && isExpanded && !collapsed;
-      const ItemIcon = item.icon;
+      const hasChildren = item.children && item.children.length > 0
+      const isExpanded = expandedItems.has(item.id)
+      const showChildren = hasChildren && isExpanded && !collapsed
+      const ItemIcon = item.icon
 
       const itemContent = (
         <div
@@ -146,30 +140,33 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
         >
           <div className="flex items-center gap-3 min-w-0">
             {ItemIcon && (
-              <ItemIcon className={clsx(
-                'w-5 h-5 flex-shrink-0',
-                item.active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
-              )} />
+              <ItemIcon
+                className={clsx(
+                  'w-5 h-5 flex-shrink-0',
+                  item.active
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-gray-500 dark:text-gray-400'
+                )}
+              />
             )}
             {!collapsed && (
-              <span className={clsx(
-                'font-medium truncate',
-                item.active 
-                  ? 'text-blue-700 dark:text-blue-300' 
-                  : 'text-gray-700 dark:text-gray-300'
-              )}>
+              <span
+                className={clsx(
+                  'font-medium truncate',
+                  item.active
+                    ? 'text-blue-700 dark:text-blue-300'
+                    : 'text-gray-700 dark:text-gray-300'
+                )}
+              >
                 {item.label}
               </span>
             )}
           </div>
-          
+
           {!collapsed && (
             <div className="flex items-center gap-1">
               {item.badge && (
-                <Badge 
-                  size="xs" 
-                  variant={item.active ? 'primary' : 'secondary'}
-                >
+                <Badge size="xs" variant={item.active ? 'primary' : 'secondary'}>
                   {item.badge}
                 </Badge>
               )}
@@ -185,34 +182,30 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
             </div>
           )}
         </div>
-      );
+      )
 
       return (
         <div key={item.id}>
           {collapsed && ItemIcon && item.badge ? (
-            <Tooltip content={`${item.label} (${item.badge})`}>
-              {itemContent}
-            </Tooltip>
+            <Tooltip content={`${item.label} (${item.badge})`}>{itemContent}</Tooltip>
           ) : collapsed && ItemIcon ? (
-            <Tooltip content={item.label}>
-              {itemContent}
-            </Tooltip>
+            <Tooltip content={item.label}>{itemContent}</Tooltip>
           ) : (
             itemContent
           )}
-          
+
           {showChildren && (
             <div className="mt-1 space-y-1">
-              {item.children!.map(child => renderItem(child, level + 1))}
+              {item.children!.map((child) => renderItem(child, level + 1))}
             </div>
           )}
         </div>
-      );
-    };
+      )
+    }
 
     const renderSection = (section: SidebarSection) => {
-      const isSectionExpanded = expandedSections.has(section.id);
-      const showItems = !section.collapsible || isSectionExpanded;
+      const isSectionExpanded = expandedSections.has(section.id)
+      const showItems = !section.collapsible || isSectionExpanded
 
       return (
         <div key={section.id} className="space-y-1">
@@ -231,31 +224,27 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
               )}
             </div>
           )}
-          
+
           {showItems && (
-            <div className="space-y-1">
-              {section.items.map(item => renderItem(item))}
-            </div>
+            <div className="space-y-1">{section.items.map((item) => renderItem(item))}</div>
           )}
         </div>
-      );
-    };
+      )
+    }
 
     const renderProfile = () => {
-      if (!showProfile) return null;
+      if (!showProfile) return null
 
       return (
         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-          <div className={clsx(
-            'flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer',
-            collapsed && 'justify-center'
-          )} onClick={onProfileClick}>
-            <Avatar
-              src={profileAvatar}
-              name={profileName}
-              size="sm"
-              status={profileStatus}
-            />
+          <div
+            className={clsx(
+              'flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer',
+              collapsed && 'justify-center'
+            )}
+            onClick={onProfileClick}
+          >
+            <Avatar src={profileAvatar} name={profileName} size="sm" status={profileStatus} />
             {!collapsed && (
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
@@ -272,8 +261,8 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
                   size="xs"
                   variant="ghost"
                   onClick={(e) => {
-                    e.stopPropagation();
-                    onLogout();
+                    e.stopPropagation()
+                    onLogout()
                   }}
                   icon={<LogOut />}
                 />
@@ -281,19 +270,16 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
             )}
           </div>
         </div>
-      );
-    };
+      )
+    }
 
-    const sidebarWidth = collapsed ? collapsedWidth : width;
+    const sidebarWidth = collapsed ? collapsedWidth : width
 
     return (
       <>
         {/* Overlay for mobile */}
         {overlay && !collapsed && (
-          <div
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-            onClick={onOverlayClick}
-          />
+          <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onOverlayClick} />
         )}
 
         <aside
@@ -313,9 +299,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
             {!collapsed && (
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Menu
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Menu</h2>
             )}
             {showToggle && (
               <Button
@@ -329,20 +313,14 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-4 space-y-6">
-            {sections.map(renderSection)}
-          </nav>
+          <nav className="flex-1 overflow-y-auto p-4 space-y-6">{sections.map(renderSection)}</nav>
 
           {/* Profile */}
-          {showProfile && (
-            <div className="p-4">
-              {renderProfile()}
-            </div>
-          )}
+          {showProfile && <div className="p-4">{renderProfile()}</div>}
         </aside>
       </>
-    );
+    )
   }
-);
+)
 
-Sidebar.displayName = 'Sidebar';
+Sidebar.displayName = 'Sidebar'

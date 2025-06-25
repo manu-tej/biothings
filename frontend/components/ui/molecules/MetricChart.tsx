@@ -1,53 +1,53 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import { Download, Maximize2, RefreshCw } from 'lucide-react';
-import React, { forwardRef, useState } from 'react';
+import { clsx } from 'clsx'
+import { Download, Maximize2, RefreshCw } from 'lucide-react'
+import React, { forwardRef, useState } from 'react'
 
-import { Badge } from '../atoms/Badge';
-import { Button } from '../atoms/Button';
-import { Card, CardHeader, CardBody } from '../atoms/Card';
-import { Spinner } from '../atoms/Spinner';
+import { Badge } from '../atoms/Badge'
+import { Button } from '../atoms/Button'
+import { Card, CardHeader, CardBody } from '../atoms/Card'
+import { Spinner } from '../atoms/Spinner'
 
 export interface ChartDataPoint {
-  x: any;
-  y: number;
-  label?: string;
-  color?: string;
+  x: any
+  y: number
+  label?: string
+  color?: string
 }
 
 export interface ChartSeries {
-  id: string;
-  name: string;
-  data: ChartDataPoint[];
-  color?: string;
-  type?: 'line' | 'bar' | 'area';
+  id: string
+  name: string
+  data: ChartDataPoint[]
+  color?: string
+  type?: 'line' | 'bar' | 'area'
 }
 
 export interface MetricChartProps {
-  title: string;
-  subtitle?: string;
-  series: ChartSeries[];
-  type?: 'line' | 'bar' | 'area' | 'pie' | 'donut';
-  loading?: boolean;
-  error?: string;
-  noData?: boolean;
-  height?: number;
-  showLegend?: boolean;
-  showGrid?: boolean;
-  showTooltip?: boolean;
-  timeRange?: string;
-  lastUpdated?: Date;
-  refreshInterval?: number;
-  onRefresh?: () => void;
-  onExport?: () => void;
-  onFullscreen?: () => void;
-  actions?: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
-  testId?: string;
+  title: string
+  subtitle?: string
+  series: ChartSeries[]
+  type?: 'line' | 'bar' | 'area' | 'pie' | 'donut'
+  loading?: boolean
+  error?: string
+  noData?: boolean
+  height?: number
+  showLegend?: boolean
+  showGrid?: boolean
+  showTooltip?: boolean
+  timeRange?: string
+  lastUpdated?: Date
+  refreshInterval?: number
+  onRefresh?: () => void
+  onExport?: () => void
+  onFullscreen?: () => void
+  actions?: React.ReactNode
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
+  testId?: string
   // Chart component to render - accepts any chart library component
-  children?: React.ReactNode;
+  children?: React.ReactNode
 }
 
 const sizeStyles = {
@@ -66,7 +66,7 @@ const sizeStyles = {
     title: 'text-lg font-medium',
     subtitle: 'text-base',
   },
-};
+}
 
 export const MetricChart = forwardRef<HTMLDivElement, MetricChartProps>(
   (
@@ -96,33 +96,33 @@ export const MetricChart = forwardRef<HTMLDivElement, MetricChartProps>(
     },
     ref
   ) => {
-    const [isRefreshing, setIsRefreshing] = useState(false);
-    const sizes = sizeStyles[size];
-    const chartHeight = height || sizes.height;
+    const [isRefreshing, setIsRefreshing] = useState(false)
+    const sizes = sizeStyles[size]
+    const chartHeight = height || sizes.height
 
     const handleRefresh = async () => {
-      if (!onRefresh || isRefreshing) return;
-      
-      setIsRefreshing(true);
+      if (!onRefresh || isRefreshing) return
+
+      setIsRefreshing(true)
       try {
-        await onRefresh();
+        await onRefresh()
       } finally {
-        setIsRefreshing(false);
+        setIsRefreshing(false)
       }
-    };
+    }
 
     const formatLastUpdated = (date: Date) => {
-      const now = new Date();
-      const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-      
-      if (diff < 60) return 'Just now';
-      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-      return date.toLocaleDateString();
-    };
+      const now = new Date()
+      const diff = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+      if (diff < 60) return 'Just now'
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+      return date.toLocaleDateString()
+    }
 
     const renderActions = () => {
-      const actionButtons = [];
+      const actionButtons = []
 
       if (onRefresh) {
         actionButtons.push(
@@ -135,7 +135,7 @@ export const MetricChart = forwardRef<HTMLDivElement, MetricChartProps>(
             icon={<RefreshCw />}
             title="Refresh chart"
           />
-        );
+        )
       }
 
       if (onExport) {
@@ -148,7 +148,7 @@ export const MetricChart = forwardRef<HTMLDivElement, MetricChartProps>(
             icon={<Download />}
             title="Export chart"
           />
-        );
+        )
       }
 
       if (onFullscreen) {
@@ -161,11 +161,11 @@ export const MetricChart = forwardRef<HTMLDivElement, MetricChartProps>(
             icon={<Maximize2 />}
             title="View fullscreen"
           />
-        );
+        )
       }
 
-      return actionButtons;
-    };
+      return actionButtons
+    }
 
     const renderEmptyState = () => {
       if (loading) {
@@ -173,12 +173,10 @@ export const MetricChart = forwardRef<HTMLDivElement, MetricChartProps>(
           <div className="flex items-center justify-center" style={{ height: chartHeight }}>
             <div className="text-center">
               <Spinner size="lg" />
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                Loading chart data...
-              </p>
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading chart data...</p>
             </div>
           </div>
-        );
+        )
       }
 
       if (error) {
@@ -191,25 +189,18 @@ export const MetricChart = forwardRef<HTMLDivElement, MetricChartProps>(
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
                 Failed to load chart
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                {error}
-              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{error}</p>
               {onRefresh && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleRefresh}
-                  loading={isRefreshing}
-                >
+                <Button size="sm" variant="outline" onClick={handleRefresh} loading={isRefreshing}>
                   Try again
                 </Button>
               )}
             </div>
           </div>
-        );
+        )
       }
 
-      if (noData || series.length === 0 || series.every(s => s.data.length === 0)) {
+      if (noData || series.length === 0 || series.every((s) => s.data.length === 0)) {
         return (
           <div className="flex items-center justify-center" style={{ height: chartHeight }}>
             <div className="text-center">
@@ -224,49 +215,40 @@ export const MetricChart = forwardRef<HTMLDivElement, MetricChartProps>(
               </p>
             </div>
           </div>
-        );
+        )
       }
 
-      return null;
-    };
+      return null
+    }
 
     const renderLegend = () => {
-      if (!showLegend || series.length <= 1) return null;
+      if (!showLegend || series.length <= 1) return null
 
       return (
         <div className="flex flex-wrap gap-4 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-          {series.map(serie => (
+          {series.map((serie) => (
             <div key={serie.id} className="flex items-center gap-2">
               <div
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: serie.color || '#3b82f6' }}
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                {serie.name}
-              </span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{serie.name}</span>
             </div>
           ))}
         </div>
-      );
-    };
+      )
+    }
 
-    const isEmpty = loading || error || noData || series.length === 0 || series.every(s => s.data.length === 0);
+    const isEmpty =
+      loading || error || noData || series.length === 0 || series.every((s) => s.data.length === 0)
 
     return (
-      <Card
-        ref={ref}
-        variant="default"
-        padding="md"
-        className={className}
-        testId={testId}
-      >
+      <Card ref={ref} variant="default" padding="md" className={className} testId={testId}>
         <CardHeader className="pb-4">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className={clsx(sizes.title, 'text-gray-900 dark:text-gray-100')}>
-                  {title}
-                </h3>
+                <h3 className={clsx(sizes.title, 'text-gray-900 dark:text-gray-100')}>{title}</h3>
                 {timeRange && (
                   <Badge size="xs" variant="secondary">
                     {timeRange}
@@ -307,29 +289,29 @@ export const MetricChart = forwardRef<HTMLDivElement, MetricChartProps>(
               )}
             </div>
           )}
-          
+
           {!isEmpty && renderLegend()}
         </CardBody>
       </Card>
-    );
+    )
   }
-);
+)
 
-MetricChart.displayName = 'MetricChart';
+MetricChart.displayName = 'MetricChart'
 
 // Chart wrapper with common configurations
 export const LineChart = forwardRef<HTMLDivElement, Omit<MetricChartProps, 'type'>>(
   (props, ref) => <MetricChart ref={ref} {...props} type="line" />
-);
+)
 
-export const BarChart = forwardRef<HTMLDivElement, Omit<MetricChartProps, 'type'>>(
-  (props, ref) => <MetricChart ref={ref} {...props} type="bar" />
-);
+export const BarChart = forwardRef<HTMLDivElement, Omit<MetricChartProps, 'type'>>((props, ref) => (
+  <MetricChart ref={ref} {...props} type="bar" />
+))
 
 export const AreaChart = forwardRef<HTMLDivElement, Omit<MetricChartProps, 'type'>>(
   (props, ref) => <MetricChart ref={ref} {...props} type="area" />
-);
+)
 
-LineChart.displayName = 'LineChart';
-BarChart.displayName = 'BarChart';
-AreaChart.displayName = 'AreaChart';
+LineChart.displayName = 'LineChart'
+BarChart.displayName = 'BarChart'
+AreaChart.displayName = 'AreaChart'

@@ -7,6 +7,7 @@ This document outlines a comprehensive architectural plan for overhauling the Bi
 ## Current State Analysis
 
 ### Technology Stack
+
 - **Framework**: Next.js 13+ with App Router
 - **UI Library**: React 18+ with TypeScript
 - **Styling**: Tailwind CSS with dark mode support
@@ -16,6 +17,7 @@ This document outlines a comprehensive architectural plan for overhauling the Bi
 - **Dependencies**: Zustand installed but unused, socket.io-client present
 
 ### Key Issues
+
 1. **Component Duplication**: Three versions of AgentOverview component
 2. **WebSocket Fragmentation**: Multiple WebSocket implementations without clear separation
 3. **State Management Gap**: No global state management for complex UI state
@@ -26,6 +28,7 @@ This document outlines a comprehensive architectural plan for overhauling the Bi
 ## 1. Component Architecture
 
 ### Design Principles
+
 - **Single Responsibility**: Each component has one clear purpose
 - **Composition over Inheritance**: Build complex UIs from simple, reusable components
 - **Separation of Concerns**: Separate UI, business logic, and data fetching
@@ -39,24 +42,24 @@ graph TD
     B --> C[Navigation]
     B --> D[Main Content Area]
     B --> E[Global Notifications]
-    
+
     D --> F[Dashboard Pages]
     F --> G[Overview Dashboard]
     F --> H[Agent Management]
     F --> I[Laboratory]
     F --> J[Analytics]
     F --> K[Workflows]
-    
+
     G --> L[Metric Cards]
     G --> M[Agent Grid]
     G --> N[Activity Feed]
     G --> O[System Health]
-    
+
     %% Component Library
     P[Component Library] --> Q[Atoms]
     P --> R[Molecules]
     P --> S[Organisms]
-    
+
     Q --> T[Button/Input/Card]
     R --> U[FormField/DataTable/Chart]
     S --> V[AgentCard/WorkflowPanel/MetricDashboard]
@@ -95,23 +98,19 @@ components/
 ```typescript
 // Example of standardized component interface
 interface ComponentProps {
-  className?: string;
-  children?: React.ReactNode;
-  loading?: boolean;
-  error?: Error | null;
-  testId?: string;
+  className?: string
+  children?: React.ReactNode
+  loading?: boolean
+  error?: Error | null
+  testId?: string
 }
 
 // Standardized component template
-export const Component: FC<ComponentProps> = memo(({
-  className,
-  children,
-  loading = false,
-  error = null,
-  testId
-}) => {
-  // Component implementation
-});
+export const Component: FC<ComponentProps> = memo(
+  ({ className, children, loading = false, error = null, testId }) => {
+    // Component implementation
+  }
+)
 ```
 
 ## 2. State Management Strategy
@@ -122,18 +121,18 @@ export const Component: FC<ComponentProps> = memo(({
 graph LR
     A[UI Components] --> B[Zustand Stores]
     A --> C[React Query]
-    
+
     B --> D[UI State Store]
     B --> E[WebSocket Store]
     B --> F[User Preferences]
-    
+
     C --> G[API Queries]
     C --> H[Mutations]
     C --> I[Infinite Queries]
-    
+
     E --> J[WebSocket Manager]
     J --> K[Connection Pool]
-    
+
     G --> L[API Client]
     H --> L
     I --> L
@@ -143,19 +142,19 @@ graph LR
 
 ```typescript
 // stores/index.ts
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { create } from 'zustand'
+import { devtools, persist } from 'zustand/middleware'
 
 // UI State Store
 interface UIState {
-  theme: 'light' | 'dark' | 'auto';
-  sidebarCollapsed: boolean;
-  dashboardLayout: DashboardLayout;
-  activeFilters: FilterState;
-  setTheme: (theme: UIState['theme']) => void;
-  toggleSidebar: () => void;
-  updateLayout: (layout: DashboardLayout) => void;
-  updateFilters: (filters: Partial<FilterState>) => void;
+  theme: 'light' | 'dark' | 'auto'
+  sidebarCollapsed: boolean
+  dashboardLayout: DashboardLayout
+  activeFilters: FilterState
+  setTheme: (theme: UIState['theme']) => void
+  toggleSidebar: () => void
+  updateLayout: (layout: DashboardLayout) => void
+  updateFilters: (filters: Partial<FilterState>) => void
 }
 
 export const useUIStore = create<UIState>()(
@@ -167,28 +166,30 @@ export const useUIStore = create<UIState>()(
         dashboardLayout: defaultLayout,
         activeFilters: {},
         setTheme: (theme) => set({ theme }),
-        toggleSidebar: () => set((state) => ({ 
-          sidebarCollapsed: !state.sidebarCollapsed 
-        })),
+        toggleSidebar: () =>
+          set((state) => ({
+            sidebarCollapsed: !state.sidebarCollapsed,
+          })),
         updateLayout: (layout) => set({ dashboardLayout: layout }),
-        updateFilters: (filters) => set((state) => ({ 
-          activeFilters: { ...state.activeFilters, ...filters } 
-        })),
+        updateFilters: (filters) =>
+          set((state) => ({
+            activeFilters: { ...state.activeFilters, ...filters },
+          })),
       }),
       { name: 'ui-store' }
     )
   )
-);
+)
 
 // WebSocket State Store
 interface WebSocketState {
-  connections: Map<string, ConnectionInfo>;
-  subscriptions: Map<string, Subscription[]>;
-  globalStatus: 'connected' | 'connecting' | 'disconnected';
-  subscribe: (topic: string, handler: MessageHandler) => () => void;
-  unsubscribe: (topic: string, handler: MessageHandler) => void;
-  send: (topic: string, data: any) => void;
-  getConnectionStatus: (topic: string) => ConnectionStatus;
+  connections: Map<string, ConnectionInfo>
+  subscriptions: Map<string, Subscription[]>
+  globalStatus: 'connected' | 'connecting' | 'disconnected'
+  subscribe: (topic: string, handler: MessageHandler) => () => void
+  unsubscribe: (topic: string, handler: MessageHandler) => void
+  send: (topic: string, data: any) => void
+  getConnectionStatus: (topic: string) => ConnectionStatus
 }
 
 export const useWebSocketStore = create<WebSocketState>()(
@@ -198,7 +199,7 @@ export const useWebSocketStore = create<WebSocketState>()(
     globalStatus: 'disconnected',
     subscribe: (topic, handler) => {
       // Implementation
-      return () => get().unsubscribe(topic, handler);
+      return () => get().unsubscribe(topic, handler)
     },
     unsubscribe: (topic, handler) => {
       // Implementation
@@ -210,16 +211,16 @@ export const useWebSocketStore = create<WebSocketState>()(
       // Implementation
     },
   }))
-);
+)
 
 // Agent State Store
 interface AgentState {
-  agents: Map<string, Agent>;
-  selectedAgent: string | null;
-  agentMetrics: Map<string, AgentMetrics>;
-  updateAgent: (agent: Agent) => void;
-  selectAgent: (agentId: string | null) => void;
-  updateMetrics: (agentId: string, metrics: AgentMetrics) => void;
+  agents: Map<string, Agent>
+  selectedAgent: string | null
+  agentMetrics: Map<string, AgentMetrics>
+  updateAgent: (agent: Agent) => void
+  selectAgent: (agentId: string | null) => void
+  updateMetrics: (agentId: string, metrics: AgentMetrics) => void
 }
 
 export const useAgentStore = create<AgentState>()(
@@ -227,19 +228,21 @@ export const useAgentStore = create<AgentState>()(
     agents: new Map(),
     selectedAgent: null,
     agentMetrics: new Map(),
-    updateAgent: (agent) => set((state) => {
-      const agents = new Map(state.agents);
-      agents.set(agent.id, agent);
-      return { agents };
-    }),
+    updateAgent: (agent) =>
+      set((state) => {
+        const agents = new Map(state.agents)
+        agents.set(agent.id, agent)
+        return { agents }
+      }),
     selectAgent: (agentId) => set({ selectedAgent: agentId }),
-    updateMetrics: (agentId, metrics) => set((state) => {
-      const agentMetrics = new Map(state.agentMetrics);
-      agentMetrics.set(agentId, metrics);
-      return { agentMetrics };
-    }),
+    updateMetrics: (agentId, metrics) =>
+      set((state) => {
+        const agentMetrics = new Map(state.agentMetrics)
+        agentMetrics.set(agentId, metrics)
+        return { agentMetrics }
+      }),
   }))
-);
+)
 ```
 
 ### React Query Integration
@@ -247,34 +250,34 @@ export const useAgentStore = create<AgentState>()(
 ```typescript
 // hooks/queries/useAgents.ts
 export const useAgents = () => {
-  const updateAgent = useAgentStore((state) => state.updateAgent);
-  
+  const updateAgent = useAgentStore((state) => state.updateAgent)
+
   return useQuery({
     queryKey: ['agents'],
     queryFn: apiClient.getAgents,
     onSuccess: (agents) => {
-      agents.forEach(agent => updateAgent(agent));
+      agents.forEach((agent) => updateAgent(agent))
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
-  });
-};
+  })
+}
 
 // Real-time sync with WebSocket
 export const useAgentSync = () => {
-  const updateAgent = useAgentStore((state) => state.updateAgent);
-  const queryClient = useQueryClient();
-  
+  const updateAgent = useAgentStore((state) => state.updateAgent)
+  const queryClient = useQueryClient()
+
   useWebSocketSubscription('agent-updates', (update) => {
     // Update Zustand store
-    updateAgent(update.agent);
-    
+    updateAgent(update.agent)
+
     // Update React Query cache
     queryClient.setQueryData(['agents'], (old: Agent[]) => {
-      return old?.map(a => a.id === update.agent.id ? update.agent : a);
-    });
-  });
-};
+      return old?.map((a) => (a.id === update.agent.id ? update.agent : a))
+    })
+  })
+}
 ```
 
 ## 3. Performance Optimization Plan
@@ -306,8 +309,8 @@ export function VirtualList<T>({ ... }: VirtualListProps<T>) {
 // hooks/useOptimizedChart.ts
 export const useOptimizedChart = (data: ChartData[], options: ChartOptions) => {
   // Debounce data updates
-  const debouncedData = useDebounce(data, 300);
-  
+  const debouncedData = useDebounce(data, 300)
+
   // Memoize chart config
   const chartConfig = useMemo(() => {
     return {
@@ -318,14 +321,14 @@ export const useOptimizedChart = (data: ChartData[], options: ChartOptions) => {
       },
       progressive: data.length > 5000 ? 500 : undefined, // Progressive rendering
       progressiveThreshold: 5000,
-    };
-  }, [debouncedData, options]);
-  
+    }
+  }, [debouncedData, options])
+
   // Use ResizeObserver for responsive charts
-  const { ref, dimensions } = useResizeObserver();
-  
-  return { chartConfig, dimensions, ref };
-};
+  const { ref, dimensions } = useResizeObserver()
+
+  return { chartConfig, dimensions, ref }
+}
 ```
 
 ### Code Splitting Strategy
@@ -354,11 +357,11 @@ const routes = [
 // Preload on hover
 export const RouteLink = ({ to, children, ...props }) => {
   const route = routes.find(r => r.path === to);
-  
+
   return (
-    <Link 
-      to={to} 
-      onMouseEnter={() => route?.preload?.()} 
+    <Link
+      to={to}
+      onMouseEnter={() => route?.preload?.()}
       {...props}
     >
       {children}
@@ -372,42 +375,42 @@ export const RouteLink = ({ to, children, ...props }) => {
 ```typescript
 // lib/cache/CacheManager.ts
 class CacheManager {
-  private memoryCache = new Map<string, CacheEntry>();
-  private indexedDB: IDBDatabase | null = null;
-  
+  private memoryCache = new Map<string, CacheEntry>()
+  private indexedDB: IDBDatabase | null = null
+
   async get<T>(key: string): Promise<T | null> {
     // Check memory cache first
-    const memEntry = this.memoryCache.get(key);
+    const memEntry = this.memoryCache.get(key)
     if (memEntry && !this.isExpired(memEntry)) {
-      return memEntry.data;
+      return memEntry.data
     }
-    
+
     // Check IndexedDB for larger data
     if (this.indexedDB) {
-      const dbEntry = await this.getFromIndexedDB(key);
+      const dbEntry = await this.getFromIndexedDB(key)
       if (dbEntry && !this.isExpired(dbEntry)) {
         // Promote to memory cache
-        this.memoryCache.set(key, dbEntry);
-        return dbEntry.data;
+        this.memoryCache.set(key, dbEntry)
+        return dbEntry.data
       }
     }
-    
-    return null;
+
+    return null
   }
-  
+
   async set<T>(key: string, data: T, ttl: number = 5 * 60 * 1000) {
     const entry: CacheEntry = {
       data,
       timestamp: Date.now(),
       ttl,
-    };
-    
+    }
+
     // Store in memory
-    this.memoryCache.set(key, entry);
-    
+    this.memoryCache.set(key, entry)
+
     // Store large data in IndexedDB
     if (this.shouldStoreInIndexedDB(data)) {
-      await this.setInIndexedDB(key, entry);
+      await this.setInIndexedDB(key, entry)
     }
   }
 }
@@ -426,23 +429,23 @@ class CacheManager {
   --color-success: #28a745;
   --color-warning: #ffc107;
   --color-danger: #dc3545;
-  
+
   // Spacing
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
   --space-xl: 2rem;
-  
+
   // Typography
   --font-sans: system-ui, -apple-system, sans-serif;
   --font-mono: 'SF Mono', Monaco, monospace;
-  
+
   // Shadows
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  
+
   // Animation
   --duration-fast: 150ms;
   --duration-normal: 300ms;
@@ -451,7 +454,7 @@ class CacheManager {
 }
 
 // Dark mode
-[data-theme="dark"] {
+[data-theme='dark'] {
   --color-primary: #4da6ff;
   --color-background: #1a1a1a;
   --color-surface: #2d2d2d;
@@ -496,16 +499,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 // hooks/useResponsive.ts
 export const useResponsive = () => {
   const [breakpoint, setBreakpoint] = useState(getBreakpoint());
-  
+
   useEffect(() => {
     const handleResize = debounce(() => {
       setBreakpoint(getBreakpoint());
     }, 150);
-    
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
+
   return {
     isMobile: breakpoint === 'sm',
     isTablet: breakpoint === 'md',
@@ -517,7 +520,7 @@ export const useResponsive = () => {
 // Responsive component example
 export const DashboardGrid = ({ children }) => {
   const { isMobile } = useResponsive();
-  
+
   return (
     <div className={cn(
       'grid gap-6',
@@ -549,20 +552,20 @@ export const animations = {
     animate: { scale: 1, opacity: 1 },
     exit: { scale: 0.9, opacity: 0 },
   },
-};
+}
 
 // Micro-interactions
 export const useHoverEffect = () => {
-  const [isHovered, setIsHovered] = useState(false);
-  
+  const [isHovered, setIsHovered] = useState(false)
+
   return {
     isHovered,
     hoverProps: {
       onMouseEnter: () => setIsHovered(true),
       onMouseLeave: () => setIsHovered(false),
     },
-  };
-};
+  }
+}
 ```
 
 ## 5. Technical Implementation Roadmap
@@ -570,12 +573,14 @@ export const useHoverEffect = () => {
 ### Phase 1: Core Infrastructure (Weeks 1-2)
 
 #### 1.1 State Management Setup
+
 - [ ] Implement Zustand stores for UI, WebSocket, and domain state
 - [ ] Create store devtools integration
 - [ ] Set up persistence middleware for user preferences
 - [ ] Create typed hooks for store access
 
 #### 1.2 Unified WebSocket Provider
+
 - [ ] Consolidate WebSocket implementations
 - [ ] Create WebSocketProvider component
 - [ ] Implement connection pooling
@@ -583,6 +588,7 @@ export const useHoverEffect = () => {
 - [ ] Create typed subscription system
 
 #### 1.3 API Client Consolidation
+
 - [ ] Merge all API client implementations
 - [ ] Implement request deduplication
 - [ ] Add proper caching with ETags
@@ -592,18 +598,21 @@ export const useHoverEffect = () => {
 ### Phase 2: Component Library Development (Weeks 3-4)
 
 #### 2.1 Design System Foundation
+
 - [ ] Create design tokens (colors, spacing, typography)
 - [ ] Build base UI components (Button, Input, Card, Modal)
 - [ ] Implement consistent theming system
 - [ ] Add Storybook for component documentation
 
 #### 2.2 Data Display Components
+
 - [ ] Create reusable Table component with sorting/filtering
 - [ ] Build Chart wrapper components for ECharts
 - [ ] Implement VirtualList for large datasets
 - [ ] Create MetricCard and StatCard components
 
 #### 2.3 Layout Components
+
 - [ ] Build responsive Navigation component
 - [ ] Create flexible Layout system
 - [ ] Implement Sidebar with collapse functionality
@@ -612,18 +621,21 @@ export const useHoverEffect = () => {
 ### Phase 3: Dashboard UI Implementation (Weeks 5-6)
 
 #### 3.1 Dashboard Consolidation
+
 - [ ] Remove duplicate AgentOverview components
 - [ ] Create unified AgentCard component
 - [ ] Implement responsive dashboard grid
 - [ ] Add drag-and-drop for dashboard customization
 
 #### 3.2 Real-time Features
+
 - [ ] Implement live data updates via WebSocket
 - [ ] Create real-time notification system
 - [ ] Add activity feed with virtual scrolling
 - [ ] Implement presence indicators
 
 #### 3.3 Performance Optimizations
+
 - [ ] Add React.memo to all components
 - [ ] Implement virtual scrolling for lists
 - [ ] Add progressive chart rendering
@@ -632,85 +644,93 @@ export const useHoverEffect = () => {
 ### Phase 4: New Feature Additions (Weeks 7-8)
 
 #### 4.1 Advanced Filtering and Search
+
 ```typescript
 interface FilterSystem {
   // Global search with fuzzy matching
-  globalSearch: string;
-  
+  globalSearch: string
+
   // Field-specific filters
   filters: {
-    agents: AgentFilter[];
-    workflows: WorkflowFilter[];
-    experiments: ExperimentFilter[];
-  };
-  
+    agents: AgentFilter[]
+    workflows: WorkflowFilter[]
+    experiments: ExperimentFilter[]
+  }
+
   // Saved filter presets
-  savedFilters: FilterPreset[];
-  
+  savedFilters: FilterPreset[]
+
   // Quick filters
-  quickFilters: QuickFilter[];
+  quickFilters: QuickFilter[]
 }
 ```
 
 #### 4.2 Customizable Dashboard Layouts
+
 ```typescript
 interface DashboardLayout {
-  id: string;
-  name: string;
-  widgets: Widget[];
-  gridConfig: GridConfig;
-  isDefault: boolean;
-  isShared: boolean;
+  id: string
+  name: string
+  widgets: Widget[]
+  gridConfig: GridConfig
+  isDefault: boolean
+  isShared: boolean
 }
 
 interface Widget {
-  id: string;
-  type: WidgetType;
-  position: GridPosition;
-  config: WidgetConfig;
-  dataSource: DataSource;
+  id: string
+  type: WidgetType
+  position: GridPosition
+  config: WidgetConfig
+  dataSource: DataSource
 }
 ```
 
 #### 4.3 Export/Import Functionality
+
 - [ ] Export dashboard configurations
 - [ ] Export data in multiple formats (CSV, JSON, PDF)
 - [ ] Import dashboard layouts
 - [ ] Share dashboard snapshots
 
 #### 4.4 Enhanced Data Visualization
+
 - [ ] Add new chart types (Sankey, Heatmap, Treemap)
 - [ ] Implement interactive chart features
 - [ ] Create data comparison views
 - [ ] Add time-series analysis tools
 
 #### 4.5 User Preferences and Settings
+
 ```typescript
 interface UserPreferences {
-  theme: 'light' | 'dark' | 'auto';
-  language: string;
-  timezone: string;
-  notifications: NotificationPreferences;
-  dashboard: DashboardPreferences;
-  accessibility: AccessibilitySettings;
+  theme: 'light' | 'dark' | 'auto'
+  language: string
+  timezone: string
+  notifications: NotificationPreferences
+  dashboard: DashboardPreferences
+  accessibility: AccessibilitySettings
 }
 ```
 
 ### Phase 5: Performance Optimization and Cleanup (Week 9)
 
 #### 5.1 Performance Audit
+
 - [ ] Run Lighthouse audits
 - [ ] Profile React components
 - [ ] Optimize bundle size
 - [ ] Implement performance monitoring
 
 #### 5.2 Code Cleanup
+
 - [ ] Remove all duplicate components
 - [ ] Consolidate similar utilities
 - [ ] Update all imports to use barrel exports
 - [ ] Add comprehensive error boundaries
 
 #### 5.3 Testing Infrastructure
+
 - [ ] Add unit tests for utilities
 - [ ] Create integration tests for API
 - [ ] Add E2E tests for critical paths
@@ -723,20 +743,20 @@ interface UserPreferences {
 ```typescript
 // components/features/search/AdvancedSearch.tsx
 interface AdvancedSearchProps {
-  onSearch: (query: SearchQuery) => void;
-  searchableFields: SearchField[];
-  enableFuzzySearch?: boolean;
-  enableRegexSearch?: boolean;
+  onSearch: (query: SearchQuery) => void
+  searchableFields: SearchField[]
+  enableFuzzySearch?: boolean
+  enableRegexSearch?: boolean
 }
 
 interface SearchQuery {
-  text: string;
-  fields: string[];
-  filters: Filter[];
-  dateRange?: DateRange;
-  sortBy?: SortConfig;
-  fuzzy?: boolean;
-  regex?: boolean;
+  text: string
+  fields: string[]
+  filters: Filter[]
+  dateRange?: DateRange
+  sortBy?: SortConfig
+  fuzzy?: boolean
+  regex?: boolean
 }
 
 // Features:
@@ -753,10 +773,10 @@ interface SearchQuery {
 ```typescript
 // components/features/dashboard/DashboardBuilder.tsx
 interface DashboardBuilderProps {
-  widgets: WidgetDefinition[];
-  layout: DashboardLayout;
-  onSave: (layout: DashboardLayout) => void;
-  onPreview: (layout: DashboardLayout) => void;
+  widgets: WidgetDefinition[]
+  layout: DashboardLayout
+  onSave: (layout: DashboardLayout) => void
+  onPreview: (layout: DashboardLayout) => void
 }
 
 // Features:
@@ -780,7 +800,7 @@ class ExportService {
   ): Promise<Blob> {
     // Implementation
   }
-  
+
   async exportData(
     dataType: DataType,
     filters: Filter[],
@@ -789,11 +809,8 @@ class ExportService {
   ): Promise<Blob> {
     // Implementation
   }
-  
-  async importDashboard(
-    file: File,
-    options: ImportOptions
-  ): Promise<DashboardLayout> {
+
+  async importDashboard(file: File, options: ImportOptions): Promise<DashboardLayout> {
     // Implementation
   }
 }
@@ -810,9 +827,9 @@ class ExportService {
 ```typescript
 // components/features/visualization/VisualizationBuilder.tsx
 interface VisualizationBuilderProps {
-  data: DataSet;
-  chartTypes: ChartType[];
-  onSave: (visualization: Visualization) => void;
+  data: DataSet
+  chartTypes: ChartType[]
+  onSave: (visualization: Visualization) => void
 }
 
 // New visualization types:
@@ -829,9 +846,9 @@ interface VisualizationBuilderProps {
 ```typescript
 // components/features/settings/UserSettings.tsx
 interface UserSettingsProps {
-  user: User;
-  preferences: UserPreferences;
-  onSave: (preferences: UserPreferences) => void;
+  user: User
+  preferences: UserPreferences
+  onSave: (preferences: UserPreferences) => void
 }
 
 // Settings categories:
@@ -846,11 +863,13 @@ interface UserSettingsProps {
 ## Migration Strategy
 
 ### Step 1: Parallel Development
+
 - Keep existing components functional
 - Build new components alongside old ones
 - Use feature flags for gradual rollout
 
 ### Step 2: Incremental Migration
+
 ```typescript
 // Feature flag system
 const features = {
@@ -866,12 +885,14 @@ export default function DashboardPage() {
 ```
 
 ### Step 3: Data Migration
+
 - Export existing user preferences
 - Transform to new schema
 - Import with validation
 - Provide rollback mechanism
 
 ### Step 4: Cleanup
+
 - Remove legacy components
 - Update documentation
 - Archive old code
@@ -880,6 +901,7 @@ export default function DashboardPage() {
 ## Success Metrics
 
 ### Performance Metrics
+
 - Initial load time < 2s
 - Time to interactive < 3s
 - Frame rate > 60fps during animations
@@ -887,6 +909,7 @@ export default function DashboardPage() {
 - WebSocket latency < 100ms
 
 ### User Experience Metrics
+
 - Task completion time reduced by 30%
 - Error rate reduced by 50%
 - User satisfaction score > 4.5/5
@@ -894,6 +917,7 @@ export default function DashboardPage() {
 - Support ticket reduction by 40%
 
 ### Technical Metrics
+
 - Code coverage > 80%
 - Bundle size < 500KB (gzipped)
 - Lighthouse score > 90
@@ -903,6 +927,7 @@ export default function DashboardPage() {
 ## Risk Mitigation
 
 ### Technical Risks
+
 1. **WebSocket Connection Issues**
    - Mitigation: Implement fallback to polling
    - Add connection health monitoring
@@ -919,6 +944,7 @@ export default function DashboardPage() {
    - Create state snapshot system
 
 ### Organizational Risks
+
 1. **User Adoption**
    - Mitigation: Phased rollout with beta testing
    - Comprehensive user training

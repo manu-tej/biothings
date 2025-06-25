@@ -1,18 +1,18 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import React, { forwardRef, HTMLAttributes } from 'react';
+import { clsx } from 'clsx'
+import React, { forwardRef, HTMLAttributes } from 'react'
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'outline' | 'ghost' | 'elevated';
-  padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
-  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
-  shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
-  hoverable?: boolean;
-  clickable?: boolean;
-  selected?: boolean;
-  fullHeight?: boolean;
-  testId?: string;
+  variant?: 'default' | 'outline' | 'ghost' | 'elevated'
+  padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl'
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl'
+  hoverable?: boolean
+  clickable?: boolean
+  selected?: boolean
+  fullHeight?: boolean
+  testId?: string
 }
 
 const variantStyles = {
@@ -20,7 +20,7 @@ const variantStyles = {
   outline: 'bg-transparent border-2 border-gray-300 dark:border-gray-600',
   ghost: 'bg-gray-50 dark:bg-gray-900/50',
   elevated: 'bg-white dark:bg-gray-800 shadow-lg',
-};
+}
 
 const paddingStyles = {
   none: '',
@@ -28,7 +28,7 @@ const paddingStyles = {
   md: 'p-4',
   lg: 'p-6',
   xl: 'p-8',
-};
+}
 
 const roundedStyles = {
   none: '',
@@ -37,7 +37,7 @@ const roundedStyles = {
   lg: 'rounded-lg',
   xl: 'rounded-xl',
   full: 'rounded-full',
-};
+}
 
 const shadowStyles = {
   none: '',
@@ -45,7 +45,7 @@ const shadowStyles = {
   md: 'shadow-md',
   lg: 'shadow-lg',
   xl: 'shadow-xl',
-};
+}
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
   (
@@ -76,7 +76,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       selected && 'ring-2 ring-blue-500 dark:ring-blue-400',
       fullHeight && 'h-full',
       className
-    );
+    )
 
     return (
       <div
@@ -89,17 +89,17 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       >
         {children}
       </div>
-    );
+    )
   }
-);
+)
 
-Card.displayName = 'Card';
+Card.displayName = 'Card'
 
 // Card sub-components for better composition
 export interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {
-  title?: string;
-  subtitle?: string;
-  action?: React.ReactNode;
+  title?: string
+  subtitle?: string
+  action?: React.ReactNode
 }
 
 export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
@@ -113,53 +113,39 @@ export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
         >
           <div>
             {title && (
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                {title}
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
             )}
             {subtitle && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {subtitle}
-              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{subtitle}</p>
             )}
           </div>
           {action && <div>{action}</div>}
         </div>
-      );
+      )
     }
 
     return (
-      <div
-        ref={ref}
-        className={clsx('mb-4', className)}
-        {...props}
-      >
+      <div ref={ref} className={clsx('mb-4', className)} {...props}>
         {children}
       </div>
-    );
+    )
   }
-);
+)
 
-CardHeader.displayName = 'CardHeader';
+CardHeader.displayName = 'CardHeader'
 
 export type CardBodyProps = HTMLAttributes<HTMLDivElement>
 
 export const CardBody = forwardRef<HTMLDivElement, CardBodyProps>(
   ({ className, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={clsx('', className)}
-        {...props}
-      />
-    );
+    return <div ref={ref} className={clsx('', className)} {...props} />
   }
-);
+)
 
-CardBody.displayName = 'CardBody';
+CardBody.displayName = 'CardBody'
 
 export interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {
-  separator?: boolean;
+  separator?: boolean
 }
 
 export const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
@@ -174,8 +160,8 @@ export const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
         )}
         {...props}
       />
-    );
+    )
   }
-);
+)
 
-CardFooter.displayName = 'CardFooter';
+CardFooter.displayName = 'CardFooter'

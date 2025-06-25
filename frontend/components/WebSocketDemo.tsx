@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from 'react'
 
-import { 
-  useWebSocket, 
-  useMetricsWebSocket, 
-  useAlertsWebSocket, 
+import {
+  useWebSocket,
+  useMetricsWebSocket,
+  useAlertsWebSocket,
   useAgentStatusWebSocket,
   useWorkflowWebSocket,
-  type LegacyWebSocketMessage as WebSocketMessage 
+  type LegacyWebSocketMessage as WebSocketMessage,
 } from '@/lib/hooks/useWebSocketNew'
 
 import { ConnectionIndicator } from './WebSocketStatus'
@@ -29,16 +29,16 @@ export default function WebSocketDemo() {
     unsubscribeFromChannel,
     registerHandler,
     reconnect,
-    disconnect
+    disconnect,
   } = useWebSocket({
     channels: ['demo', 'system'],
     onMessage: (msg) => {
       console.log('Received message:', msg)
-      setMessages(prev => [...prev.slice(-9), msg])
+      setMessages((prev) => [...prev.slice(-9), msg])
     },
     onConnect: () => console.log('Demo connected'),
     onDisconnect: () => console.log('Demo disconnected'),
-    onError: (error) => console.error('Demo error:', error)
+    onError: (error) => console.error('Demo error:', error),
   })
 
   // Example of using specialized hooks
@@ -60,9 +60,13 @@ export default function WebSocketDemo() {
 
   // Register a custom handler for a specific message type
   useEffect(() => {
-    const unregister = registerHandler((msg) => {
-      console.log('Custom handler received:', msg)
-    }, 'system', 'demo')
+    const unregister = registerHandler(
+      (msg) => {
+        console.log('Custom handler received:', msg)
+      },
+      'system',
+      'demo'
+    )
 
     return unregister
   }, [registerHandler])
@@ -84,7 +88,7 @@ export default function WebSocketDemo() {
         type: 'system',
         channel: 'demo',
         data: { content: messageToSend },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       })
       setMessageToSend('')
     }
@@ -92,9 +96,7 @@ export default function WebSocketDemo() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-        WebSocket Demo
-      </h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">WebSocket Demo</h1>
 
       {/* Connection Status */}
       <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
@@ -131,7 +133,7 @@ export default function WebSocketDemo() {
           <div>
             <h3 className="text-sm font-medium mb-2">Subscribed Channels:</h3>
             <div className="flex flex-wrap gap-2">
-              {subscribedChannels.map(channel => (
+              {subscribedChannels.map((channel) => (
                 <div
                   key={channel}
                   className="flex items-center space-x-1 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm"
@@ -195,14 +197,9 @@ export default function WebSocketDemo() {
             <p className="text-gray-500 dark:text-gray-400 text-sm">No messages yet</p>
           ) : (
             messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className="p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm font-mono"
-              >
+              <div key={idx} className="p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm font-mono">
                 <div className="flex items-center justify-between">
-                  <span className="text-blue-600 dark:text-blue-400">
-                    Type: {msg.type}
-                  </span>
+                  <span className="text-blue-600 dark:text-blue-400">Type: {msg.type}</span>
                   {msg.channel && (
                     <span className="text-green-600 dark:text-green-400">
                       Channel: {msg.channel}

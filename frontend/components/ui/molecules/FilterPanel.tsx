@@ -1,41 +1,41 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import { Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
-import React, { forwardRef, useState } from 'react';
+import { clsx } from 'clsx'
+import { Filter, X, ChevronDown, ChevronUp } from 'lucide-react'
+import React, { forwardRef, useState } from 'react'
 
-import { Badge } from '../atoms/Badge';
-import { Button } from '../atoms/Button';
-import { Card } from '../atoms/Card';
-import { Checkbox } from '../atoms/Checkbox';
-import { Input } from '../atoms/Input';
-import { Select, SelectOption } from '../atoms/Select';
+import { Badge } from '../atoms/Badge'
+import { Button } from '../atoms/Button'
+import { Card } from '../atoms/Card'
+import { Checkbox } from '../atoms/Checkbox'
+import { Input } from '../atoms/Input'
+import { Select, SelectOption } from '../atoms/Select'
 
 export interface FilterOption {
-  id: string;
-  label: string;
-  type: 'text' | 'select' | 'multiselect' | 'checkbox' | 'date' | 'range';
-  options?: SelectOption[];
-  value?: any;
-  placeholder?: string;
+  id: string
+  label: string
+  type: 'text' | 'select' | 'multiselect' | 'checkbox' | 'date' | 'range'
+  options?: SelectOption[]
+  value?: any
+  placeholder?: string
 }
 
 export interface FilterPanelProps {
-  filters: FilterOption[];
-  values: Record<string, any>;
-  onFilterChange: (filterId: string, value: any) => void;
-  onClearAll: () => void;
-  onApply?: () => void;
-  title?: string;
-  collapsible?: boolean;
-  defaultCollapsed?: boolean;
-  showApplyButton?: boolean;
-  showClearButton?: boolean;
-  showActiveCount?: boolean;
-  orientation?: 'vertical' | 'horizontal';
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
-  testId?: string;
+  filters: FilterOption[]
+  values: Record<string, any>
+  onFilterChange: (filterId: string, value: any) => void
+  onClearAll: () => void
+  onApply?: () => void
+  title?: string
+  collapsible?: boolean
+  defaultCollapsed?: boolean
+  showApplyButton?: boolean
+  showClearButton?: boolean
+  showActiveCount?: boolean
+  orientation?: 'vertical' | 'horizontal'
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
+  testId?: string
 }
 
 const sizeStyles = {
@@ -54,7 +54,7 @@ const sizeStyles = {
     spacing: 'space-y-4',
     padding: 'p-5',
   },
-};
+}
 
 export const FilterPanel = forwardRef<HTMLDivElement, FilterPanelProps>(
   (
@@ -77,27 +77,27 @@ export const FilterPanel = forwardRef<HTMLDivElement, FilterPanelProps>(
     },
     ref
   ) => {
-    const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
-    const sizes = sizeStyles[size];
+    const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed)
+    const sizes = sizeStyles[size]
 
     // Count active filters
     const activeFilterCount = filters.reduce((count, filter) => {
-      const value = values[filter.id];
-      if (value === undefined || value === null || value === '') return count;
-      if (Array.isArray(value) && value.length === 0) return count;
-      return count + 1;
-    }, 0);
+      const value = values[filter.id]
+      if (value === undefined || value === null || value === '') return count
+      if (Array.isArray(value) && value.length === 0) return count
+      return count + 1
+    }, 0)
 
     const handleFilterChange = (filterId: string, value: any) => {
-      onFilterChange(filterId, value);
-    };
+      onFilterChange(filterId, value)
+    }
 
     const handleClearAll = () => {
-      onClearAll();
-    };
+      onClearAll()
+    }
 
     const renderFilterInput = (filter: FilterOption) => {
-      const value = values[filter.id];
+      const value = values[filter.id]
 
       switch (filter.type) {
         case 'text':
@@ -111,7 +111,7 @@ export const FilterPanel = forwardRef<HTMLDivElement, FilterPanelProps>(
               clearable
               onClear={() => handleFilterChange(filter.id, '')}
             />
-          );
+          )
 
         case 'select':
           return (
@@ -124,28 +124,28 @@ export const FilterPanel = forwardRef<HTMLDivElement, FilterPanelProps>(
               selectSize={size}
               clearable
             />
-          );
+          )
 
         case 'multiselect':
           return (
             <div key={filter.id} className="space-y-2">
-              {filter.options?.map(option => (
+              {filter.options?.map((option) => (
                 <Checkbox
                   key={option.value}
                   label={option.label}
                   checked={Array.isArray(value) ? value.includes(option.value) : false}
                   onChange={(e) => {
-                    const currentValues = Array.isArray(value) ? value : [];
+                    const currentValues = Array.isArray(value) ? value : []
                     const newValues = e.target.checked
                       ? [...currentValues, option.value]
-                      : currentValues.filter(v => v !== option.value);
-                    handleFilterChange(filter.id, newValues);
+                      : currentValues.filter((v) => v !== option.value)
+                    handleFilterChange(filter.id, newValues)
                   }}
                   checkboxSize={size}
                 />
               ))}
             </div>
-          );
+          )
 
         case 'checkbox':
           return (
@@ -156,7 +156,7 @@ export const FilterPanel = forwardRef<HTMLDivElement, FilterPanelProps>(
               onChange={(e) => handleFilterChange(filter.id, e.target.checked)}
               checkboxSize={size}
             />
-          );
+          )
 
         case 'date':
           return (
@@ -167,7 +167,7 @@ export const FilterPanel = forwardRef<HTMLDivElement, FilterPanelProps>(
               onChange={(e) => handleFilterChange(filter.id, e.target.value)}
               inputSize={size}
             />
-          );
+          )
 
         case 'range':
           return (
@@ -185,34 +185,34 @@ export const FilterPanel = forwardRef<HTMLDivElement, FilterPanelProps>(
                 inputSize={size}
               />
             </div>
-          );
+          )
 
         default:
-          return null;
+          return null
       }
-    };
+    }
 
     const renderActiveFilters = () => {
-      if (!showActiveCount || activeFilterCount === 0) return null;
+      if (!showActiveCount || activeFilterCount === 0) return null
 
-      const activeFilters = filters.filter(filter => {
-        const value = values[filter.id];
-        if (value === undefined || value === null || value === '') return false;
-        if (Array.isArray(value) && value.length === 0) return false;
-        return true;
-      });
+      const activeFilters = filters.filter((filter) => {
+        const value = values[filter.id]
+        if (value === undefined || value === null || value === '') return false
+        if (Array.isArray(value) && value.length === 0) return false
+        return true
+      })
 
       return (
         <div className="flex flex-wrap gap-1 mt-2">
-          {activeFilters.map(filter => {
-            const value = values[filter.id];
-            let displayValue = value;
-            
+          {activeFilters.map((filter) => {
+            const value = values[filter.id]
+            let displayValue = value
+
             if (Array.isArray(value)) {
-              displayValue = value.length > 1 ? `${value.length} selected` : value[0];
+              displayValue = value.length > 1 ? `${value.length} selected` : value[0]
             } else if (filter.type === 'select' && filter.options) {
-              const option = filter.options.find(opt => opt.value === value);
-              displayValue = option?.label || value;
+              const option = filter.options.find((opt) => opt.value === value)
+              displayValue = option?.label || value
             }
 
             return (
@@ -221,33 +221,27 @@ export const FilterPanel = forwardRef<HTMLDivElement, FilterPanelProps>(
                 size="xs"
                 variant="primary"
                 className="cursor-pointer"
-                onClick={() => handleFilterChange(filter.id, filter.type === 'multiselect' ? [] : '')}
+                onClick={() =>
+                  handleFilterChange(filter.id, filter.type === 'multiselect' ? [] : '')
+                }
               >
                 {filter.label}: {displayValue}
                 <X className="w-3 h-3 ml-1" />
               </Badge>
-            );
+            )
           })}
         </div>
-      );
-    };
+      )
+    }
 
     return (
-      <Card
-        ref={ref}
-        variant="default"
-        padding="none"
-        className={className}
-        testId={testId}
-      >
+      <Card ref={ref} variant="default" padding="none" className={className} testId={testId}>
         <div className={sizes.padding}>
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-              <h3 className={clsx(sizes.title, 'text-gray-900 dark:text-gray-100')}>
-                {title}
-              </h3>
+              <h3 className={clsx(sizes.title, 'text-gray-900 dark:text-gray-100')}>{title}</h3>
               {showActiveCount && activeFilterCount > 0 && (
                 <Badge size="xs" variant="primary">
                   {activeFilterCount}
@@ -256,11 +250,7 @@ export const FilterPanel = forwardRef<HTMLDivElement, FilterPanelProps>(
             </div>
             <div className="flex items-center gap-1">
               {showClearButton && activeFilterCount > 0 && (
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  onClick={handleClearAll}
-                >
+                <Button size="xs" variant="ghost" onClick={handleClearAll}>
                   Clear all
                 </Button>
               )}
@@ -281,12 +271,17 @@ export const FilterPanel = forwardRef<HTMLDivElement, FilterPanelProps>(
           {/* Filter Controls */}
           {(!collapsible || !isCollapsed) && (
             <>
-              <div className={clsx(
-                'mt-4',
-                orientation === 'vertical' ? sizes.spacing : 'flex flex-wrap gap-4'
-              )}>
-                {filters.map(filter => (
-                  <div key={filter.id} className={orientation === 'horizontal' ? 'flex-1 min-w-0' : ''}>
+              <div
+                className={clsx(
+                  'mt-4',
+                  orientation === 'vertical' ? sizes.spacing : 'flex flex-wrap gap-4'
+                )}
+              >
+                {filters.map((filter) => (
+                  <div
+                    key={filter.id}
+                    className={orientation === 'horizontal' ? 'flex-1 min-w-0' : ''}
+                  >
                     {filter.type !== 'checkbox' && (
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {filter.label}
@@ -302,21 +297,13 @@ export const FilterPanel = forwardRef<HTMLDivElement, FilterPanelProps>(
                 <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
                   <div>
                     {showClearButton && activeFilterCount > 0 && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={handleClearAll}
-                      >
+                      <Button size="sm" variant="ghost" onClick={handleClearAll}>
                         Clear all filters
                       </Button>
                     )}
                   </div>
                   {showApplyButton && (
-                    <Button
-                      size="sm"
-                      onClick={onApply}
-                      disabled={activeFilterCount === 0}
-                    >
+                    <Button size="sm" onClick={onApply} disabled={activeFilterCount === 0}>
                       Apply filters
                     </Button>
                   )}
@@ -326,8 +313,8 @@ export const FilterPanel = forwardRef<HTMLDivElement, FilterPanelProps>(
           )}
         </div>
       </Card>
-    );
+    )
   }
-);
+)
 
-FilterPanel.displayName = 'FilterPanel';
+FilterPanel.displayName = 'FilterPanel'

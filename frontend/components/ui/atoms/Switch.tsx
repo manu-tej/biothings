@@ -1,16 +1,16 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import React, { forwardRef, InputHTMLAttributes } from 'react';
+import { clsx } from 'clsx'
+import React, { forwardRef, InputHTMLAttributes } from 'react'
 
 export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
-  label?: string;
-  description?: string;
-  switchSize?: 'sm' | 'md' | 'lg';
-  labelPosition?: 'left' | 'right';
-  error?: boolean;
-  fullWidth?: boolean;
-  testId?: string;
+  label?: string
+  description?: string
+  switchSize?: 'sm' | 'md' | 'lg'
+  labelPosition?: 'left' | 'right'
+  error?: boolean
+  fullWidth?: boolean
+  testId?: string
 }
 
 const sizeStyles = {
@@ -35,7 +35,7 @@ const sizeStyles = {
     label: 'text-lg',
     description: 'text-base',
   },
-};
+}
 
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
   (
@@ -54,15 +54,13 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
     },
     ref
   ) => {
-    const sizes = sizeStyles[switchSize];
-    
+    const sizes = sizeStyles[switchSize]
+
     const trackStyles = clsx(
       'relative inline-flex rounded-full transition-colors duration-200',
       'focus-within:ring-2 focus-within:ring-offset-2',
       sizes.track,
-      error
-        ? 'focus-within:ring-red-500'
-        : 'focus-within:ring-blue-500',
+      error ? 'focus-within:ring-red-500' : 'focus-within:ring-blue-500',
       checked
         ? error
           ? 'bg-red-500'
@@ -70,21 +68,21 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
         : 'bg-gray-200 dark:bg-gray-700',
       disabled && 'opacity-50 cursor-not-allowed',
       !disabled && 'cursor-pointer'
-    );
+    )
 
     const thumbStyles = clsx(
       'absolute top-0.5 left-0.5 bg-white rounded-full shadow-lg',
       'transform transition-transform duration-200',
       sizes.thumb,
       checked && sizes.translate
-    );
+    )
 
     const wrapperStyles = clsx(
       'inline-flex items-start gap-3',
       labelPosition === 'left' && 'flex-row-reverse',
       fullWidth && 'w-full',
       className
-    );
+    )
 
     const labelStyles = clsx(
       'select-none',
@@ -92,14 +90,14 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
       'text-gray-900 dark:text-gray-100',
       !disabled && 'cursor-pointer',
       disabled && 'opacity-50'
-    );
+    )
 
     const descriptionStyles = clsx(
       'mt-1',
       sizes.description,
       'text-gray-600 dark:text-gray-400',
       disabled && 'opacity-50'
-    );
+    )
 
     const switchElement = (
       <div className={trackStyles}>
@@ -115,10 +113,10 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
         />
         <span className={thumbStyles} />
       </div>
-    );
+    )
 
     if (!label && !description) {
-      return switchElement;
+      return switchElement
     }
 
     return (
@@ -133,8 +131,8 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
           )}
         </div>
       </label>
-    );
+    )
   }
-);
+)
 
-Switch.displayName = 'Switch';
+Switch.displayName = 'Switch'

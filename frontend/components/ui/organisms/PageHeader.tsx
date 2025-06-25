@@ -1,82 +1,71 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import { 
-  Bell, 
-  Search, 
-  User, 
-  Moon, 
-  Sun, 
-  Monitor,
-  Settings,
-  LogOut,
-  ChevronDown
-} from 'lucide-react';
-import React from 'react';
-import { useState, useRef, useEffect } from 'react';
+import { clsx } from 'clsx'
+import { Bell, Search, User, Moon, Sun, Monitor, Settings, LogOut, ChevronDown } from 'lucide-react'
+import React from 'react'
+import { useState, useRef, useEffect } from 'react'
 
-import { useDashboardStore } from '@/lib/stores/dashboardStore';
-import { useUIStore } from '@/lib/stores/uiStore';
-import { useWebSocketStore } from '@/lib/stores/websocketStore';
+import { useDashboardStore } from '@/lib/stores/dashboardStore'
+import { useUIStore } from '@/lib/stores/uiStore'
+import { useWebSocketStore } from '@/lib/stores/websocketStore'
 
-import { Badge } from '../atoms/Badge';
-import { Button } from '../atoms/Button';
-import { Input } from '../atoms/Input';
-
+import { Badge } from '../atoms/Badge'
+import { Button } from '../atoms/Button'
+import { Input } from '../atoms/Input'
 
 export interface PageHeaderProps {
-  className?: string;
+  className?: string
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({ className }) => {
-  const { preferences, activeFilters, setTheme, updateFilters } = useUIStore();
-  const { notifications } = useDashboardStore();
-  const { getConnectionStatus } = useWebSocketStore();
-  
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const userMenuRef = useRef<HTMLDivElement>(null);
-  const notificationsRef = useRef<HTMLDivElement>(null);
+  const { preferences, activeFilters, setTheme, updateFilters } = useUIStore()
+  const { notifications } = useDashboardStore()
+  const { getConnectionStatus } = useWebSocketStore()
+
+  const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement>(null)
+  const notificationsRef = useRef<HTMLDivElement>(null)
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false);
+        setShowUserMenu(false)
       }
       if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
-        setShowNotifications(false);
+        setShowNotifications(false)
       }
-    };
+    }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
-  const unreadNotifications = notifications.filter(n => !n.read);
-  const connectionStatus = getConnectionStatus('dashboard');
+  const unreadNotifications = notifications.filter((n) => !n.read)
+  const connectionStatus = getConnectionStatus('dashboard')
 
   const handleThemeToggle = () => {
-    const themes: Array<'light' | 'dark' | 'auto'> = ['light', 'dark', 'auto'];
-    const currentIndex = themes.indexOf(preferences.theme);
-    const nextTheme = themes[(currentIndex + 1) % themes.length];
-    setTheme(nextTheme);
-  };
+    const themes: Array<'light' | 'dark' | 'auto'> = ['light', 'dark', 'auto']
+    const currentIndex = themes.indexOf(preferences.theme)
+    const nextTheme = themes[(currentIndex + 1) % themes.length]
+    setTheme(nextTheme)
+  }
 
   const getThemeIcon = () => {
     switch (preferences.theme) {
       case 'light':
-        return <Sun className="w-4 h-4" />;
+        return <Sun className="w-4 h-4" />
       case 'dark':
-        return <Moon className="w-4 h-4" />;
+        return <Moon className="w-4 h-4" />
       default:
-        return <Monitor className="w-4 h-4" />;
+        return <Monitor className="w-4 h-4" />
     }
-  };
+  }
 
   const handleSearch = (query: string) => {
-    updateFilters({ globalSearch: query });
-  };
+    updateFilters({ globalSearch: query })
+  }
 
   return (
     <header
@@ -140,22 +129,20 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ className }) => {
             <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
               <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    Notifications
-                  </h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
                   <Badge variant="secondary" size="xs">
                     {unreadNotifications.length} new
                   </Badge>
                 </div>
               </div>
-              
+
               <div className="max-h-96 overflow-y-auto">
                 {notifications.length === 0 ? (
                   <div className="p-4 text-center text-gray-500 dark:text-gray-400">
                     No notifications
                   </div>
                 ) : (
-                  notifications.slice(0, 5).map(notification => (
+                  notifications.slice(0, 5).map((notification) => (
                     <div
                       key={notification.id}
                       className={clsx(
@@ -164,13 +151,15 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ className }) => {
                       )}
                     >
                       <div className="flex items-start space-x-3">
-                        <div className={clsx(
-                          'w-2 h-2 rounded-full mt-2 flex-shrink-0',
-                          notification.type === 'error' && 'bg-red-500',
-                          notification.type === 'warning' && 'bg-yellow-500',
-                          notification.type === 'success' && 'bg-green-500',
-                          notification.type === 'info' && 'bg-blue-500'
-                        )} />
+                        <div
+                          className={clsx(
+                            'w-2 h-2 rounded-full mt-2 flex-shrink-0',
+                            notification.type === 'error' && 'bg-red-500',
+                            notification.type === 'warning' && 'bg-yellow-500',
+                            notification.type === 'success' && 'bg-green-500',
+                            notification.type === 'info' && 'bg-blue-500'
+                          )}
+                        />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 dark:text-white">
                             {notification.title}
@@ -189,7 +178,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ className }) => {
                   ))
                 )}
               </div>
-              
+
               {notifications.length > 5 && (
                 <div className="p-3 text-center border-t border-gray-200 dark:border-gray-700">
                   <Button variant="ghost" size="sm">
@@ -224,16 +213,12 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ className }) => {
                     <User className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      Admin User
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      admin@biothings.ai
-                    </p>
+                    <p className="font-medium text-gray-900 dark:text-white">Admin User</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">admin@biothings.ai</p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="py-2">
                 <button className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                   <Settings className="w-4 h-4" />
@@ -249,5 +234,5 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ className }) => {
         </div>
       </div>
     </header>
-  );
-};
+  )
+}

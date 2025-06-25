@@ -1,14 +1,6 @@
 'use client'
 
-import { 
-  Zap, 
-  Clock, 
-  Database, 
-  Wifi,
-  Activity,
-  BarChart3,
-  AlertCircle
-} from 'lucide-react'
+import { Zap, Clock, Database, Wifi, Activity, BarChart3, AlertCircle } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import React, { useState, useEffect } from 'react'
 
@@ -17,13 +9,10 @@ import { batchClient } from '@/lib/api/batch-client'
 import { useWebSocketInfo } from '@/lib/websocket/hooks'
 
 // Lazy load chart
-const PerformanceChart = dynamic(
-  () => import('@/components/performance/PerformanceChart'),
-  { 
-    loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-700 animate-pulse rounded" />,
-    ssr: false 
-  }
-)
+const PerformanceChart = dynamic(() => import('@/components/performance/PerformanceChart'), {
+  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-700 animate-pulse rounded" />,
+  ssr: false,
+})
 
 interface PerformanceMetrics {
   fps: number
@@ -41,14 +30,16 @@ export default function PerformanceMonitoringPage() {
     cacheHitRate: 0,
     apiLatency: 0,
     wsConnections: 0,
-    renderTime: 0
+    renderTime: 0,
   })
-  
-  const [performanceHistory, setPerformanceHistory] = useState<Array<{
-    timestamp: Date
-    fps: number
-    memory: number
-  }>>([])
+
+  const [performanceHistory, setPerformanceHistory] = useState<
+    Array<{
+      timestamp: Date
+      fps: number
+      memory: number
+    }>
+  >([])
 
   const wsInfo = useWebSocketInfo()
   const cacheStats = batchClient.getCacheStats()
@@ -76,7 +67,7 @@ export default function PerformanceMonitoringPage() {
         requestAnimationFrame(() => {
           const fps = measureFPS()
           if (fps !== null) {
-            setMetrics(prev => ({ ...prev, fps }))
+            setMetrics((prev) => ({ ...prev, fps }))
           }
         })
       }, 16) // ~60fps
@@ -85,15 +76,18 @@ export default function PerformanceMonitoringPage() {
       const memoryInterval = setInterval(() => {
         if ('memory' in performance && (performance as any).memory) {
           const memoryUsage = Math.round((performance as any).memory.usedJSHeapSize / 1048576) // Convert to MB
-          setMetrics(prev => ({ ...prev, memoryUsage }))
-          
+          setMetrics((prev) => ({ ...prev, memoryUsage }))
+
           // Add to history
-          setPerformanceHistory(prev => {
-            const newHistory = [...prev, {
-              timestamp: new Date(),
-              fps: metrics.fps,
-              memory: memoryUsage
-            }]
+          setPerformanceHistory((prev) => {
+            const newHistory = [
+              ...prev,
+              {
+                timestamp: new Date(),
+                fps: metrics.fps,
+                memory: memoryUsage,
+              },
+            ]
             // Keep last 60 data points (1 minute of data)
             return newHistory.slice(-60)
           })
@@ -112,23 +106,26 @@ export default function PerformanceMonitoringPage() {
 
   // Update other metrics
   useEffect(() => {
-    setMetrics(prev => ({
+    setMetrics((prev) => ({
       ...prev,
       wsConnections: wsInfo.length,
-      cacheHitRate: cacheStats.size > 0 ? Math.round((cacheStats.hits / (cacheStats.hits + cacheStats.misses)) * 100) : 0
+      cacheHitRate:
+        cacheStats.size > 0
+          ? Math.round((cacheStats.hits / (cacheStats.hits + cacheStats.misses)) * 100)
+          : 0,
     }))
   }, [wsInfo, cacheStats])
 
   // Calculate performance score
   const performanceScore = React.useMemo(() => {
     let score = 100
-    
+
     // Deduct points for poor metrics
     if (metrics.fps < 60) score -= (60 - metrics.fps) * 0.5
     if (metrics.memoryUsage > 200) score -= (metrics.memoryUsage - 200) * 0.1
     if (metrics.cacheHitRate < 80) score -= (80 - metrics.cacheHitRate) * 0.2
     if (metrics.apiLatency > 200) score -= (metrics.apiLatency - 200) * 0.05
-    
+
     return Math.max(0, Math.round(score))
   }, [metrics])
 
@@ -203,10 +200,13 @@ export default function PerformanceMonitoringPage() {
               </div>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div 
+              <div
                 className={`h-2 rounded-full transition-all duration-300 ${
-                  metrics.memoryUsage < 100 ? 'bg-green-600' :
-                  metrics.memoryUsage < 200 ? 'bg-yellow-600' : 'bg-red-600'
+                  metrics.memoryUsage < 100
+                    ? 'bg-green-600'
+                    : metrics.memoryUsage < 200
+                      ? 'bg-yellow-600'
+                      : 'bg-red-600'
                 }`}
                 style={{ width: `${Math.min(100, (metrics.memoryUsage / 300) * 100)}%` }}
               />
@@ -228,9 +228,7 @@ export default function PerformanceMonitoringPage() {
                 </div>
               </div>
             </div>
-            <div className="text-sm text-gray-500">
-              Cache size: {cacheStats.size} items
-            </div>
+            <div className="text-sm text-gray-500">Cache size: {cacheStats.size} items</div>
           </div>
 
           {/* WebSocket Connections */}
@@ -248,9 +246,7 @@ export default function PerformanceMonitoringPage() {
                 </div>
               </div>
             </div>
-            <div className="text-sm text-gray-500">
-              Max connections: 3
-            </div>
+            <div className="text-sm text-gray-500">Max connections: 3</div>
           </div>
 
           {/* API Latency */}
@@ -268,9 +264,7 @@ export default function PerformanceMonitoringPage() {
                 </div>
               </div>
             </div>
-            <div className="text-sm text-gray-500">
-              Batch requests enabled
-            </div>
+            <div className="text-sm text-gray-500">Batch requests enabled</div>
           </div>
 
           {/* Render Time */}
@@ -288,9 +282,7 @@ export default function PerformanceMonitoringPage() {
                 </div>
               </div>
             </div>
-            <div className="text-sm text-gray-500">
-              Component memoization active
-            </div>
+            <div className="text-sm text-gray-500">Component memoization active</div>
           </div>
         </div>
 
@@ -309,21 +301,26 @@ export default function PerformanceMonitoringPage() {
           </h2>
           <div className="space-y-3">
             {wsInfo.map((conn, index) => (
-              <div key={conn.key} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
+              <div
+                key={conn.key}
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded"
+              >
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {conn.key}
-                  </p>
+                  <p className="font-medium text-gray-900 dark:text-white">{conn.key}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Topics: {conn.topics.join(', ') || 'None'}
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                    conn.state === 'connected' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                    conn.state === 'connecting' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                    'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      conn.state === 'connected'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                        : conn.state === 'connecting'
+                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                    }`}
+                  >
                     {conn.state}
                   </span>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -349,33 +346,31 @@ export default function PerformanceMonitoringPage() {
                     Low Frame Rate Detected
                   </p>
                   <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                    Consider reducing the number of animated elements or enabling hardware acceleration.
+                    Consider reducing the number of animated elements or enabling hardware
+                    acceleration.
                   </p>
                 </div>
               </div>
             )}
-            
+
             {metrics.memoryUsage > 200 && (
               <div className="flex items-start space-x-3 p-3 bg-red-50 dark:bg-red-900/20 rounded">
                 <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
                 <div>
-                  <p className="font-medium text-red-800 dark:text-red-200">
-                    High Memory Usage
-                  </p>
+                  <p className="font-medium text-red-800 dark:text-red-200">High Memory Usage</p>
                   <p className="text-sm text-red-700 dark:text-red-300">
-                    Memory usage is high. Check for memory leaks or consider implementing pagination.
+                    Memory usage is high. Check for memory leaks or consider implementing
+                    pagination.
                   </p>
                 </div>
               </div>
             )}
-            
+
             {metrics.cacheHitRate < 50 && cacheStats.size > 0 && (
               <div className="flex items-start space-x-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded">
                 <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
                 <div>
-                  <p className="font-medium text-blue-800 dark:text-blue-200">
-                    Low Cache Hit Rate
-                  </p>
+                  <p className="font-medium text-blue-800 dark:text-blue-200">Low Cache Hit Rate</p>
                   <p className="text-sm text-blue-700 dark:text-blue-300">
                     Many API requests are not hitting the cache. Consider increasing cache duration.
                   </p>

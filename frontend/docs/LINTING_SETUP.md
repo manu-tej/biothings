@@ -14,7 +14,7 @@ The project uses ESLint with the following key rules:
    - `no-console`: Warns on console usage (except warn/error)
 
 2. **Unused Code Detection**
-   - `no-unused-vars`: Errors on unused variables (with _ prefix exception)
+   - `no-unused-vars`: Errors on unused variables (with \_ prefix exception)
    - `unused-imports/no-unused-imports`: Automatically removes unused imports
 
 3. **React Hooks**
@@ -31,6 +31,7 @@ The project uses ESLint with the following key rules:
 ### Prettier Configuration (.prettierrc)
 
 Formatting rules include:
+
 - No semicolons
 - Single quotes
 - 2-space indentation
@@ -41,6 +42,7 @@ Formatting rules include:
 ### Ignored Files
 
 Both ESLint and Prettier ignore:
+
 - node_modules/
 - .next/
 - build/dist directories
@@ -77,6 +79,7 @@ Husky is configured to run linting and formatting automatically before commits:
 Location: `/.husky/pre-commit`
 
 To bypass pre-commit hooks in emergencies:
+
 ```bash
 git commit --no-verify -m "Emergency fix"
 ```
@@ -84,6 +87,7 @@ git commit --no-verify -m "Emergency fix"
 ## Dependencies
 
 ### Dev Dependencies
+
 - `eslint`: Core linting engine
 - `eslint-config-next`: Next.js ESLint configuration
 - `@typescript-eslint/eslint-plugin`: TypeScript linting rules
@@ -113,17 +117,22 @@ git commit --no-verify -m "Emergency fix"
 ## Common Issues and Solutions
 
 ### Issue: Import order errors
+
 **Solution**: Run `npm run lint:fix` to automatically reorder imports
 
 ### Issue: Unused variables/imports
-**Solution**: 
+
+**Solution**:
+
 - Prefix unused parameters with underscore: `_unusedParam`
 - Run `npm run lint:fix` to remove unused imports
 
 ### Issue: Console statements
+
 **Solution**: Use console.warn() or console.error() for necessary logging
 
 ### Issue: TypeScript any usage
+
 **Solution**: Define proper types or use `unknown` if type is truly unknown
 
 ## Best Practices

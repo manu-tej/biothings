@@ -41,7 +41,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           <div className="text-center">
             <h2 className="text-xl font-semibold mb-4">Unable to initialize application</h2>
             <p className="text-gray-600 mb-4">Please refresh the page to try again</p>
-            <button 
+            <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
@@ -51,7 +51,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         </div>
       }
       onError={(error) => {
-        console.error('Provider initialization error:', error);
+        console.error('Provider initialization error:', error)
       }}
     >
       <QueryClientProvider client={queryClient}>
@@ -65,9 +65,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             </div>
           }
         >
-          <WebSocketProvider>
-            {children}
-          </WebSocketProvider>
+          <WebSocketProvider>{children}</WebSocketProvider>
         </ErrorBoundary>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>

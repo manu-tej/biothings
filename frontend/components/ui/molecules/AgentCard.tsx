@@ -1,61 +1,53 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import { 
-  Clock, 
-  MoreHorizontal, 
-  Play, 
-  Pause, 
-  Square,
-  AlertCircle,
-  CheckCircle
-} from 'lucide-react';
-import React, { forwardRef } from 'react';
+import { clsx } from 'clsx'
+import { Clock, MoreHorizontal, Play, Pause, Square, AlertCircle, CheckCircle } from 'lucide-react'
+import React, { forwardRef } from 'react'
 
-import { Avatar } from '../atoms/Avatar';
-import { Badge } from '../atoms/Badge';
-import { Button } from '../atoms/Button';
-import { Card, CardHeader, CardBody, CardFooter } from '../atoms/Card';
-import { Tooltip } from '../atoms/Tooltip';
+import { Avatar } from '../atoms/Avatar'
+import { Badge } from '../atoms/Badge'
+import { Button } from '../atoms/Button'
+import { Card, CardHeader, CardBody, CardFooter } from '../atoms/Card'
+import { Tooltip } from '../atoms/Tooltip'
 
 export interface AgentStatus {
-  status: 'active' | 'idle' | 'error' | 'offline';
-  lastSeen?: Date;
-  uptime?: number;
-  tasksCompleted?: number;
-  currentTask?: string;
+  status: 'active' | 'idle' | 'error' | 'offline'
+  lastSeen?: Date
+  uptime?: number
+  tasksCompleted?: number
+  currentTask?: string
 }
 
 export interface AgentMetrics {
-  cpuUsage?: number;
-  memoryUsage?: number;
-  activeConnections?: number;
-  throughput?: number;
+  cpuUsage?: number
+  memoryUsage?: number
+  activeConnections?: number
+  throughput?: number
 }
 
 export interface AgentCardProps {
-  id: string;
-  name: string;
-  type: string;
-  description?: string;
-  status: AgentStatus;
-  metrics?: AgentMetrics;
-  avatar?: string;
-  tags?: string[];
+  id: string
+  name: string
+  type: string
+  description?: string
+  status: AgentStatus
+  metrics?: AgentMetrics
+  avatar?: string
+  tags?: string[]
   actions?: {
-    onStart?: () => void;
-    onPause?: () => void;
-    onStop?: () => void;
-    onSettings?: () => void;
-    onView?: () => void;
-  };
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'compact' | 'detailed';
-  selectable?: boolean;
-  selected?: boolean;
-  onSelect?: (selected: boolean) => void;
-  className?: string;
-  testId?: string;
+    onStart?: () => void
+    onPause?: () => void
+    onStop?: () => void
+    onSettings?: () => void
+    onView?: () => void
+  }
+  size?: 'sm' | 'md' | 'lg'
+  variant?: 'default' | 'compact' | 'detailed'
+  selectable?: boolean
+  selected?: boolean
+  onSelect?: (selected: boolean) => void
+  className?: string
+  testId?: string
 }
 
 const statusConfig = {
@@ -83,7 +75,7 @@ const statusConfig = {
     icon: Square,
     label: 'Offline',
   },
-};
+}
 
 const sizeStyles = {
   sm: {
@@ -107,7 +99,7 @@ const sizeStyles = {
     subtitle: 'text-base',
     metrics: 'text-base',
   },
-};
+}
 
 export const AgentCard = forwardRef<HTMLDivElement, AgentCardProps>(
   (
@@ -131,70 +123,55 @@ export const AgentCard = forwardRef<HTMLDivElement, AgentCardProps>(
     },
     ref
   ) => {
-    const sizes = sizeStyles[size];
-    const statusInfo = statusConfig[status.status];
-    const StatusIcon = statusInfo.icon;
+    const sizes = sizeStyles[size]
+    const statusInfo = statusConfig[status.status]
+    const StatusIcon = statusInfo.icon
 
     const formatUptime = (seconds?: number) => {
-      if (!seconds) return '';
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      return `${hours}h ${minutes}m`;
-    };
+      if (!seconds) return ''
+      const hours = Math.floor(seconds / 3600)
+      const minutes = Math.floor((seconds % 3600) / 60)
+      return `${hours}h ${minutes}m`
+    }
 
     const formatMetric = (value?: number, suffix = '') => {
-      if (value === undefined) return '';
-      return `${value}${suffix}`;
-    };
+      if (value === undefined) return ''
+      return `${value}${suffix}`
+    }
 
     const handleSelect = () => {
       if (selectable) {
-        onSelect?.(!selected);
+        onSelect?.(!selected)
       }
-    };
+    }
 
     const renderActions = () => {
-      if (!actions) return null;
+      if (!actions) return null
 
-      const actionButtons = [];
-      
+      const actionButtons = []
+
       if (status.status === 'active' && actions.onPause) {
         actionButtons.push(
           <Tooltip key="pause" content="Pause Agent">
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={actions.onPause}
-              icon={<Pause />}
-            />
+            <Button size="xs" variant="ghost" onClick={actions.onPause} icon={<Pause />} />
           </Tooltip>
-        );
+        )
       }
-      
+
       if (status.status !== 'active' && actions.onStart) {
         actionButtons.push(
           <Tooltip key="start" content="Start Agent">
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={actions.onStart}
-              icon={<Play />}
-            />
+            <Button size="xs" variant="ghost" onClick={actions.onStart} icon={<Play />} />
           </Tooltip>
-        );
+        )
       }
-      
+
       if (actions.onStop) {
         actionButtons.push(
           <Tooltip key="stop" content="Stop Agent">
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={actions.onStop}
-              icon={<Square />}
-            />
+            <Button size="xs" variant="ghost" onClick={actions.onStop} icon={<Square />} />
           </Tooltip>
-        );
+        )
       }
 
       if (actions.onSettings) {
@@ -207,11 +184,11 @@ export const AgentCard = forwardRef<HTMLDivElement, AgentCardProps>(
               icon={<MoreHorizontal />}
             />
           </Tooltip>
-        );
+        )
       }
 
-      return actionButtons;
-    };
+      return actionButtons
+    }
 
     if (variant === 'compact') {
       return (
@@ -250,12 +227,10 @@ export const AgentCard = forwardRef<HTMLDivElement, AgentCardProps>(
                 {type}
               </p>
             </div>
-            <div className="flex items-center gap-1">
-              {renderActions()}
-            </div>
+            <div className="flex items-center gap-1">{renderActions()}</div>
           </div>
         </Card>
-      );
+      )
     }
 
     return (
@@ -279,14 +254,8 @@ export const AgentCard = forwardRef<HTMLDivElement, AgentCardProps>(
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className={clsx(sizes.title, 'text-gray-900 dark:text-gray-100')}>
-                  {name}
-                </h3>
-                <Badge
-                  size="xs"
-                  variant={statusInfo.badgeVariant}
-                  icon={<StatusIcon />}
-                >
+                <h3 className={clsx(sizes.title, 'text-gray-900 dark:text-gray-100')}>{name}</h3>
+                <Badge size="xs" variant={statusInfo.badgeVariant} icon={<StatusIcon />}>
                   {statusInfo.label}
                 </Badge>
               </div>
@@ -299,9 +268,7 @@ export const AgentCard = forwardRef<HTMLDivElement, AgentCardProps>(
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-1">
-              {renderActions()}
-            </div>
+            <div className="flex items-center gap-1">{renderActions()}</div>
           </div>
         </CardHeader>
 
@@ -326,40 +293,46 @@ export const AgentCard = forwardRef<HTMLDivElement, AgentCardProps>(
                   <p className={clsx(sizes.metrics, 'text-gray-600 dark:text-gray-400')}>
                     Tasks Completed
                   </p>
-                  <p className={clsx(sizes.subtitle, 'text-gray-900 dark:text-gray-100 font-medium')}>
+                  <p
+                    className={clsx(sizes.subtitle, 'text-gray-900 dark:text-gray-100 font-medium')}
+                  >
                     {status.tasksCompleted}
                   </p>
                 </div>
               )}
-              
+
               {status.uptime !== undefined && (
                 <div>
-                  <p className={clsx(sizes.metrics, 'text-gray-600 dark:text-gray-400')}>
-                    Uptime
-                  </p>
-                  <p className={clsx(sizes.subtitle, 'text-gray-900 dark:text-gray-100 font-medium')}>
+                  <p className={clsx(sizes.metrics, 'text-gray-600 dark:text-gray-400')}>Uptime</p>
+                  <p
+                    className={clsx(sizes.subtitle, 'text-gray-900 dark:text-gray-100 font-medium')}
+                  >
                     {formatUptime(status.uptime)}
                   </p>
                 </div>
               )}
-              
+
               {metrics?.cpuUsage !== undefined && (
                 <div>
                   <p className={clsx(sizes.metrics, 'text-gray-600 dark:text-gray-400')}>
                     CPU Usage
                   </p>
-                  <p className={clsx(sizes.subtitle, 'text-gray-900 dark:text-gray-100 font-medium')}>
+                  <p
+                    className={clsx(sizes.subtitle, 'text-gray-900 dark:text-gray-100 font-medium')}
+                  >
                     {formatMetric(metrics.cpuUsage, '%')}
                   </p>
                 </div>
               )}
-              
+
               {metrics?.throughput !== undefined && (
                 <div>
                   <p className={clsx(sizes.metrics, 'text-gray-600 dark:text-gray-400')}>
                     Throughput
                   </p>
-                  <p className={clsx(sizes.subtitle, 'text-gray-900 dark:text-gray-100 font-medium')}>
+                  <p
+                    className={clsx(sizes.subtitle, 'text-gray-900 dark:text-gray-100 font-medium')}
+                  >
                     {formatMetric(metrics.throughput, '/s')}
                   </p>
                 </div>
@@ -370,7 +343,7 @@ export const AgentCard = forwardRef<HTMLDivElement, AgentCardProps>(
           {/* Tags */}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {tags.map(tag => (
+              {tags.map((tag) => (
                 <Badge key={tag} size="xs" variant="secondary">
                   {tag}
                 </Badge>
@@ -387,8 +360,8 @@ export const AgentCard = forwardRef<HTMLDivElement, AgentCardProps>(
           </CardFooter>
         )}
       </Card>
-    );
+    )
   }
-);
+)
 
-AgentCard.displayName = 'AgentCard';
+AgentCard.displayName = 'AgentCard'

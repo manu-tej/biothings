@@ -35,27 +35,32 @@ frontend/
 ## Running Tests
 
 ### All Tests
+
 ```bash
 npm test
 ```
 
 ### Watch Mode
+
 ```bash
 npm run test:watch
 ```
 
 ### Coverage Report
+
 ```bash
 npm run test:coverage
 ```
 
 ### Specific Test Types
+
 ```bash
 npm run test:unit        # Run unit tests only
 npm run test:integration # Run integration tests only
 ```
 
 ### CI Mode
+
 ```bash
 npm run test:ci         # Optimized for CI/CD pipelines
 ```
@@ -71,11 +76,11 @@ import MyComponent from '@/components/MyComponent';
 describe('MyComponent', () => {
   it('should render correctly', async () => {
     render(<MyComponent />);
-    
+
     expect(screen.getByText('Hello')).toBeInTheDocument();
-    
+
     fireEvent.click(screen.getByRole('button'));
-    
+
     await waitFor(() => {
       expect(screen.getByText('Updated')).toBeInTheDocument();
     });
@@ -86,57 +91,57 @@ describe('MyComponent', () => {
 ### Hook Tests
 
 ```typescript
-import { renderHook, act } from '@testing-library/react';
-import useMyHook from '@/hooks/useMyHook';
+import { renderHook, act } from '@testing-library/react'
+import useMyHook from '@/hooks/useMyHook'
 
 describe('useMyHook', () => {
   it('should update state', () => {
-    const { result } = renderHook(() => useMyHook());
-    
-    expect(result.current.value).toBe(0);
-    
+    const { result } = renderHook(() => useMyHook())
+
+    expect(result.current.value).toBe(0)
+
     act(() => {
-      result.current.increment();
-    });
-    
-    expect(result.current.value).toBe(1);
-  });
-});
+      result.current.increment()
+    })
+
+    expect(result.current.value).toBe(1)
+  })
+})
 ```
 
 ### API Tests with MSW
 
 ```typescript
-import { server } from '@/__tests__/mocks/server';
-import { http, HttpResponse } from 'msw';
+import { server } from '@/__tests__/mocks/server'
+import { http, HttpResponse } from 'msw'
 
 it('should handle API errors', async () => {
   server.use(
     http.get('/api/data', () => {
-      return new HttpResponse(null, { status: 500 });
+      return new HttpResponse(null, { status: 500 })
     })
-  );
-  
+  )
+
   // Test error handling
-});
+})
 ```
 
 ### WebSocket Tests
 
 ```typescript
-import WS from 'jest-websocket-mock';
+import WS from 'jest-websocket-mock'
 
 it('should handle WebSocket messages', async () => {
-  const server = new WS('ws://localhost:8000/ws');
-  
+  const server = new WS('ws://localhost:8000/ws')
+
   // Render component that uses WebSocket
-  
-  await server.connected;
-  
-  server.send(JSON.stringify({ type: 'update', data: 'test' }));
-  
+
+  await server.connected
+
+  server.send(JSON.stringify({ type: 'update', data: 'test' }))
+
   // Assert on UI updates
-});
+})
 ```
 
 ## Best Practices
@@ -185,26 +190,28 @@ it('should show loading state', () => {
 
 ```typescript
 it('should handle errors gracefully', async () => {
-  const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-  
+  const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
+
   // Trigger error condition
-  
+
   await waitFor(() => {
-    expect(screen.getByText(/error/i)).toBeInTheDocument();
-  });
-  
-  consoleSpy.mockRestore();
-});
+    expect(screen.getByText(/error/i)).toBeInTheDocument()
+  })
+
+  consoleSpy.mockRestore()
+})
 ```
 
 ## Debugging Tests
 
 ### Interactive Mode
+
 ```bash
 npm run test:watch
 ```
 
 ### Debug in VS Code
+
 Add this configuration to `.vscode/launch.json`:
 
 ```json
@@ -230,6 +237,7 @@ Add this configuration to `.vscode/launch.json`:
 ## CI/CD Integration
 
 Tests run automatically on:
+
 - Push to main/develop branches
 - Pull requests
 - Manual workflow dispatch

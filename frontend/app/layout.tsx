@@ -13,11 +13,7 @@ export const metadata: Metadata = {
   description: 'LLM-powered biotech automation and monitoring platform',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={inter.className}>
@@ -31,9 +27,7 @@ export default function RootLayout({
             }
           }}
         >
-          <Providers>
-            {children}
-          </Providers>
+          <Providers>{children}</Providers>
         </ErrorBoundary>
       </body>
     </html>

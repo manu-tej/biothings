@@ -1,38 +1,38 @@
-'use client';
+'use client'
 
-import type { EChartsOption } from 'echarts';
-import ReactECharts from 'echarts-for-react';
-import React from 'react';
+import type { EChartsOption } from 'echarts'
+import ReactECharts from 'echarts-for-react'
+import React from 'react'
 
 export interface SankeyNode {
-  id: string;
-  name: string;
-  category?: string;
-  value?: number;
+  id: string
+  name: string
+  category?: string
+  value?: number
   itemStyle?: {
-    color?: string;
-  };
+    color?: string
+  }
 }
 
 export interface SankeyLink {
-  source: string;
-  target: string;
-  value: number;
-  label?: string;
+  source: string
+  target: string
+  value: number
+  label?: string
 }
 
 export interface SankeyData {
-  nodes: SankeyNode[];
-  links: SankeyLink[];
+  nodes: SankeyNode[]
+  links: SankeyLink[]
 }
 
 interface SankeyChartProps {
-  data: SankeyData;
-  width?: number;
-  height?: number;
-  className?: string;
-  onNodeClick?: (node: SankeyNode) => void;
-  onLinkClick?: (link: SankeyLink) => void;
+  data: SankeyData
+  width?: number
+  height?: number
+  className?: string
+  onNodeClick?: (node: SankeyNode) => void
+  onLinkClick?: (link: SankeyLink) => void
 }
 
 export const SankeyChart: React.FC<SankeyChartProps> = ({
@@ -55,26 +55,26 @@ export const SankeyChart: React.FC<SankeyChartProps> = ({
     tooltip: {
       trigger: 'item',
       triggerOn: 'mousemove',
-      formatter: function(params: any) {
+      formatter: function (params: any) {
         if (params.dataType === 'node') {
-          return `${params.data.name}<br/>Value: ${params.data.value || 0}`;
+          return `${params.data.name}<br/>Value: ${params.data.value || 0}`
         } else if (params.dataType === 'edge') {
-          return `${params.data.source} → ${params.data.target}<br/>Value: ${params.data.value}`;
+          return `${params.data.source} → ${params.data.target}<br/>Value: ${params.data.value}`
         }
-        return '';
+        return ''
       },
     },
     series: [
       {
         type: 'sankey',
-        data: data.nodes.map(node => ({
+        data: data.nodes.map((node) => ({
           name: node.name,
           value: node.value,
           itemStyle: node.itemStyle || {
             color: getNodeColor(node.category),
           },
         })),
-        links: data.links.map(link => ({
+        links: data.links.map((link) => ({
           source: link.source,
           target: link.target,
           value: link.value,
@@ -109,25 +109,25 @@ export const SankeyChart: React.FC<SankeyChartProps> = ({
     animation: true,
     animationDuration: 1000,
     animationEasing: 'cubicOut',
-  };
+  }
 
   const handleEvents = {
     click: (params: any) => {
       if (params.dataType === 'node' && onNodeClick) {
-        const originalNode = data.nodes.find(node => node.name === params.data.name);
+        const originalNode = data.nodes.find((node) => node.name === params.data.name)
         if (originalNode) {
-          onNodeClick(originalNode);
+          onNodeClick(originalNode)
         }
       } else if (params.dataType === 'edge' && onLinkClick) {
         const originalLink = data.links.find(
-          link => link.source === params.data.source && link.target === params.data.target
-        );
+          (link) => link.source === params.data.source && link.target === params.data.target
+        )
         if (originalLink) {
-          onLinkClick(originalLink);
+          onLinkClick(originalLink)
         }
       }
     },
-  };
+  }
 
   return (
     <div className={`sankey-chart ${className}`}>
@@ -138,19 +138,19 @@ export const SankeyChart: React.FC<SankeyChartProps> = ({
         opts={{ renderer: 'canvas' }}
       />
     </div>
-  );
-};
+  )
+}
 
 function getNodeColor(category?: string): string {
   const colors: Record<string, string> = {
     input: '#4CAF50',
-    process: '#2196F3', 
+    process: '#2196F3',
     output: '#FF9800',
     decision: '#9C27B0',
     default: '#607D8B',
-  };
-  
-  return colors[category || 'default'] || colors.default;
+  }
+
+  return colors[category || 'default'] || colors.default
 }
 
-export default SankeyChart;
+export default SankeyChart

@@ -1,59 +1,54 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import { 
-  ChevronRight, 
-  Bell, 
-  Search,
-  Menu
-} from 'lucide-react';
-import React, { forwardRef } from 'react';
+import { clsx } from 'clsx'
+import { ChevronRight, Bell, Search, Menu } from 'lucide-react'
+import React, { forwardRef } from 'react'
 
-import { Avatar } from '../atoms/Avatar';
-import { Badge } from '../atoms/Badge';
-import { Button } from '../atoms/Button';
-import { Input } from '../atoms/Input';
-import { Tooltip } from '../atoms/Tooltip';
+import { Avatar } from '../atoms/Avatar'
+import { Badge } from '../atoms/Badge'
+import { Button } from '../atoms/Button'
+import { Input } from '../atoms/Input'
+import { Tooltip } from '../atoms/Tooltip'
 
 export interface BreadcrumbItem {
-  label: string;
-  href?: string;
-  icon?: React.ComponentType<{ className?: string }>;
-  onClick?: () => void;
+  label: string
+  href?: string
+  icon?: React.ComponentType<{ className?: string }>
+  onClick?: () => void
 }
 
 export interface PageHeaderAction {
-  label: string;
-  icon?: React.ComponentType<{ className?: string }>;
-  onClick: () => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  disabled?: boolean;
-  badge?: string | number;
+  label: string
+  icon?: React.ComponentType<{ className?: string }>
+  onClick: () => void
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
+  disabled?: boolean
+  badge?: string | number
 }
 
 export interface PageHeaderProps {
-  title: string;
-  subtitle?: string;
-  breadcrumbs?: BreadcrumbItem[];
-  actions?: PageHeaderAction[];
-  showSearch?: boolean;
-  searchPlaceholder?: string;
-  onSearch?: (query: string) => void;
-  showNotifications?: boolean;
-  notificationCount?: number;
-  onNotificationsClick?: () => void;
-  showProfile?: boolean;
-  profileName?: string;
-  profileAvatar?: string;
-  profileStatus?: 'online' | 'offline' | 'away' | 'busy';
-  onProfileClick?: () => void;
-  showMenuToggle?: boolean;
-  onMenuToggle?: () => void;
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'compact' | 'minimal';
-  sticky?: boolean;
-  className?: string;
-  testId?: string;
+  title: string
+  subtitle?: string
+  breadcrumbs?: BreadcrumbItem[]
+  actions?: PageHeaderAction[]
+  showSearch?: boolean
+  searchPlaceholder?: string
+  onSearch?: (query: string) => void
+  showNotifications?: boolean
+  notificationCount?: number
+  onNotificationsClick?: () => void
+  showProfile?: boolean
+  profileName?: string
+  profileAvatar?: string
+  profileStatus?: 'online' | 'offline' | 'away' | 'busy'
+  onProfileClick?: () => void
+  showMenuToggle?: boolean
+  onMenuToggle?: () => void
+  size?: 'sm' | 'md' | 'lg'
+  variant?: 'default' | 'compact' | 'minimal'
+  sticky?: boolean
+  className?: string
+  testId?: string
 }
 
 const sizeStyles = {
@@ -75,7 +70,7 @@ const sizeStyles = {
     subtitle: 'text-lg',
     spacing: 'gap-4',
   },
-};
+}
 
 export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
   (
@@ -105,16 +100,16 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
     },
     ref
   ) => {
-    const sizes = sizeStyles[size];
+    const sizes = sizeStyles[size]
 
     const renderBreadcrumbs = () => {
-      if (breadcrumbs.length === 0) return null;
+      if (breadcrumbs.length === 0) return null
 
       return (
         <nav className="flex items-center space-x-1 text-sm" aria-label="Breadcrumb">
           {breadcrumbs.map((item, index) => {
-            const isLast = index === breadcrumbs.length - 1;
-            const ItemIcon = item.icon;
+            const isLast = index === breadcrumbs.length - 1
+            const ItemIcon = item.icon
 
             return (
               <div key={index} className="flex items-center">
@@ -122,16 +117,14 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
                   <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 mx-1" />
                 )}
                 <div className="flex items-center gap-1">
-                  {ItemIcon && (
-                    <ItemIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                  )}
+                  {ItemIcon && <ItemIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />}
                   {item.href || item.onClick ? (
                     <button
                       onClick={item.onClick}
                       className={clsx(
                         'hover:text-gray-900 dark:hover:text-gray-100 transition-colors',
-                        isLast 
-                          ? 'text-gray-900 dark:text-gray-100 font-medium cursor-default' 
+                        isLast
+                          ? 'text-gray-900 dark:text-gray-100 font-medium cursor-default'
                           : 'text-gray-500 dark:text-gray-400'
                       )}
                       aria-current={isLast ? 'page' : undefined}
@@ -141,8 +134,8 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
                   ) : (
                     <span
                       className={clsx(
-                        isLast 
-                          ? 'text-gray-900 dark:text-gray-100 font-medium' 
+                        isLast
+                          ? 'text-gray-900 dark:text-gray-100 font-medium'
                           : 'text-gray-500 dark:text-gray-400'
                       )}
                       aria-current={isLast ? 'page' : undefined}
@@ -152,20 +145,20 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
                   )}
                 </div>
               </div>
-            );
+            )
           })}
         </nav>
-      );
-    };
+      )
+    }
 
     const renderActions = () => {
-      if (actions.length === 0) return null;
+      if (actions.length === 0) return null
 
       return (
         <div className={clsx('flex items-center', sizes.spacing)}>
           {actions.map((action, index) => {
-            const ActionIcon = action.icon;
-            
+            const ActionIcon = action.icon
+
             return (
               <div key={index} className="relative">
                 <Button
@@ -178,24 +171,20 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
                   {action.label}
                 </Button>
                 {action.badge && (
-                  <Badge
-                    size="xs"
-                    variant="danger"
-                    className="absolute -top-1 -right-1"
-                  >
+                  <Badge size="xs" variant="danger" className="absolute -top-1 -right-1">
                     {action.badge}
                   </Badge>
                 )}
               </div>
-            );
+            )
           })}
         </div>
-      );
-    };
+      )
+    }
 
     const renderUtilities = () => {
-      const hasUtilities = showSearch || showNotifications || showProfile;
-      if (!hasUtilities) return null;
+      const hasUtilities = showSearch || showNotifications || showProfile
+      if (!hasUtilities) return null
 
       return (
         <div className={clsx('flex items-center', sizes.spacing)}>
@@ -221,11 +210,7 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
                 />
               </Tooltip>
               {notificationCount > 0 && (
-                <Badge
-                  size="xs"
-                  variant="danger"
-                  className="absolute -top-1 -right-1"
-                >
+                <Badge size="xs" variant="danger" className="absolute -top-1 -right-1">
                   {notificationCount > 99 ? '99+' : notificationCount}
                 </Badge>
               )}
@@ -253,8 +238,8 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
             </Tooltip>
           )}
         </div>
-      );
-    };
+      )
+    }
 
     if (variant === 'minimal') {
       return (
@@ -271,21 +256,14 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {showMenuToggle && (
-                <Button
-                  size={size}
-                  variant="ghost"
-                  onClick={onMenuToggle}
-                  icon={<Menu />}
-                />
+                <Button size={size} variant="ghost" onClick={onMenuToggle} icon={<Menu />} />
               )}
-              <h1 className={clsx(sizes.title, 'text-gray-900 dark:text-gray-100')}>
-                {title}
-              </h1>
+              <h1 className={clsx(sizes.title, 'text-gray-900 dark:text-gray-100')}>{title}</h1>
             </div>
             {renderUtilities()}
           </div>
         </header>
-      );
+      )
     }
 
     if (variant === 'compact') {
@@ -303,12 +281,7 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {showMenuToggle && (
-                <Button
-                  size={size}
-                  variant="ghost"
-                  onClick={onMenuToggle}
-                  icon={<Menu />}
-                />
+                <Button size={size} variant="ghost" onClick={onMenuToggle} icon={<Menu />} />
               )}
               <div>
                 {renderBreadcrumbs()}
@@ -323,7 +296,7 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
             </div>
           </div>
         </header>
-      );
+      )
     }
 
     return (
@@ -340,23 +313,16 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-4">
             {showMenuToggle && (
-              <Button
-                size={size}
-                variant="ghost"
-                onClick={onMenuToggle}
-                icon={<Menu />}
-              />
+              <Button size={size} variant="ghost" onClick={onMenuToggle} icon={<Menu />} />
             )}
             {renderBreadcrumbs()}
           </div>
           {renderUtilities()}
         </div>
-        
+
         <div className="flex items-end justify-between">
           <div>
-            <h1 className={clsx(sizes.title, 'text-gray-900 dark:text-gray-100')}>
-              {title}
-            </h1>
+            <h1 className={clsx(sizes.title, 'text-gray-900 dark:text-gray-100')}>{title}</h1>
             {subtitle && (
               <p className={clsx(sizes.subtitle, 'text-gray-600 dark:text-gray-400 mt-1')}>
                 {subtitle}
@@ -366,8 +332,8 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
           {renderActions()}
         </div>
       </header>
-    );
+    )
   }
-);
+)
 
-PageHeader.displayName = 'PageHeader';
+PageHeader.displayName = 'PageHeader'

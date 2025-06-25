@@ -3,55 +3,55 @@
  * Using LangGraph architecture with specialized agents
  */
 
-import { BaseMessage, HumanMessage, AIMessage } from '@langchain/core/messages';
-import { StateGraph, MessagesState, START, END } from '@langchain/langgraph';
+import { BaseMessage, HumanMessage, AIMessage } from '@langchain/core/messages'
+import { StateGraph, MessagesState, START, END } from '@langchain/langgraph'
 
 // Agent State Interface
 interface PerformanceAnalysisState extends MessagesState {
-  currentIssues: string[];
-  optimizationStrategies: string[];
-  implementationPlan: string[];
-  validationResults: string[];
-  lastActiveAgent: string;
-  round: number;
-  maxRounds: number;
+  currentIssues: string[]
+  optimizationStrategies: string[]
+  implementationPlan: string[]
+  validationResults: string[]
+  lastActiveAgent: string
+  round: number
+  maxRounds: number
 }
 
 // Vector Memory System
 interface VectorMemory {
-  sessionId: string;
-  topic: string;
-  goal: string;
-  rounds: RoundMemory[];
+  sessionId: string
+  topic: string
+  goal: string
+  rounds: RoundMemory[]
   agents: {
-    planner: AgentMemory;
-    researcher: AgentMemory;
-    architect: AgentMemory;
-    engineer: AgentMemory;
-    verifier: AgentMemory;
-  };
-  crossPollination: string[];
-  synthesis: SynthesisResult;
+    planner: AgentMemory
+    researcher: AgentMemory
+    architect: AgentMemory
+    engineer: AgentMemory
+    verifier: AgentMemory
+  }
+  crossPollination: string[]
+  synthesis: SynthesisResult
 }
 
 interface AgentMemory {
-  insights: string[];
-  decisions: string[];
-  recommendations: string[];
+  insights: string[]
+  decisions: string[]
+  recommendations: string[]
 }
 
 interface RoundMemory {
-  roundNumber: number;
-  timestamp: string;
-  agentOutputs: Record<string, string>;
-  emergentInsights: string[];
+  roundNumber: number
+  timestamp: string
+  agentOutputs: Record<string, string>
+  emergentInsights: string[]
 }
 
 interface SynthesisResult {
-  keyFindings: string[];
-  actionItems: string[];
-  implementationRoadmap: string[];
-  successMetrics: string[];
+  keyFindings: string[]
+  actionItems: string[]
+  implementationRoadmap: string[]
+  successMetrics: string[]
 }
 
 // Agent Definitions
@@ -97,8 +97,8 @@ export class PlannerAgent {
     - Time to Interactive < 3s
     - 60fps scrolling performance
     - Bundle size reduction > 40%
-    `;
-    
+    `
+
     return {
       messages: [...state.messages, new AIMessage({ content: analysis, name: 'planner' })],
       optimizationStrategies: [
@@ -106,10 +106,10 @@ export class PlannerAgent {
         'React performance optimizations',
         'WebSocket pooling',
         'List virtualization',
-        'Bundle optimization'
+        'Bundle optimization',
       ],
-      lastActiveAgent: 'planner'
-    };
+      lastActiveAgent: 'planner',
+    }
   }
 }
 
@@ -143,18 +143,18 @@ export class ResearcherAgent {
     - Million.js for faster virtual DOM
     - Qwik's resumability for instant interactivity
     - Solid.js reactive primitives for fine-grained updates
-    `;
-    
+    `
+
     return {
       messages: [...state.messages, new AIMessage({ content: research, name: 'researcher' })],
       currentIssues: [
         ...state.currentIssues,
         'Safari-specific rendering bottlenecks',
         'Suboptimal use of M1 GPU acceleration',
-        'Missing progressive enhancement strategies'
+        'Missing progressive enhancement strategies',
       ],
-      lastActiveAgent: 'researcher'
-    };
+      lastActiveAgent: 'researcher',
+    }
   }
 }
 
@@ -209,8 +209,8 @@ export class ArchitectAgent {
     - CSS: < 50KB
     - Initial Load: < 3s (3G)
     - TTI: < 2s (4G)
-    `;
-    
+    `
+
     return {
       messages: [...state.messages, new AIMessage({ content: architecture, name: 'architect' })],
       implementationPlan: [
@@ -218,10 +218,10 @@ export class ArchitectAgent {
         'Implement WebSocket Manager singleton',
         'Add route-based code splitting',
         'Configure webpack optimization',
-        'Set up performance monitoring'
+        'Set up performance monitoring',
       ],
-      lastActiveAgent: 'architect'
-    };
+      lastActiveAgent: 'architect',
+    }
   }
 }
 
@@ -313,8 +313,8 @@ export class EngineerAgent {
       }
     }
     \`\`\`
-    `;
-    
+    `
+
     return {
       messages: [...state.messages, new AIMessage({ content: implementation, name: 'engineer' })],
       implementationPlan: [
@@ -322,10 +322,10 @@ export class EngineerAgent {
         'Create reusable performance hooks',
         'Implement progressive enhancement',
         'Add performance monitoring',
-        'Set up A/B testing for optimizations'
+        'Set up A/B testing for optimizations',
       ],
-      lastActiveAgent: 'engineer'
-    };
+      lastActiveAgent: 'engineer',
+    }
   }
 }
 
@@ -384,110 +384,110 @@ export class VerifierAgent {
     - ✅ Smooth 60fps interactions
     - ✅ Reduced memory footprint
     - ✅ Better battery life on M1
-    `;
-    
+    `
+
     return {
       messages: [...state.messages, new AIMessage({ content: verification, name: 'verifier' })],
       validationResults: [
         'Performance targets defined and measurable',
         'Risk mitigation strategies in place',
         'Monitoring infrastructure ready',
-        'Rollback procedures documented'
+        'Rollback procedures documented',
       ],
-      lastActiveAgent: 'verifier'
-    };
+      lastActiveAgent: 'verifier',
+    }
   }
 }
 
 // Multi-Agent Orchestrator
 export class PerformanceOptimizationSwarm {
-  private graph: StateGraph<PerformanceAnalysisState>;
+  private graph: StateGraph<PerformanceAnalysisState>
   private agents: {
-    planner: PlannerAgent;
-    researcher: ResearcherAgent;
-    architect: ArchitectAgent;
-    engineer: EngineerAgent;
-    verifier: VerifierAgent;
-  };
-  
+    planner: PlannerAgent
+    researcher: ResearcherAgent
+    architect: ArchitectAgent
+    engineer: EngineerAgent
+    verifier: VerifierAgent
+  }
+
   constructor() {
     this.agents = {
       planner: new PlannerAgent(),
       researcher: new ResearcherAgent(),
       architect: new ArchitectAgent(),
       engineer: new EngineerAgent(),
-      verifier: new VerifierAgent()
-    };
-    
-    this.graph = this.buildGraph();
+      verifier: new VerifierAgent(),
+    }
+
+    this.graph = this.buildGraph()
   }
-  
+
   private buildGraph(): StateGraph<PerformanceAnalysisState> {
     const graph = new StateGraph<PerformanceAnalysisState>({
       channels: {
         messages: {
           reducer: (a, b) => [...a, ...b],
-          default: () => []
+          default: () => [],
         },
         currentIssues: {
           reducer: (a, b) => [...new Set([...a, ...b])],
-          default: () => []
+          default: () => [],
         },
         optimizationStrategies: {
           reducer: (a, b) => [...new Set([...a, ...b])],
-          default: () => []
+          default: () => [],
         },
         implementationPlan: {
           reducer: (a, b) => [...new Set([...a, ...b])],
-          default: () => []
+          default: () => [],
         },
         validationResults: {
           reducer: (a, b) => [...new Set([...a, ...b])],
-          default: () => []
+          default: () => [],
         },
         lastActiveAgent: {
           reducer: (_, b) => b,
-          default: () => 'none'
+          default: () => 'none',
         },
         round: {
           reducer: (_, b) => b,
-          default: () => 1
+          default: () => 1,
         },
         maxRounds: {
           reducer: (_, b) => b,
-          default: () => 4
-        }
-      }
-    });
-    
+          default: () => 4,
+        },
+      },
+    })
+
     // Add nodes for each agent
-    graph.addNode('planner', (state) => this.agents.planner.analyze(state));
-    graph.addNode('researcher', (state) => this.agents.researcher.analyze(state));
-    graph.addNode('architect', (state) => this.agents.architect.analyze(state));
-    graph.addNode('engineer', (state) => this.agents.engineer.analyze(state));
-    graph.addNode('verifier', (state) => this.agents.verifier.analyze(state));
-    
+    graph.addNode('planner', (state) => this.agents.planner.analyze(state))
+    graph.addNode('researcher', (state) => this.agents.researcher.analyze(state))
+    graph.addNode('architect', (state) => this.agents.architect.analyze(state))
+    graph.addNode('engineer', (state) => this.agents.engineer.analyze(state))
+    graph.addNode('verifier', (state) => this.agents.verifier.analyze(state))
+
     // Define the flow
-    graph.addEdge(START, 'planner');
-    graph.addEdge('planner', 'researcher');
-    graph.addEdge('researcher', 'architect');
-    graph.addEdge('architect', 'engineer');
-    graph.addEdge('engineer', 'verifier');
-    
+    graph.addEdge(START, 'planner')
+    graph.addEdge('planner', 'researcher')
+    graph.addEdge('researcher', 'architect')
+    graph.addEdge('architect', 'engineer')
+    graph.addEdge('engineer', 'verifier')
+
     // Conditional edge from verifier
     graph.addConditionalEdges('verifier', (state) => {
       if (state.round < state.maxRounds) {
-        return 'planner'; // Continue to next round
+        return 'planner' // Continue to next round
       }
-      return END; // Complete analysis
-    });
-    
-    return graph;
+      return END // Complete analysis
+    })
+
+    return graph
   }
-  
+
   async analyze(topic: string, goal: string): Promise<VectorMemory> {
-    const compiled = this.graph.compile();
-    
+    const compiled = this.graph.compile()
+
     const initialState: Partial<PerformanceAnalysisState> = {
       messages: [new HumanMessage(`Analyze: ${topic}\nGoal: ${goal}`)],
       currentIssues: [],
@@ -496,23 +496,23 @@ export class PerformanceOptimizationSwarm {
       validationResults: [],
       lastActiveAgent: 'none',
       round: 1,
-      maxRounds: 4
-    };
-    
-    const result = await compiled.invoke(initialState);
-    
+      maxRounds: 4,
+    }
+
+    const result = await compiled.invoke(initialState)
+
     // Convert to VectorMemory format
-    return this.buildVectorMemory(result, topic, goal);
+    return this.buildVectorMemory(result, topic, goal)
   }
-  
+
   private buildVectorMemory(
-    state: PerformanceAnalysisState, 
-    topic: string, 
+    state: PerformanceAnalysisState,
+    topic: string,
     goal: string
   ): VectorMemory {
     // Extract insights from agent messages
-    const agentMessages = state.messages.filter(m => m instanceof AIMessage);
-    
+    const agentMessages = state.messages.filter((m) => m instanceof AIMessage)
+
     return {
       sessionId: `perf-opt-${Date.now()}`,
       topic,
@@ -523,31 +523,31 @@ export class PerformanceOptimizationSwarm {
         researcher: this.extractAgentMemory(agentMessages, 'researcher'),
         architect: this.extractAgentMemory(agentMessages, 'architect'),
         engineer: this.extractAgentMemory(agentMessages, 'engineer'),
-        verifier: this.extractAgentMemory(agentMessages, 'verifier')
+        verifier: this.extractAgentMemory(agentMessages, 'verifier'),
       },
       crossPollination: state.optimizationStrategies,
       synthesis: {
         keyFindings: state.currentIssues,
         actionItems: state.implementationPlan,
         implementationRoadmap: state.optimizationStrategies,
-        successMetrics: state.validationResults
-      }
-    };
+        successMetrics: state.validationResults,
+      },
+    }
   }
-  
+
   private extractRounds(messages: BaseMessage[]): RoundMemory[] {
     // Group messages by round and extract insights
-    const rounds: RoundMemory[] = [];
+    const rounds: RoundMemory[] = []
     // Implementation details...
-    return rounds;
+    return rounds
   }
-  
+
   private extractAgentMemory(messages: BaseMessage[], agentName: string): AgentMemory {
     // Extract agent-specific insights
     return {
       insights: [],
       decisions: [],
-      recommendations: []
-    };
+      recommendations: [],
+    }
   }
 }

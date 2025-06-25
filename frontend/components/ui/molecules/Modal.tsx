@@ -1,27 +1,27 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import { X } from 'lucide-react';
-import React, { forwardRef, useEffect, useRef } from 'react';
+import { clsx } from 'clsx'
+import { X } from 'lucide-react'
+import React, { forwardRef, useEffect, useRef } from 'react'
 
-import { Button } from '../atoms/Button';
-import { Card, CardHeader, CardBody, CardFooter } from '../atoms/Card';
+import { Button } from '../atoms/Button'
+import { Card, CardHeader, CardBody, CardFooter } from '../atoms/Card'
 
 export interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  children: React.ReactNode;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
-  position?: 'center' | 'top';
-  closable?: boolean;
-  closeOnOverlayClick?: boolean;
-  closeOnEscape?: boolean;
-  preventScroll?: boolean;
-  footer?: React.ReactNode;
-  className?: string;
-  overlayClassName?: string;
-  testId?: string;
+  isOpen: boolean
+  onClose: () => void
+  title?: string
+  children: React.ReactNode
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  position?: 'center' | 'top'
+  closable?: boolean
+  closeOnOverlayClick?: boolean
+  closeOnEscape?: boolean
+  preventScroll?: boolean
+  footer?: React.ReactNode
+  className?: string
+  overlayClassName?: string
+  testId?: string
 }
 
 const sizeStyles = {
@@ -31,12 +31,12 @@ const sizeStyles = {
   lg: 'max-w-lg',
   xl: 'max-w-xl',
   full: 'max-w-full mx-4 my-4 h-[calc(100vh-2rem)]',
-};
+}
 
 const positionStyles = {
   center: 'items-center justify-center',
   top: 'items-start justify-center pt-12',
-};
+}
 
 export const Modal = forwardRef<HTMLDivElement, ModalProps>(
   (
@@ -58,17 +58,17 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
     },
     ref
   ) => {
-    const modalRef = useRef<HTMLDivElement>(null);
-    const mergedRef = ref || modalRef;
+    const modalRef = useRef<HTMLDivElement>(null)
+    const mergedRef = ref || modalRef
 
     useEffect(() => {
-      if (!isOpen) return;
+      if (!isOpen) return
 
       const handleEscape = (e: KeyboardEvent) => {
         if (e.key === 'Escape' && closeOnEscape) {
-          onClose();
+          onClose()
         }
-      };
+      }
 
       const handleFocus = (e: FocusEvent) => {
         if (
@@ -77,40 +77,40 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
           mergedRef.current &&
           !mergedRef.current.contains(e.target as Node)
         ) {
-          mergedRef.current.focus();
+          mergedRef.current.focus()
         }
-      };
+      }
 
-      document.addEventListener('keydown', handleEscape);
-      document.addEventListener('focusin', handleFocus);
+      document.addEventListener('keydown', handleEscape)
+      document.addEventListener('focusin', handleFocus)
 
       // Prevent body scroll
       if (preventScroll) {
-        document.body.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden'
       }
 
       return () => {
-        document.removeEventListener('keydown', handleEscape);
-        document.removeEventListener('focusin', handleFocus);
+        document.removeEventListener('keydown', handleEscape)
+        document.removeEventListener('focusin', handleFocus)
         if (preventScroll) {
-          document.body.style.overflow = '';
+          document.body.style.overflow = ''
         }
-      };
-    }, [isOpen, closeOnEscape, onClose, preventScroll, mergedRef]);
+      }
+    }, [isOpen, closeOnEscape, onClose, preventScroll, mergedRef])
 
     useEffect(() => {
       if (isOpen && mergedRef && 'current' in mergedRef && mergedRef.current) {
-        mergedRef.current.focus();
+        mergedRef.current.focus()
       }
-    }, [isOpen, mergedRef]);
+    }, [isOpen, mergedRef])
 
-    if (!isOpen) return null;
+    if (!isOpen) return null
 
     const handleOverlayClick = (e: React.MouseEvent) => {
       if (e.target === e.currentTarget && closeOnOverlayClick) {
-        onClose();
+        onClose()
       }
-    };
+    }
 
     return (
       <div
@@ -162,36 +162,30 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
                 </div>
               </CardHeader>
             )}
-            
-            <CardBody className={!title && !closable ? 'pt-6' : ''}>
-              {children}
-            </CardBody>
-            
-            {footer && (
-              <CardFooter>
-                {footer}
-              </CardFooter>
-            )}
+
+            <CardBody className={!title && !closable ? 'pt-6' : ''}>{children}</CardBody>
+
+            {footer && <CardFooter>{footer}</CardFooter>}
           </Card>
         </div>
       </div>
-    );
+    )
   }
-);
+)
 
-Modal.displayName = 'Modal';
+Modal.displayName = 'Modal'
 
 // Confirmation modal component
 export interface ConfirmModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  message: string;
-  confirmText?: string;
-  cancelText?: string;
-  variant?: 'danger' | 'warning' | 'info';
-  loading?: boolean;
+  isOpen: boolean
+  onClose: () => void
+  onConfirm: () => void
+  title: string
+  message: string
+  confirmText?: string
+  cancelText?: string
+  variant?: 'danger' | 'warning' | 'info'
+  loading?: boolean
 }
 
 export const ConfirmModal = forwardRef<HTMLDivElement, ConfirmModalProps>(
@@ -209,8 +203,8 @@ export const ConfirmModal = forwardRef<HTMLDivElement, ConfirmModalProps>(
     },
     ref
   ) => {
-    const confirmVariant = variant === 'danger' ? 'danger' : 'primary';
-    
+    const confirmVariant = variant === 'danger' ? 'danger' : 'primary'
+
     return (
       <Modal
         ref={ref}
@@ -220,45 +214,35 @@ export const ConfirmModal = forwardRef<HTMLDivElement, ConfirmModalProps>(
         size="sm"
         footer={
           <div className="flex gap-3 justify-end">
-            <Button
-              variant="ghost"
-              onClick={onClose}
-              disabled={loading}
-            >
+            <Button variant="ghost" onClick={onClose} disabled={loading}>
               {cancelText}
             </Button>
-            <Button
-              variant={confirmVariant}
-              onClick={onConfirm}
-              loading={loading}
-            >
+            <Button variant={confirmVariant} onClick={onConfirm} loading={loading}>
               {confirmText}
             </Button>
           </div>
         }
       >
-        <p className="text-gray-700 dark:text-gray-300">
-          {message}
-        </p>
+        <p className="text-gray-700 dark:text-gray-300">{message}</p>
       </Modal>
-    );
+    )
   }
-);
+)
 
-ConfirmModal.displayName = 'ConfirmModal';
+ConfirmModal.displayName = 'ConfirmModal'
 
 // Hook for modal state management
 export const useModal = (defaultOpen = false) => {
-  const [isOpen, setIsOpen] = React.useState(defaultOpen);
-  
-  const open = React.useCallback(() => setIsOpen(true), []);
-  const close = React.useCallback(() => setIsOpen(false), []);
-  const toggle = React.useCallback(() => setIsOpen(prev => !prev), []);
-  
+  const [isOpen, setIsOpen] = React.useState(defaultOpen)
+
+  const open = React.useCallback(() => setIsOpen(true), [])
+  const close = React.useCallback(() => setIsOpen(false), [])
+  const toggle = React.useCallback(() => setIsOpen((prev) => !prev), [])
+
   return {
     isOpen,
     open,
     close,
     toggle,
-  };
-};
+  }
+}

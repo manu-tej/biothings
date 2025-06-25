@@ -1,100 +1,96 @@
-'use client';
+'use client'
 
-import { Plus, Download, RefreshCw, Play, Pause } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { Plus, Download, RefreshCw, Play, Pause } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
 
-import { Badge } from '@/components/ui/atoms/Badge';
-import { Button } from '@/components/ui/atoms/Button';
-import { Card } from '@/components/ui/atoms/Card';
-import { SearchBar } from '@/components/ui/molecules/SearchBar';
-import { WorkflowCard } from '@/components/ui/molecules/WorkflowCard';
-import { useDashboardStore } from '@/lib/stores/dashboardStore';
-import { WorkflowStatus } from '@/lib/stores/dashboardStore';
-import { useWebSocketStore } from '@/lib/stores/websocketStore';
+import { Badge } from '@/components/ui/atoms/Badge'
+import { Button } from '@/components/ui/atoms/Button'
+import { Card } from '@/components/ui/atoms/Card'
+import { SearchBar } from '@/components/ui/molecules/SearchBar'
+import { WorkflowCard } from '@/components/ui/molecules/WorkflowCard'
+import { useDashboardStore } from '@/lib/stores/dashboardStore'
+import { WorkflowStatus } from '@/lib/stores/dashboardStore'
+import { useWebSocketStore } from '@/lib/stores/websocketStore'
 
 export default function WorkflowsPage() {
-  const {
-    workflows,
-    selectedWorkflowId,
-    selectWorkflow,
-  } = useDashboardStore();
+  const { workflows, selectedWorkflowId, selectWorkflow } = useDashboardStore()
 
-  const { connect, disconnect, getConnectionStatus } = useWebSocketStore();
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const { connect, disconnect, getConnectionStatus } = useWebSocketStore()
+  const [isLoading, setIsLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
 
   useEffect(() => {
     const initializeWorkflowsPage = async () => {
       try {
         // Connect to workflows WebSocket channel
-        const connectionStatus = getConnectionStatus('workflows');
+        const connectionStatus = getConnectionStatus('workflows')
         if (!connectionStatus || connectionStatus === 'disconnected') {
-          connect('workflows', process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws');
+          connect('workflows', process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws')
         }
       } catch (error) {
-        console.error('Failed to initialize workflows page:', error);
+        console.error('Failed to initialize workflows page:', error)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    initializeWorkflowsPage();
+    initializeWorkflowsPage()
 
     return () => {
-      disconnect('workflows');
-    };
-  }, [connect, disconnect, getConnectionStatus]);
+      disconnect('workflows')
+    }
+  }, [connect, disconnect, getConnectionStatus])
 
   // Convert Map to array for filtering and display
-  const workflowsArray = Array.from(workflows.values());
+  const workflowsArray = Array.from(workflows.values())
 
   // Filter workflows based on search query and status
   const filteredWorkflows = workflowsArray.filter((workflow) => {
-    const matchesSearch = !searchQuery || 
-      workflow.name.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || workflow.status === statusFilter;
+    const matchesSearch =
+      !searchQuery || workflow.name.toLowerCase().includes(searchQuery.toLowerCase())
 
-    return matchesSearch && matchesStatus;
-  });
+    const matchesStatus = statusFilter === 'all' || workflow.status === statusFilter
+
+    return matchesSearch && matchesStatus
+  })
 
   // Calculate summary stats
-  const runningWorkflows = workflowsArray.filter(w => w.status === 'running').length;
-  const completedWorkflows = workflowsArray.filter(w => w.status === 'completed').length;
-  const failedWorkflows = workflowsArray.filter(w => w.status === 'failed').length;
-  const pendingWorkflows = workflowsArray.filter(w => w.status === 'pending').length;
+  const runningWorkflows = workflowsArray.filter((w) => w.status === 'running').length
+  const completedWorkflows = workflowsArray.filter((w) => w.status === 'completed').length
+  const failedWorkflows = workflowsArray.filter((w) => w.status === 'failed').length
+  const pendingWorkflows = workflowsArray.filter((w) => w.status === 'pending').length
 
   const handleWorkflowSelect = (workflow: WorkflowStatus) => {
-    selectWorkflow(workflow.id);
-  };
+    selectWorkflow(workflow.id)
+  }
 
   const handleCreateWorkflow = () => {
-    console.log('Create new workflow');
-  };
+    console.log('Create new workflow')
+  }
 
   const handleStartAll = () => {
-    console.log('Start all pending workflows');
-  };
+    console.log('Start all pending workflows')
+  }
 
   const handlePauseAll = () => {
-    console.log('Pause all running workflows');
-  };
+    console.log('Pause all running workflows')
+  }
 
   const handleExportWorkflows = () => {
-    console.log('Export workflows data');
-  };
+    console.log('Export workflows data')
+  }
 
   const handleRefresh = () => {
-    console.log('Refresh workflows');
-  };
+    console.log('Refresh workflows')
+  }
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
-    );
+    )
   }
 
   return (
@@ -102,38 +98,26 @@ export default function WorkflowsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Workflow Management
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Workflow Management</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Track and manage your automated workflows
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Badge 
+          <Badge
             variant={getConnectionStatus('workflows') === 'connected' ? 'success' : 'danger'}
             className="capitalize"
           >
             {getConnectionStatus('workflows') === 'connected' ? 'Connected' : 'Disconnected'}
           </Badge>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleRefresh}
-            icon={<RefreshCw />}
-          >
+          <Button variant="outline" size="sm" onClick={handleRefresh} icon={<RefreshCw />}>
             Refresh
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleExportWorkflows}
-            icon={<Download />}
-          >
+          <Button variant="outline" size="sm" onClick={handleExportWorkflows} icon={<Download />}>
             Export
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={handlePauseAll}
             icon={<Pause />}
@@ -141,8 +125,8 @@ export default function WorkflowsPage() {
           >
             Pause All
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={handleStartAll}
             icon={<Play />}
@@ -150,12 +134,7 @@ export default function WorkflowsPage() {
           >
             Start All
           </Button>
-          <Button 
-            variant="primary" 
-            size="sm"
-            onClick={handleCreateWorkflow}
-            icon={<Plus />}
-          >
+          <Button variant="primary" size="sm" onClick={handleCreateWorkflow} icon={<Plus />}>
             New Workflow
           </Button>
         </div>
@@ -168,42 +147,34 @@ export default function WorkflowsPage() {
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
               {workflowsArray.length}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Total Workflows
-            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Total Workflows</div>
           </div>
         </Card>
-        
+
         <Card className="p-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
               {runningWorkflows}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Running
-            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Running</div>
           </div>
         </Card>
-        
+
         <Card className="p-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {completedWorkflows}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Completed
-            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Completed</div>
           </div>
         </Card>
-        
+
         <Card className="p-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-red-600 dark:text-red-400">
               {failedWorkflows}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Failed
-            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Failed</div>
           </div>
         </Card>
       </div>
@@ -217,9 +188,11 @@ export default function WorkflowsPage() {
             onChange={setSearchQuery}
           />
         </div>
-        
+
         <div className="flex items-center space-x-2">
-          <label htmlFor="status-filter" className="sr-only">Filter by status</label>
+          <label htmlFor="status-filter" className="sr-only">
+            Filter by status
+          </label>
           <select
             id="status-filter"
             value={statusFilter}
@@ -244,17 +217,12 @@ export default function WorkflowsPage() {
               No workflows found
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              {searchQuery || statusFilter !== 'all' 
+              {searchQuery || statusFilter !== 'all'
                 ? 'Try adjusting your search or filters'
-                : 'Create your first workflow to get started'
-              }
+                : 'Create your first workflow to get started'}
             </p>
-            {(!searchQuery && statusFilter === 'all') && (
-              <Button
-                onClick={handleCreateWorkflow}
-                icon={<Plus />}
-                variant="primary"
-              >
+            {!searchQuery && statusFilter === 'all' && (
+              <Button onClick={handleCreateWorkflow} icon={<Plus />} variant="primary">
                 Create Workflow
               </Button>
             )}
@@ -266,10 +234,16 @@ export default function WorkflowsPage() {
               id={workflow.id}
               name={workflow.name}
               status={{
-                status: workflow.status === 'pending' ? 'draft' :
-                        workflow.status === 'running' ? 'running' :
-                        workflow.status === 'completed' ? 'completed' :
-                        workflow.status === 'failed' ? 'failed' : 'cancelled',
+                status:
+                  workflow.status === 'pending'
+                    ? 'draft'
+                    : workflow.status === 'running'
+                      ? 'running'
+                      : workflow.status === 'completed'
+                        ? 'completed'
+                        : workflow.status === 'failed'
+                          ? 'failed'
+                          : 'cancelled',
                 progress: workflow.progress,
                 currentStep: workflow.currentStep,
                 totalSteps: 10, // Mock value
@@ -281,15 +255,24 @@ export default function WorkflowsPage() {
               selectable={true}
               onSelect={() => handleWorkflowSelect(workflow)}
               actions={{
-                onStart: workflow.status === 'pending' ? () => {
-                  console.log(`Start workflow ${workflow.id}`);
-                } : undefined,
-                onPause: workflow.status === 'running' ? () => {
-                  console.log(`Pause workflow ${workflow.id}`);
-                } : undefined,
-                onStop: (workflow.status === 'running' || workflow.status === 'pending') ? () => {
-                  console.log(`Stop workflow ${workflow.id}`);
-                } : undefined,
+                onStart:
+                  workflow.status === 'pending'
+                    ? () => {
+                        console.log(`Start workflow ${workflow.id}`)
+                      }
+                    : undefined,
+                onPause:
+                  workflow.status === 'running'
+                    ? () => {
+                        console.log(`Pause workflow ${workflow.id}`)
+                      }
+                    : undefined,
+                onStop:
+                  workflow.status === 'running' || workflow.status === 'pending'
+                    ? () => {
+                        console.log(`Stop workflow ${workflow.id}`)
+                      }
+                    : undefined,
                 onView: () => handleWorkflowSelect(workflow),
               }}
             />
@@ -308,8 +291,8 @@ export default function WorkflowsPage() {
               variant="ghost"
               size="sm"
               onClick={() => {
-                setSearchQuery('');
-                setStatusFilter('all');
+                setSearchQuery('')
+                setStatusFilter('all')
               }}
             >
               Clear Filters
@@ -318,5 +301,5 @@ export default function WorkflowsPage() {
         </div>
       )}
     </div>
-  );
+  )
 }

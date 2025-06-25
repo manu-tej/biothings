@@ -12,7 +12,7 @@ export const config = {
       workflows: '/api/workflows',
       metrics: '/api/metrics',
       chat: '/api/chat',
-    }
+    },
   },
   websocket: {
     url: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws',
@@ -21,5 +21,5 @@ export const config = {
     name: 'BioThings',
     description: 'AI-Powered Biotech Dashboard',
     version: '1.0.0',
-  }
-};
+  },
+}

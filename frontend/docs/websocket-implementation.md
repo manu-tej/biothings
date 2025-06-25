@@ -5,6 +5,7 @@ This document describes the robust WebSocket implementation for real-time featur
 ## Overview
 
 The WebSocket system provides real-time communication between the frontend and backend with features including:
+
 - Automatic reconnection with exponential backoff
 - Channel-based subscriptions
 - Message type handling
@@ -31,7 +32,7 @@ function MyComponent() {
     unsubscribeFromChannel,
     registerHandler,
     reconnect,
-    disconnect
+    disconnect,
   } = useWebSocket({
     channels: ['metrics', 'alerts'], // Auto-subscribe to these channels
     onMessage: (message) => {
@@ -43,7 +44,7 @@ function MyComponent() {
     reconnectAttempts: 5, // Default: 5
     reconnectInterval: 1000, // Default: 1000ms
     maxReconnectDelay: 30000, // Default: 30000ms
-    heartbeatInterval: 30000 // Default: 30000ms
+    heartbeatInterval: 30000, // Default: 30000ms
   })
 }
 ```
@@ -51,6 +52,7 @@ function MyComponent() {
 ### Message Types
 
 The system supports various message types:
+
 - `metrics` - System performance metrics
 - `alert` - System alerts and notifications
 - `agent_update` - Agent status updates
@@ -156,9 +158,13 @@ useEffect(() => {
 }, [registerHandler])
 
 // Handle messages from a specific channel
-const unregister = registerHandler((message) => {
-  console.log('Channel message:', message)
-}, undefined, 'my-channel')
+const unregister = registerHandler(
+  (message) => {
+    console.log('Channel message:', message)
+  },
+  undefined,
+  'my-channel'
+)
 ```
 
 ## Sending Messages
@@ -169,8 +175,8 @@ sendMessage({
   channel: 'chat-agent-1',
   data: {
     content: 'Hello, agent!',
-    sender_id: 'user-123'
-  }
+    sender_id: 'user-123',
+  },
 })
 ```
 
@@ -179,6 +185,7 @@ sendMessage({
 ### Exponential Backoff
 
 The system automatically reconnects with exponential backoff:
+
 - 1st attempt: 1 second
 - 2nd attempt: 2 seconds
 - 3rd attempt: 4 seconds
@@ -238,7 +245,7 @@ import { ConnectionIndicator } from '@/components/WebSocketStatus'
 
 export default function Dashboard() {
   const queryClient = useQueryClient()
-  
+
   // Initial data fetch
   const { data: metrics } = useQuery({
     queryKey: ['metrics'],

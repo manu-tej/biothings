@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import React from 'react';
+import React from 'react'
 
-import { Button } from './atoms/Button';
-import { ErrorBoundary, AsyncBoundary, withErrorBoundary, useErrorHandler } from './ErrorBoundary';
+import { Button } from './atoms/Button'
+import { ErrorBoundary, AsyncBoundary, withErrorBoundary, useErrorHandler } from './ErrorBoundary'
 
 // Example 1: Basic Error Boundary usage
 export function BasicErrorBoundaryExample() {
@@ -11,7 +11,7 @@ export function BasicErrorBoundaryExample() {
     <ErrorBoundary>
       <ComponentThatMightError />
     </ErrorBoundary>
-  );
+  )
 }
 
 // Example 2: Error Boundary with custom fallback
@@ -27,7 +27,7 @@ export function CustomFallbackExample() {
     >
       <ComponentThatMightError />
     </ErrorBoundary>
-  );
+  )
 }
 
 // Example 3: Isolated Error Boundary (doesn't affect parent layout)
@@ -39,7 +39,7 @@ export function IsolatedErrorBoundaryExample() {
       </ErrorBoundary>
       <div>This component will still render even if the other fails</div>
     </div>
-  );
+  )
 }
 
 // Example 4: Error Boundary with error logging
@@ -48,34 +48,31 @@ export function ErrorLoggingExample() {
     <ErrorBoundary
       onError={(error, errorInfo) => {
         // Send to monitoring service
-        console.error('Component error:', error);
+        console.error('Component error:', error)
         // TODO: logToSentry(error, errorInfo);
       }}
       showDetails={process.env.NODE_ENV === 'development'}
     >
       <ComponentThatMightError />
     </ErrorBoundary>
-  );
+  )
 }
 
 // Example 5: Reset keys - Error boundary resets when keys change
 export function ResetKeysExample() {
-  const [userId, setUserId] = React.useState('123');
-  
+  const [userId, setUserId] = React.useState('123')
+
   return (
-    <ErrorBoundary
-      resetKeys={[userId]}
-      resetOnPropsChange
-    >
+    <ErrorBoundary resetKeys={[userId]} resetOnPropsChange>
       <UserProfile userId={userId} />
     </ErrorBoundary>
-  );
+  )
 }
 
 // Example 6: Async Boundary for lazy-loaded components
 export function AsyncBoundaryExample() {
-  const LazyComponent = React.lazy(() => import('./LazyComponent'));
-  
+  const LazyComponent = React.lazy(() => import('./LazyComponent'))
+
   return (
     <AsyncBoundary
       fallback={<div>Loading component...</div>}
@@ -83,37 +80,33 @@ export function AsyncBoundaryExample() {
     >
       <LazyComponent />
     </AsyncBoundary>
-  );
+  )
 }
 
 // Example 7: HOC usage
 const SafeComponent = withErrorBoundary(ComponentThatMightError, {
   isolate: true,
   fallback: <div>Component failed to render</div>,
-});
+})
 
 export function HOCExample() {
-  return <SafeComponent />;
+  return <SafeComponent />
 }
 
 // Example 8: Hook usage for imperative error handling
 export function UseErrorHandlerExample() {
-  const throwError = useErrorHandler();
-  
+  const throwError = useErrorHandler()
+
   const handleAsyncError = async () => {
     try {
-      await riskyAsyncOperation();
+      await riskyAsyncOperation()
     } catch (error) {
       // This will be caught by the nearest error boundary
-      throwError(error as Error);
+      throwError(error as Error)
     }
-  };
-  
-  return (
-    <Button onClick={handleAsyncError}>
-      Perform Risky Operation
-    </Button>
-  );
+  }
+
+  return <Button onClick={handleAsyncError}>Perform Risky Operation</Button>
 }
 
 // Example 9: Multiple nested error boundaries
@@ -124,17 +117,17 @@ export function NestedBoundariesExample() {
         <ErrorBoundary isolate fallback={<div>Header failed</div>}>
           <Header />
         </ErrorBoundary>
-        
+
         <ErrorBoundary isolate fallback={<div>Content failed</div>}>
           <MainContent />
         </ErrorBoundary>
-        
+
         <ErrorBoundary isolate fallback={<div>Footer failed</div>}>
           <Footer />
         </ErrorBoundary>
       </div>
     </ErrorBoundary>
-  );
+  )
 }
 
 // Example 10: Dashboard with comprehensive error handling
@@ -157,23 +150,23 @@ export function DashboardWithErrorBoundaries() {
         >
           <DashboardHeader />
         </ErrorBoundary>
-        
+
         {/* Main content area */}
         <div className="grid grid-cols-3 gap-4 p-4">
           {/* Each widget has its own boundary */}
           <ErrorBoundary isolate fallback={<WidgetErrorFallback />}>
             <MetricsWidget />
           </ErrorBoundary>
-          
+
           <ErrorBoundary isolate fallback={<WidgetErrorFallback />}>
             <ChartWidget />
           </ErrorBoundary>
-          
+
           <ErrorBoundary isolate fallback={<WidgetErrorFallback />}>
             <AlertsWidget />
           </ErrorBoundary>
         </div>
-        
+
         {/* WebSocket consumer with special handling */}
         <ErrorBoundary
           isolate
@@ -184,23 +177,23 @@ export function DashboardWithErrorBoundaries() {
         </ErrorBoundary>
       </div>
     </ErrorBoundary>
-  );
+  )
 }
 
 // Helper components for examples
 function ComponentThatMightError() {
-  const [shouldError, setShouldError] = React.useState(false);
-  
+  const [shouldError, setShouldError] = React.useState(false)
+
   if (shouldError) {
-    throw new Error('Example error thrown');
+    throw new Error('Example error thrown')
   }
-  
+
   return (
     <div className="p-4">
       <p>This component is working fine!</p>
       <Button onClick={() => setShouldError(true)}>Trigger Error</Button>
     </div>
-  );
+  )
 }
 
 function WidgetErrorFallback() {
@@ -208,46 +201,46 @@ function WidgetErrorFallback() {
     <div className="p-4 bg-gray-100 rounded-lg text-center">
       <p className="text-gray-600">Widget unavailable</p>
     </div>
-  );
+  )
 }
 
 // Placeholder components
 function UserProfile({ userId }: { userId: string }) {
-  return <div>User Profile: {userId}</div>;
+  return <div>User Profile: {userId}</div>
 }
 
 function Header() {
-  return <header>Header</header>;
+  return <header>Header</header>
 }
 
 function MainContent() {
-  return <main>Main Content</main>;
+  return <main>Main Content</main>
 }
 
 function Footer() {
-  return <footer>Footer</footer>;
+  return <footer>Footer</footer>
 }
 
 function DashboardHeader() {
-  return <header>Dashboard Header</header>;
+  return <header>Dashboard Header</header>
 }
 
 function MetricsWidget() {
-  return <div>Metrics Widget</div>;
+  return <div>Metrics Widget</div>
 }
 
 function ChartWidget() {
-  return <div>Chart Widget</div>;
+  return <div>Chart Widget</div>
 }
 
 function AlertsWidget() {
-  return <div>Alerts Widget</div>;
+  return <div>Alerts Widget</div>
 }
 
 function WebSocketConsumer() {
-  return <div>WebSocket Consumer</div>;
+  return <div>WebSocket Consumer</div>
 }
 
 async function riskyAsyncOperation() {
-  throw new Error('Async operation failed');
+  throw new Error('Async operation failed')
 }

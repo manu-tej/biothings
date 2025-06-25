@@ -1,6 +1,6 @@
-import { http, HttpResponse } from 'msw';
+import { http, HttpResponse } from 'msw'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export const handlers = [
   // Agent endpoints
@@ -22,7 +22,7 @@ export const handlers = [
         department: 'Technology',
         last_active: new Date().toISOString(),
       },
-    ]);
+    ])
   }),
 
   // Workflow endpoints
@@ -43,7 +43,7 @@ export const handlers = [
         started_at: new Date(Date.now() - 7200000).toISOString(),
         completed_at: new Date(Date.now() - 1800000).toISOString(),
       },
-    ]);
+    ])
   }),
 
   // Metrics endpoint
@@ -71,12 +71,12 @@ export const handlers = [
       },
       websocket_connections: 3,
       timestamp: new Date().toISOString(),
-    });
+    })
   }),
 
   // Agent messages endpoint
   http.get(`${API_BASE_URL}/api/agents/:agentId/messages`, ({ params }) => {
-    const { agentId } = params;
+    const { agentId } = params
     return HttpResponse.json([
       {
         id: 'msg-001',
@@ -92,12 +92,12 @@ export const handlers = [
         timestamp: new Date(Date.now() - 60000).toISOString(),
         type: 'success',
       },
-    ]);
+    ])
   }),
 
   // Error scenarios
   http.get(`${API_BASE_URL}/api/error`, () => {
-    return new HttpResponse(null, { status: 500 });
+    return new HttpResponse(null, { status: 500 })
   }),
 
   // Workflow actions
@@ -106,7 +106,7 @@ export const handlers = [
       id: params.workflowId,
       status: 'running',
       message: 'Workflow started successfully',
-    });
+    })
   }),
 
   http.post(`${API_BASE_URL}/api/workflows/:workflowId/stop`, ({ params }) => {
@@ -114,18 +114,18 @@ export const handlers = [
       id: params.workflowId,
       status: 'stopped',
       message: 'Workflow stopped successfully',
-    });
+    })
   }),
 
   // Agent communication
   http.post(`${API_BASE_URL}/api/agents/:agentId/message`, async ({ params, request }) => {
-    const body = await request.json();
+    const body = await request.json()
     return HttpResponse.json({
       id: 'msg-new',
       agent_id: params.agentId,
       content: body.message,
       timestamp: new Date().toISOString(),
       status: 'sent',
-    });
+    })
   }),
-];
+]

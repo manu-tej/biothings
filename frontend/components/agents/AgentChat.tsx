@@ -5,7 +5,10 @@ import { Send, X, Bot, User, Loader2, Wifi, WifiOff } from 'lucide-react'
 import { useState, useRef, useEffect, useCallback } from 'react'
 
 import { apiClient } from '@/lib/api/client'
-import { useWebSocket, type LegacyWebSocketMessage as WebSocketMessage } from '@/lib/hooks/useWebSocketNew'
+import {
+  useWebSocket,
+  type LegacyWebSocketMessage as WebSocketMessage,
+} from '@/lib/hooks/useWebSocketNew'
 
 interface Message {
   id: string
@@ -34,8 +37,8 @@ export default function AgentChat({ agent, isOpen, onClose }: AgentChatProps) {
       role: 'agent',
       content: `Hello! I'm ${agent.name}, your ${agent.agent_type} for ${agent.department}. How can I assist you today?`,
       timestamp: new Date(),
-      agentName: agent.name
-    }
+      agentName: agent.name,
+    },
   ])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -58,42 +61,48 @@ export default function AgentChat({ agent, isOpen, onClose }: AgentChatProps) {
   }, [isOpen])
 
   // Handle incoming chat messages via WebSocket
-  const handleChatMessage = useCallback((message: WebSocketMessage) => {
-    if (message.type === 'chat_message' && message.data) {
-      const { session_id, sender_id, content, timestamp } = message.data
-      
-      // Only process messages for this chat session
-      if (session_id === chatSessionId.current && sender_id === agent.id) {
-        setMessages(prev => [...prev, {
-          id: `ws-${Date.now()}`,
-          role: 'agent',
-          content: content,
-          timestamp: new Date(timestamp || Date.now()),
-          agentName: agent.name,
-          status: 'sent'
-        }])
-        setIsTyping(false)
+  const handleChatMessage = useCallback(
+    (message: WebSocketMessage) => {
+      if (message.type === 'chat_message' && message.data) {
+        const { session_id, sender_id, content, timestamp } = message.data
+
+        // Only process messages for this chat session
+        if (session_id === chatSessionId.current && sender_id === agent.id) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `ws-${Date.now()}`,
+              role: 'agent',
+              content: content,
+              timestamp: new Date(timestamp || Date.now()),
+              agentName: agent.name,
+              status: 'sent',
+            },
+          ])
+          setIsTyping(false)
+        }
+      } else if (message.type === 'agent_status' && message.data) {
+        // Handle typing indicators
+        if (message.data.agent_id === agent.id && message.data.status === 'typing') {
+          setIsTyping(true)
+        }
       }
-    } else if (message.type === 'agent_status' && message.data) {
-      // Handle typing indicators
-      if (message.data.agent_id === agent.id && message.data.status === 'typing') {
-        setIsTyping(true)
-      }
-    }
-  }, [agent.id, agent.name])
+    },
+    [agent.id, agent.name]
+  )
 
   // WebSocket connection for real-time chat
-  const { 
-    isConnected, 
-    connectionState, 
+  const {
+    isConnected,
+    connectionState,
     sendMessage: sendWebSocketMessage,
     registerHandler,
-    subscribeToChannel 
+    subscribeToChannel,
   } = useWebSocket({
     channels: [`chat-${agent.id}`, `agent-${agent.id}`],
     onConnect: () => {
       // Connected to chat for agent
-    }
+    },
   })
 
   // Register chat message handler
@@ -108,27 +117,34 @@ export default function AgentChat({ agent, isOpen, onClose }: AgentChatProps) {
       return apiClient.chatWithAgent(agent.agent_type, message)
     },
     onSuccess: (response) => {
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        role: 'agent',
-        content: response.message,
-        timestamp: new Date(),
-        agentName: agent.name,
-        status: 'sent'
-      }])
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: 'agent',
+          content: response.message,
+          timestamp: new Date(),
+          agentName: agent.name,
+          status: 'sent',
+        },
+      ])
       setIsTyping(false)
     },
     onError: () => {
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        role: 'agent',
-        content: "I apologize, but I'm experiencing some technical difficulties. Please try again later.",
-        timestamp: new Date(),
-        agentName: agent.name,
-        status: 'error'
-      }])
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: 'agent',
+          content:
+            "I apologize, but I'm experiencing some technical difficulties. Please try again later.",
+          timestamp: new Date(),
+          agentName: agent.name,
+          status: 'error',
+        },
+      ])
       setIsTyping(false)
-    }
+    },
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -140,10 +156,10 @@ export default function AgentChat({ agent, isOpen, onClose }: AgentChatProps) {
       role: 'user',
       content: input,
       timestamp: new Date(),
-      status: 'sending'
+      status: 'sending',
     }
 
-    setMessages(prev => [...prev, userMessage])
+    setMessages((prev) => [...prev, userMessage])
     setInput('')
     setIsTyping(true)
 
@@ -158,15 +174,15 @@ export default function AgentChat({ agent, isOpen, onClose }: AgentChatProps) {
           recipient_id: agent.id,
           agent_type: agent.agent_type,
           content: input,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       })
-      
+
       // Update message status
       setTimeout(() => {
-        setMessages(prev => prev.map(msg => 
-          msg.id === userMessage.id ? { ...msg, status: 'sent' } : msg
-        ))
+        setMessages((prev) =>
+          prev.map((msg) => (msg.id === userMessage.id ? { ...msg, status: 'sent' } : msg))
+        )
       }, 100)
     } else {
       // Fallback to HTTP
@@ -194,9 +210,13 @@ export default function AgentChat({ agent, isOpen, onClose }: AgentChatProps) {
           </div>
           <div className="flex items-center space-x-2">
             {/* Connection status */}
-            <div className={`flex items-center space-x-1 text-xs ${
-              isConnected ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
-            }`}>
+            <div
+              className={`flex items-center space-x-1 text-xs ${
+                isConnected
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-gray-500 dark:text-gray-400'
+              }`}
+            >
               {isConnected ? (
                 <>
                   <Wifi className="w-3 h-3" />
@@ -225,14 +245,18 @@ export default function AgentChat({ agent, isOpen, onClose }: AgentChatProps) {
               key={message.id}
               className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`flex items-start space-x-2 max-w-[80%] ${
-                message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''
-              }`}>
-                <div className={`p-2 rounded-lg ${
-                  message.role === 'user' 
-                    ? 'bg-gray-100 dark:bg-gray-700' 
-                    : 'bg-primary-50 dark:bg-primary-900/20'
-                }`}>
+              <div
+                className={`flex items-start space-x-2 max-w-[80%] ${
+                  message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''
+                }`}
+              >
+                <div
+                  className={`p-2 rounded-lg ${
+                    message.role === 'user'
+                      ? 'bg-gray-100 dark:bg-gray-700'
+                      : 'bg-primary-50 dark:bg-primary-900/20'
+                  }`}
+                >
                   {message.role === 'user' ? (
                     <User className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                   ) : (
@@ -245,18 +269,20 @@ export default function AgentChat({ agent, isOpen, onClose }: AgentChatProps) {
                       {message.agentName}
                     </p>
                   )}
-                  <div className={`p-3 rounded-lg ${
-                    message.role === 'user'
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                  } ${message.status === 'sending' ? 'opacity-70' : ''}`}>
+                  <div
+                    className={`p-3 rounded-lg ${
+                      message.role === 'user'
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                    } ${message.status === 'sending' ? 'opacity-70' : ''}`}
+                  >
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                   </div>
                   <div className="flex items-center justify-between mt-1">
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {message.timestamp.toLocaleTimeString([], { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
                       })}
                     </p>
                     {message.status === 'error' && (
@@ -274,9 +300,7 @@ export default function AgentChat({ agent, isOpen, onClose }: AgentChatProps) {
                   <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                    {agent.name}
-                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{agent.name}</p>
                   <div className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white p-3 rounded-lg">
                     <div className="flex items-center space-x-2">
                       <Loader2 className="w-4 h-4 animate-spin" />

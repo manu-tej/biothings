@@ -37,11 +37,7 @@ export default function WebSocketStatus() {
   return (
     <div className="flex items-center space-x-2">
       <div className={`flex items-center space-x-1 ${getStatusColor()}`}>
-        {isConnected ? (
-          <Wifi className="w-4 h-4" />
-        ) : (
-          <WifiOff className="w-4 h-4" />
-        )}
+        {isConnected ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
         <span className="text-sm font-medium">{getStatusText()}</span>
       </div>
       {connectionState === 'connecting' && (
@@ -56,14 +52,17 @@ export function ConnectionIndicator({ className = '' }: { className?: string }) 
   const { connectionState } = useWebSocket()
 
   return (
-    <div 
+    <div
       className={`w-2 h-2 rounded-full ${className} ${
-        connectionState === 'connected' ? 'bg-green-500' :
-        connectionState === 'connecting' ? 'bg-yellow-500 animate-pulse' :
-        connectionState === 'error' ? 'bg-red-500' :
-        'bg-gray-400'
-      }`} 
-      title={`WebSocket: ${connectionState}`} 
+        connectionState === 'connected'
+          ? 'bg-green-500'
+          : connectionState === 'connecting'
+            ? 'bg-yellow-500 animate-pulse'
+            : connectionState === 'error'
+              ? 'bg-red-500'
+              : 'bg-gray-400'
+      }`}
+      title={`WebSocket: ${connectionState}`}
     />
   )
 }

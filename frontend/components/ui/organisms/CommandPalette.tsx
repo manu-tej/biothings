@@ -1,27 +1,27 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
+import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
 
-import { Badge } from '../atoms/Badge';
-import { Input } from '../atoms/Input';
+import { Badge } from '../atoms/Badge'
+import { Input } from '../atoms/Input'
 
 export interface Command {
-  id: string;
-  name: string;
-  description?: string;
-  category: string;
-  keywords: string[];
-  icon?: string;
-  shortcut?: string[];
-  action: () => void | Promise<void>;
-  priority?: number;
+  id: string
+  name: string
+  description?: string
+  category: string
+  keywords: string[]
+  icon?: string
+  shortcut?: string[]
+  action: () => void | Promise<void>
+  priority?: number
 }
 
 interface CommandPaletteProps {
-  isOpen: boolean;
-  onClose: () => void;
-  commands?: Command[];
+  isOpen: boolean
+  onClose: () => void
+  commands?: Command[]
 }
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({
@@ -29,11 +29,11 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   onClose,
   commands = [],
 }) => {
-  const [query, setQuery] = useState('');
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [filteredCommands, setFilteredCommands] = useState<Command[]>([]);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
+  const [query, setQuery] = useState('')
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [filteredCommands, setFilteredCommands] = useState<Command[]>([])
+  const inputRef = useRef<HTMLInputElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
   // Default commands
   const defaultCommands: Command[] = [
@@ -45,7 +45,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       keywords: ['dashboard', 'home', 'main'],
       icon: '🏠',
       shortcut: ['Cmd', '1'],
-      action: () => window.location.href = '/dashboard',
+      action: () => (window.location.href = '/dashboard'),
       priority: 10,
     },
     {
@@ -56,7 +56,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       keywords: ['agents', 'ai', 'bots'],
       icon: '🤖',
       shortcut: ['Cmd', '2'],
-      action: () => window.location.href = '/dashboard/agents',
+      action: () => (window.location.href = '/dashboard/agents'),
       priority: 9,
     },
     {
@@ -67,7 +67,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       keywords: ['workflows', 'processes'],
       icon: '⚡',
       shortcut: ['Cmd', '3'],
-      action: () => window.location.href = '/dashboard/workflows',
+      action: () => (window.location.href = '/dashboard/workflows'),
       priority: 9,
     },
     {
@@ -78,7 +78,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       keywords: ['analytics', 'charts', 'stats'],
       icon: '📊',
       shortcut: ['Cmd', '4'],
-      action: () => window.location.href = '/dashboard/analytics',
+      action: () => (window.location.href = '/dashboard/analytics'),
       priority: 8,
     },
     {
@@ -89,7 +89,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       keywords: ['settings', 'config', 'preferences'],
       icon: '⚙️',
       shortcut: ['Cmd', ','],
-      action: () => window.location.href = '/dashboard/settings',
+      action: () => (window.location.href = '/dashboard/settings'),
       priority: 7,
     },
     {
@@ -133,118 +133,125 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       action: () => console.log('Create workflow'),
       priority: 4,
     },
-  ];
+  ]
 
-  const allCommands = [...defaultCommands, ...commands];
+  const allCommands = [...defaultCommands, ...commands]
 
   // Filter commands based on query
   useEffect(() => {
     if (!query.trim()) {
-      setFilteredCommands(allCommands.sort((a, b) => (b.priority || 0) - (a.priority || 0)));
+      setFilteredCommands(allCommands.sort((a, b) => (b.priority || 0) - (a.priority || 0)))
     } else {
-      const filtered = allCommands.filter(command => {
-        const searchString = `${command.name} ${command.description} ${command.category} ${command.keywords.join(' ')}`.toLowerCase();
-        return searchString.includes(query.toLowerCase());
-      });
-      
+      const filtered = allCommands.filter((command) => {
+        const searchString =
+          `${command.name} ${command.description} ${command.category} ${command.keywords.join(' ')}`.toLowerCase()
+        return searchString.includes(query.toLowerCase())
+      })
+
       // Sort by relevance
       filtered.sort((a, b) => {
-        const aScore = getRelevanceScore(a, query);
-        const bScore = getRelevanceScore(b, query);
-        return bScore - aScore;
-      });
-      
-      setFilteredCommands(filtered);
+        const aScore = getRelevanceScore(a, query)
+        const bScore = getRelevanceScore(b, query)
+        return bScore - aScore
+      })
+
+      setFilteredCommands(filtered)
     }
-    setSelectedIndex(0);
-  }, [query, allCommands]);
+    setSelectedIndex(0)
+  }, [query, allCommands])
 
   // Handle keyboard navigation
   useHotkeys(
     'arrowdown',
     () => {
-      setSelectedIndex(prev => Math.min(prev + 1, filteredCommands.length - 1));
+      setSelectedIndex((prev) => Math.min(prev + 1, filteredCommands.length - 1))
     },
     { enabled: isOpen, preventDefault: true }
-  );
+  )
 
   useHotkeys(
     'arrowup',
     () => {
-      setSelectedIndex(prev => Math.max(prev - 1, 0));
+      setSelectedIndex((prev) => Math.max(prev - 1, 0))
     },
     { enabled: isOpen, preventDefault: true }
-  );
+  )
 
   useHotkeys(
     'enter',
     () => {
       if (filteredCommands[selectedIndex]) {
-        executeCommand(filteredCommands[selectedIndex]);
+        executeCommand(filteredCommands[selectedIndex])
       }
     },
     { enabled: isOpen, preventDefault: true }
-  );
+  )
 
   useHotkeys(
     'escape',
     () => {
-      onClose();
+      onClose()
     },
     { enabled: isOpen, preventDefault: true }
-  );
+  )
 
   // Focus input when opened
   useEffect(() => {
     if (isOpen && inputRef.current) {
-      inputRef.current.focus();
-      setQuery('');
-      setSelectedIndex(0);
+      inputRef.current.focus()
+      setQuery('')
+      setSelectedIndex(0)
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   // Scroll selected item into view
   useEffect(() => {
     if (listRef.current) {
-      const selectedElement = listRef.current.children[selectedIndex] as HTMLElement;
+      const selectedElement = listRef.current.children[selectedIndex] as HTMLElement
       if (selectedElement) {
-        selectedElement.scrollIntoView({ block: 'nearest' });
+        selectedElement.scrollIntoView({ block: 'nearest' })
       }
     }
-  }, [selectedIndex]);
+  }, [selectedIndex])
 
-  const executeCommand = useCallback(async (command: Command) => {
-    try {
-      await command.action();
-      onClose();
-    } catch (error) {
-      console.error('Command execution failed:', error);
-    }
-  }, [onClose]);
+  const executeCommand = useCallback(
+    async (command: Command) => {
+      try {
+        await command.action()
+        onClose()
+      } catch (error) {
+        console.error('Command execution failed:', error)
+      }
+    },
+    [onClose]
+  )
 
   const getRelevanceScore = (command: Command, query: string): number => {
-    const lowerQuery = query.toLowerCase();
-    let score = 0;
-    
-    if (command.name.toLowerCase().startsWith(lowerQuery)) score += 10;
-    if (command.name.toLowerCase().includes(lowerQuery)) score += 5;
-    if (command.description?.toLowerCase().includes(lowerQuery)) score += 3;
-    if (command.keywords.some(keyword => keyword.toLowerCase().includes(lowerQuery))) score += 2;
-    if (command.category.toLowerCase().includes(lowerQuery)) score += 1;
-    
-    return score + (command.priority || 0);
-  };
+    const lowerQuery = query.toLowerCase()
+    let score = 0
 
-  const groupedCommands = filteredCommands.reduce((groups, command) => {
-    const category = command.category;
-    if (!groups[category]) {
-      groups[category] = [];
-    }
-    groups[category].push(command);
-    return groups;
-  }, {} as Record<string, Command[]>);
+    if (command.name.toLowerCase().startsWith(lowerQuery)) score += 10
+    if (command.name.toLowerCase().includes(lowerQuery)) score += 5
+    if (command.description?.toLowerCase().includes(lowerQuery)) score += 3
+    if (command.keywords.some((keyword) => keyword.toLowerCase().includes(lowerQuery))) score += 2
+    if (command.category.toLowerCase().includes(lowerQuery)) score += 1
 
-  if (!isOpen) return null;
+    return score + (command.priority || 0)
+  }
+
+  const groupedCommands = filteredCommands.reduce(
+    (groups, command) => {
+      const category = command.category
+      if (!groups[category]) {
+        groups[category] = []
+      }
+      groups[category].push(command)
+      return groups
+    },
+    {} as Record<string, Command[]>
+  )
+
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center pt-20 z-50">
@@ -273,7 +280,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   {category}
                 </div>
                 {categoryCommands.map((command, index) => {
-                  const globalIndex = filteredCommands.indexOf(command);
+                  const globalIndex = filteredCommands.indexOf(command)
                   return (
                     <div
                       key={command.id}
@@ -285,9 +292,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       onClick={() => executeCommand(command)}
                     >
                       <div className="flex items-center space-x-3">
-                        {command.icon && (
-                          <span className="text-lg">{command.icon}</span>
-                        )}
+                        {command.icon && <span className="text-lg">{command.icon}</span>}
                         <div>
                           <div className="font-medium text-gray-900 dark:text-white">
                             {command.name}
@@ -309,7 +314,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                         </div>
                       )}
                     </div>
-                  );
+                  )
                 })}
               </div>
             ))
@@ -324,14 +329,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               <span>↵ Execute</span>
               <span>Esc Close</span>
             </div>
-            <div>
-              {filteredCommands.length} commands
-            </div>
+            <div>{filteredCommands.length} commands</div>
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CommandPalette;
+export default CommandPalette

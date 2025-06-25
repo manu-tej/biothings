@@ -1,17 +1,18 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import { Check, Minus } from 'lucide-react';
-import React, { forwardRef, InputHTMLAttributes } from 'react';
+import { clsx } from 'clsx'
+import { Check, Minus } from 'lucide-react'
+import React, { forwardRef, InputHTMLAttributes } from 'react'
 
-export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
-  label?: string;
-  description?: string;
-  checkboxSize?: 'sm' | 'md' | 'lg';
-  indeterminate?: boolean;
-  error?: boolean;
-  fullWidth?: boolean;
-  testId?: string;
+export interface CheckboxProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
+  label?: string
+  description?: string
+  checkboxSize?: 'sm' | 'md' | 'lg'
+  indeterminate?: boolean
+  error?: boolean
+  fullWidth?: boolean
+  testId?: string
 }
 
 const sizeStyles = {
@@ -33,7 +34,7 @@ const sizeStyles = {
     label: 'text-lg',
     description: 'text-base',
   },
-};
+}
 
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
   (
@@ -52,17 +53,17 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     },
     ref
   ) => {
-    const checkboxRef = React.useRef<HTMLInputElement>(null);
-    const mergedRef = ref || checkboxRef;
+    const checkboxRef = React.useRef<HTMLInputElement>(null)
+    const mergedRef = ref || checkboxRef
 
     React.useEffect(() => {
       if (mergedRef && 'current' in mergedRef && mergedRef.current) {
-        mergedRef.current.indeterminate = indeterminate;
+        mergedRef.current.indeterminate = indeterminate
       }
-    }, [indeterminate, mergedRef]);
+    }, [indeterminate, mergedRef])
 
-    const sizes = sizeStyles[checkboxSize];
-    
+    const sizes = sizeStyles[checkboxSize]
+
     const checkboxStyles = clsx(
       'relative appearance-none border-2 rounded transition-all duration-200',
       'focus:outline-none focus:ring-2 focus:ring-offset-2',
@@ -77,18 +78,14 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         : 'bg-white dark:bg-gray-900',
       disabled && 'opacity-50 cursor-not-allowed',
       !disabled && 'cursor-pointer hover:border-blue-500 dark:hover:border-blue-400'
-    );
+    )
 
     const iconStyles = clsx(
       'absolute inset-0 flex items-center justify-center text-white pointer-events-none',
       sizes.icon
-    );
+    )
 
-    const wrapperStyles = clsx(
-      'inline-flex items-start gap-3',
-      fullWidth && 'w-full',
-      className
-    );
+    const wrapperStyles = clsx('inline-flex items-start gap-3', fullWidth && 'w-full', className)
 
     const labelStyles = clsx(
       'select-none',
@@ -96,14 +93,14 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       'text-gray-900 dark:text-gray-100',
       !disabled && 'cursor-pointer',
       disabled && 'opacity-50'
-    );
+    )
 
     const descriptionStyles = clsx(
       'mt-1',
       sizes.description,
       'text-gray-600 dark:text-gray-400',
       disabled && 'opacity-50'
-    );
+    )
 
     const checkbox = (
       <div className="relative inline-block">
@@ -118,17 +115,13 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           {...props}
         />
         <div className={iconStyles}>
-          {indeterminate ? (
-            <Minus strokeWidth={3} />
-          ) : checked ? (
-            <Check strokeWidth={3} />
-          ) : null}
+          {indeterminate ? <Minus strokeWidth={3} /> : checked ? <Check strokeWidth={3} /> : null}
         </div>
       </div>
-    );
+    )
 
     if (!label && !description) {
-      return checkbox;
+      return checkbox
     }
 
     return (
@@ -143,8 +136,8 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           )}
         </div>
       </label>
-    );
+    )
   }
-);
+)
 
-Checkbox.displayName = 'Checkbox';
+Checkbox.displayName = 'Checkbox'

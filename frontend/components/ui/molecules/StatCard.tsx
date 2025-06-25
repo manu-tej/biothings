@@ -1,34 +1,34 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import { TrendingUp, TrendingDown, Minus, MoreHorizontal } from 'lucide-react';
-import React, { forwardRef } from 'react';
+import { clsx } from 'clsx'
+import { TrendingUp, TrendingDown, Minus, MoreHorizontal } from 'lucide-react'
+import React, { forwardRef } from 'react'
 
-import { Button } from '../atoms/Button';
-import { Card, CardHeader, CardBody } from '../atoms/Card';
+import { Button } from '../atoms/Button'
+import { Card, CardHeader, CardBody } from '../atoms/Card'
 
 export interface TrendData {
-  value: number;
-  percentage: number;
-  direction: 'up' | 'down' | 'neutral';
-  period?: string;
+  value: number
+  percentage: number
+  direction: 'up' | 'down' | 'neutral'
+  period?: string
 }
 
 export interface StatCardProps {
-  title: string;
-  subtitle?: string;
-  value: string | number;
-  unit?: string;
-  trend?: TrendData;
-  icon?: React.ReactNode;
-  iconColor?: 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'gray';
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'minimal' | 'highlighted';
-  loading?: boolean;
-  onClick?: () => void;
-  onMenuClick?: () => void;
-  className?: string;
-  testId?: string;
+  title: string
+  subtitle?: string
+  value: string | number
+  unit?: string
+  trend?: TrendData
+  icon?: React.ReactNode
+  iconColor?: 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'gray'
+  size?: 'sm' | 'md' | 'lg'
+  variant?: 'default' | 'minimal' | 'highlighted'
+  loading?: boolean
+  onClick?: () => void
+  onMenuClick?: () => void
+  className?: string
+  testId?: string
 }
 
 const iconColorStyles = {
@@ -38,7 +38,7 @@ const iconColorStyles = {
   yellow: 'text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30',
   purple: 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900/30',
   gray: 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900/30',
-};
+}
 
 const sizeStyles = {
   sm: {
@@ -65,7 +65,7 @@ const sizeStyles = {
     subtitle: 'text-base',
     trend: 'text-base',
   },
-};
+}
 
 export const StatCard = forwardRef<HTMLDivElement, StatCardProps>(
   (
@@ -87,67 +87,62 @@ export const StatCard = forwardRef<HTMLDivElement, StatCardProps>(
     },
     ref
   ) => {
-    const sizes = sizeStyles[size];
-    
+    const sizes = sizeStyles[size]
+
     const formatValue = (val: string | number) => {
       if (typeof val === 'number') {
-        return val.toLocaleString();
+        return val.toLocaleString()
       }
-      return val;
-    };
+      return val
+    }
 
     const getTrendIcon = (direction: TrendData['direction']) => {
       switch (direction) {
         case 'up':
-          return <TrendingUp className={sizes.iconSize} />;
+          return <TrendingUp className={sizes.iconSize} />
         case 'down':
-          return <TrendingDown className={sizes.iconSize} />;
+          return <TrendingDown className={sizes.iconSize} />
         case 'neutral':
         default:
-          return <Minus className={sizes.iconSize} />;
+          return <Minus className={sizes.iconSize} />
       }
-    };
+    }
 
     const getTrendColor = (direction: TrendData['direction']) => {
       switch (direction) {
         case 'up':
-          return 'text-green-600 dark:text-green-400';
+          return 'text-green-600 dark:text-green-400'
         case 'down':
-          return 'text-red-600 dark:text-red-400';
+          return 'text-red-600 dark:text-red-400'
         case 'neutral':
         default:
-          return 'text-gray-600 dark:text-gray-400';
+          return 'text-gray-600 dark:text-gray-400'
       }
-    };
+    }
 
-    const cardVariant = variant === 'minimal' ? 'ghost' : variant === 'highlighted' ? 'elevated' : 'default';
-    
+    const cardVariant =
+      variant === 'minimal' ? 'ghost' : variant === 'highlighted' ? 'elevated' : 'default'
+
     const cardContent = (
       <>
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               {icon && (
-                <div className={clsx(
-                  'rounded-lg flex items-center justify-center',
-                  sizes.icon,
-                  iconColorStyles[iconColor]
-                )}>
+                <div
+                  className={clsx(
+                    'rounded-lg flex items-center justify-center',
+                    sizes.icon,
+                    iconColorStyles[iconColor]
+                  )}
+                >
                   <span className={sizes.iconSize}>{icon}</span>
                 </div>
               )}
               <div>
-                <h3 className={clsx(
-                  'text-gray-900 dark:text-gray-100',
-                  sizes.title
-                )}>
-                  {title}
-                </h3>
+                <h3 className={clsx('text-gray-900 dark:text-gray-100', sizes.title)}>{title}</h3>
                 {subtitle && (
-                  <p className={clsx(
-                    'text-gray-600 dark:text-gray-400 mt-1',
-                    sizes.subtitle
-                  )}>
+                  <p className={clsx('text-gray-600 dark:text-gray-400 mt-1', sizes.subtitle)}>
                     {subtitle}
                   </p>
                 )}
@@ -158,15 +153,15 @@ export const StatCard = forwardRef<HTMLDivElement, StatCardProps>(
                 size="xs"
                 variant="ghost"
                 onClick={(e) => {
-                  e.stopPropagation();
-                  onMenuClick();
+                  e.stopPropagation()
+                  onMenuClick()
                 }}
                 icon={<MoreHorizontal />}
               />
             )}
           </div>
         </CardHeader>
-        
+
         <CardBody>
           <div className="space-y-2">
             <div className="flex items-baseline gap-1">
@@ -176,44 +171,34 @@ export const StatCard = forwardRef<HTMLDivElement, StatCardProps>(
                 </div>
               ) : (
                 <>
-                  <span className={clsx(
-                    'text-gray-900 dark:text-gray-100',
-                    sizes.value
-                  )}>
+                  <span className={clsx('text-gray-900 dark:text-gray-100', sizes.value)}>
                     {formatValue(value)}
                   </span>
                   {unit && (
-                    <span className={clsx(
-                      'text-gray-600 dark:text-gray-400 font-normal',
-                      sizes.trend
-                    )}>
+                    <span
+                      className={clsx('text-gray-600 dark:text-gray-400 font-normal', sizes.trend)}
+                    >
                       {unit}
                     </span>
                   )}
                 </>
               )}
             </div>
-            
+
             {trend && !loading && (
               <div className="flex items-center gap-2">
-                <div className={clsx(
-                  'flex items-center gap-1',
-                  getTrendColor(trend.direction)
-                )}>
+                <div className={clsx('flex items-center gap-1', getTrendColor(trend.direction))}>
                   {getTrendIcon(trend.direction)}
                   <span className={clsx('font-medium', sizes.trend)}>
                     {Math.abs(trend.percentage)}%
                   </span>
                 </div>
-                <span className={clsx(
-                  'text-gray-600 dark:text-gray-400',
-                  sizes.trend
-                )}>
+                <span className={clsx('text-gray-600 dark:text-gray-400', sizes.trend)}>
                   {trend.period ? `vs ${trend.period}` : 'vs previous period'}
                 </span>
               </div>
             )}
-            
+
             {loading && trend && (
               <div className="animate-pulse">
                 <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
@@ -222,7 +207,7 @@ export const StatCard = forwardRef<HTMLDivElement, StatCardProps>(
           </div>
         </CardBody>
       </>
-    );
+    )
 
     return (
       <Card
@@ -235,18 +220,18 @@ export const StatCard = forwardRef<HTMLDivElement, StatCardProps>(
       >
         {cardContent}
       </Card>
-    );
+    )
   }
-);
+)
 
-StatCard.displayName = 'StatCard';
+StatCard.displayName = 'StatCard'
 
 // Compound component for stat card groups
 export interface StatCardGroupProps {
-  children: React.ReactNode;
-  columns?: 2 | 3 | 4;
-  gap?: 'sm' | 'md' | 'lg';
-  className?: string;
+  children: React.ReactNode
+  columns?: 2 | 3 | 4
+  gap?: 'sm' | 'md' | 'lg'
+  className?: string
 }
 
 export const StatCardGroup = forwardRef<HTMLDivElement, StatCardGroupProps>(
@@ -255,28 +240,20 @@ export const StatCardGroup = forwardRef<HTMLDivElement, StatCardGroupProps>(
       sm: 'gap-3',
       md: 'gap-4',
       lg: 'gap-6',
-    };
+    }
 
     const columnStyles = {
       2: 'grid-cols-1 sm:grid-cols-2',
       3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
       4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
-    };
+    }
 
     return (
-      <div
-        ref={ref}
-        className={clsx(
-          'grid',
-          columnStyles[columns],
-          gapStyles[gap],
-          className
-        )}
-      >
+      <div ref={ref} className={clsx('grid', columnStyles[columns], gapStyles[gap], className)}>
         {children}
       </div>
-    );
+    )
   }
-);
+)
 
-StatCardGroup.displayName = 'StatCardGroup';
+StatCardGroup.displayName = 'StatCardGroup'

@@ -24,27 +24,27 @@ export default function PerformanceChart({ data }: PerformanceChartProps) {
       tooltip: {
         trigger: 'axis',
         axisPointer: {
-          type: 'cross'
-        }
+          type: 'cross',
+        },
       },
       legend: {
         data: ['FPS', 'Memory (MB)'],
-        textStyle: { color: '#9CA3AF' }
+        textStyle: { color: '#9CA3AF' },
       },
       grid: {
         left: '3%',
         right: '4%',
         bottom: '3%',
-        containLabel: true
+        containLabel: true,
       },
       xAxis: {
         type: 'category',
-        data: data.map(d => d.timestamp.toLocaleTimeString()),
+        data: data.map((d) => d.timestamp.toLocaleTimeString()),
         axisLabel: {
           color: '#9CA3AF',
-          interval: Math.floor(data.length / 6) // Show ~6 labels
+          interval: Math.floor(data.length / 6), // Show ~6 labels
         },
-        axisLine: { lineStyle: { color: '#374151' } }
+        axisLine: { lineStyle: { color: '#374151' } },
       },
       yAxis: [
         {
@@ -54,21 +54,21 @@ export default function PerformanceChart({ data }: PerformanceChartProps) {
           min: 0,
           max: 120,
           axisLabel: { color: '#9CA3AF' },
-          splitLine: { lineStyle: { color: '#374151' } }
+          splitLine: { lineStyle: { color: '#374151' } },
         },
         {
           type: 'value',
           name: 'Memory (MB)',
           position: 'right',
           min: 0,
-          axisLabel: { color: '#9CA3AF' }
-        }
+          axisLabel: { color: '#9CA3AF' },
+        },
       ],
       series: [
         {
           name: 'FPS',
           type: 'line',
-          data: data.map(d => d.fps),
+          data: data.map((d) => d.fps),
           smooth: true,
           itemStyle: { color: '#10B981' },
           areaStyle: {
@@ -80,9 +80,9 @@ export default function PerformanceChart({ data }: PerformanceChartProps) {
               y2: 1,
               colorStops: [
                 { offset: 0, color: 'rgba(16, 185, 129, 0.3)' },
-                { offset: 1, color: 'rgba(16, 185, 129, 0.05)' }
-              ]
-            }
+                { offset: 1, color: 'rgba(16, 185, 129, 0.05)' },
+              ],
+            },
           },
           markLine: {
             data: [
@@ -90,21 +90,21 @@ export default function PerformanceChart({ data }: PerformanceChartProps) {
                 yAxis: 60,
                 label: {
                   formatter: 'Target: 60 FPS',
-                  color: '#9CA3AF'
+                  color: '#9CA3AF',
                 },
                 lineStyle: {
                   color: '#F59E0B',
-                  type: 'dashed'
-                }
-              }
-            ]
-          }
+                  type: 'dashed',
+                },
+              },
+            ],
+          },
         },
         {
           name: 'Memory (MB)',
           type: 'line',
           yAxisIndex: 1,
-          data: data.map(d => d.memory),
+          data: data.map((d) => d.memory),
           smooth: true,
           itemStyle: { color: '#3B82F6' },
           areaStyle: {
@@ -116,12 +116,12 @@ export default function PerformanceChart({ data }: PerformanceChartProps) {
               y2: 1,
               colorStops: [
                 { offset: 0, color: 'rgba(59, 130, 246, 0.3)' },
-                { offset: 1, color: 'rgba(59, 130, 246, 0.05)' }
-              ]
-            }
-          }
-        }
-      ]
+                { offset: 1, color: 'rgba(59, 130, 246, 0.05)' },
+              ],
+            },
+          },
+        },
+      ],
     }
 
     chart.setOption(option)

@@ -13,9 +13,13 @@ interface NewWorkflowModalProps {
 
 const workflowTypes = [
   { value: 'experiment', label: 'Experiment', description: 'Scientific experiments and protocols' },
-  { value: 'manufacturing', label: 'Manufacturing', description: 'Production and manufacturing processes' },
+  {
+    value: 'manufacturing',
+    label: 'Manufacturing',
+    description: 'Production and manufacturing processes',
+  },
   { value: 'quality_control', label: 'Quality Control', description: 'QC testing and validation' },
-  { value: 'data_analysis', label: 'Data Analysis', description: 'Data processing and analysis' }
+  { value: 'data_analysis', label: 'Data Analysis', description: 'Data processing and analysis' },
 ]
 
 const availableAgents = [
@@ -24,7 +28,7 @@ const availableAgents = [
   { id: 'research_manager', name: 'Research Manager', type: 'Management' },
   { id: 'lab_tech_worker_1', name: 'Lab Tech Worker 1', type: 'Operations' },
   { id: 'lab_tech_worker_2', name: 'Lab Tech Worker 2', type: 'Operations' },
-  { id: 'quality_control_1', name: 'Quality Control 1', type: 'QC' }
+  { id: 'quality_control_1', name: 'Quality Control 1', type: 'QC' },
 ]
 
 export default function NewWorkflowModal({ isOpen, onClose }: NewWorkflowModalProps) {
@@ -33,7 +37,7 @@ export default function NewWorkflowModal({ isOpen, onClose }: NewWorkflowModalPr
     name: '',
     workflow_type: 'experiment',
     description: '',
-    assigned_agents: [] as string[]
+    assigned_agents: [] as string[],
   })
 
   const createWorkflowMutation = useMutation({
@@ -43,8 +47,8 @@ export default function NewWorkflowModal({ isOpen, onClose }: NewWorkflowModalPr
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...data,
-          parameters: {} // Add default parameters
-        })
+          parameters: {}, // Add default parameters
+        }),
       })
       if (!response.ok) throw new Error('Failed to create workflow')
       return response.json()
@@ -56,13 +60,13 @@ export default function NewWorkflowModal({ isOpen, onClose }: NewWorkflowModalPr
         name: '',
         workflow_type: 'experiment',
         description: '',
-        assigned_agents: []
+        assigned_agents: [],
       })
     },
     onError: (error) => {
       console.error('Failed to create workflow:', error)
       alert('Failed to create workflow. Please try again.')
-    }
+    },
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -75,11 +79,11 @@ export default function NewWorkflowModal({ isOpen, onClose }: NewWorkflowModalPr
   }
 
   const toggleAgent = (agentId: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       assigned_agents: prev.assigned_agents.includes(agentId)
-        ? prev.assigned_agents.filter(id => id !== agentId)
-        : [...prev.assigned_agents, agentId]
+        ? prev.assigned_agents.filter((id) => id !== agentId)
+        : [...prev.assigned_agents, agentId],
     }))
   }
 

@@ -187,7 +187,7 @@ class UnifiedApiClient {
     if (cached?.etag) {
       options.headers = {
         ...options.headers,
-        'If-None-Match': cached.etag
+        'If-None-Match': cached.etag,
       }
     }
 
@@ -199,7 +199,7 @@ class UnifiedApiClient {
         ...options.headers,
       },
     })
-      .then(async response => {
+      .then(async (response) => {
         // Handle 304 Not Modified
         if (response.status === 304 && cached) {
           cached.timestamp = Date.now()
@@ -217,7 +217,7 @@ class UnifiedApiClient {
         this.cache.set(cacheKey, {
           data,
           timestamp: Date.now(),
-          etag: etag || undefined
+          etag: etag || undefined,
         })
 
         return data
@@ -236,12 +236,12 @@ class UnifiedApiClient {
       id: agent.agent_id || agent.id,
       name: agent.name || `${agent.agent_type} Agent`,
       agent_type: agent.agent_type,
-      status: agent.active ? 'active' : (agent.status || 'idle'),
+      status: agent.active ? 'active' : agent.status || 'idle',
       parent_id: agent.parent_id || (agent.agent_type === 'CEO' ? null : 'ceo_agent'),
       subordinates: agent.subordinates || [],
       department: agent.department || agent.agent_type,
       last_active: agent.last_active || new Date().toISOString(),
-      capabilities: agent.capabilities || []
+      capabilities: agent.capabilities || [],
     }
   }
 
@@ -258,10 +258,14 @@ class UnifiedApiClient {
   }
 
   async sendCommandToAgent(agentId: string, command: string, parameters?: any): Promise<any> {
-    return this.fetchWithCache(`/api/agents/${agentId}/command`, {
-      method: 'POST',
-      body: JSON.stringify({ command, parameters }),
-    }, 0) // No cache for commands
+    return this.fetchWithCache(
+      `/api/agents/${agentId}/command`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ command, parameters }),
+      },
+      0
+    ) // No cache for commands
   }
 
   async getAgentHierarchy(): Promise<AgentHierarchy> {
@@ -274,10 +278,10 @@ class UnifiedApiClient {
     const response = await fetch(`${this.apiBaseUrl}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         agent_id: agentId,
         agent_type: agentId, // Support both formats
-        message 
+        message,
       }),
     })
 
@@ -286,11 +290,11 @@ class UnifiedApiClient {
     }
 
     const data = await response.json()
-    
+
     // Transform response to match frontend expectations
     return {
       ...data,
-      message: data.response || data.message // Backend returns 'response', frontend expects 'message'
+      message: data.response || data.message, // Backend returns 'response', frontend expects 'message'
     }
   }
 
@@ -302,14 +306,14 @@ class UnifiedApiClient {
   // Monitoring APIs
   async getCurrentMetrics(): Promise<SystemMetrics> {
     const data = await this.fetchWithCache<any>('/api/monitoring/metrics/current', {}, 10000)
-    
+
     // Transform to match frontend expectations
     return {
       system: {
-        cpu_percent: data.metrics?.cpu_percent || (35 + Math.random() * 20),
-        memory_percent: data.metrics?.memory_percent || (55 + Math.random() * 15),
+        cpu_percent: data.metrics?.cpu_percent || 35 + Math.random() * 20,
+        memory_percent: data.metrics?.memory_percent || 55 + Math.random() * 15,
         memory_used_gb: data.metrics?.memory_used_gb || 8.5,
-        memory_total_gb: data.metrics?.memory_total_gb || 16
+        memory_total_gb: data.metrics?.memory_total_gb || 16,
       },
       agents: {
         total_agents: data.metrics?.agents_online || 5,
@@ -319,11 +323,11 @@ class UnifiedApiClient {
           CSO: 1,
           CFO: 1,
           CTO: 1,
-          COO: 1
-        }
+          COO: 1,
+        },
       },
       websocket_connections: data.metrics?.websocket_connections || 1,
-      timestamp: data.timestamp || new Date().toISOString()
+      timestamp: data.timestamp || new Date().toISOString(),
     }
   }
 
@@ -335,7 +339,7 @@ class UnifiedApiClient {
   async getAlerts(): Promise<Alert[]> {
     const data = await this.fetchWithCache<any>('/api/monitoring/alerts', {}, 5000)
     const alerts = data.alerts || []
-    
+
     if (alerts.length === 0) {
       // Return some demo alerts
       return [
@@ -344,17 +348,17 @@ class UnifiedApiClient {
           severity: 'info',
           type: 'system',
           message: 'System started successfully',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       ]
     }
-    
+
     return alerts.map((alert: any) => ({
       id: alert.id || `alert-${Date.now()}`,
       severity: alert.severity || 'info',
       type: alert.type || 'system',
       message: alert.message || '',
-      timestamp: alert.timestamp || new Date().toISOString()
+      timestamp: alert.timestamp || new Date().toISOString(),
     }))
   }
 
@@ -362,7 +366,7 @@ class UnifiedApiClient {
   async getWorkflows(): Promise<Workflow[]> {
     const data = await this.fetchWithCache<any>('/api/workflows', {}, 30000)
     const workflows = data.workflows || data || []
-    
+
     if (Array.isArray(workflows) && workflows.length > 0 && typeof workflows[0] === 'string') {
       // Transform string array to workflow objects
       return workflows.map((workflow: string, index: number) => ({
@@ -373,25 +377,33 @@ class UnifiedApiClient {
         progress: 0,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        assigned_agents: []
+        assigned_agents: [],
       }))
     }
-    
+
     return workflows
   }
 
   async simulateWorkflow(type: string): Promise<any> {
-    return this.fetchWithCache('/api/workflows/simulate', {
-      method: 'POST',
-      body: JSON.stringify({ type }),
-    }, 0)
+    return this.fetchWithCache(
+      '/api/workflows/simulate',
+      {
+        method: 'POST',
+        body: JSON.stringify({ type }),
+      },
+      0
+    )
   }
 
   async updateWorkflowStatus(workflowId: string, status: string): Promise<any> {
-    return this.fetchWithCache(`/api/workflows/${workflowId}/status`, {
-      method: 'PUT',
-      body: JSON.stringify({ status }),
-    }, 0)
+    return this.fetchWithCache(
+      `/api/workflows/${workflowId}/status`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+      },
+      0
+    )
   }
 
   // Message History
@@ -416,7 +428,7 @@ class UnifiedApiClient {
     this.wsConnection.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data)
-        
+
         if (data.type === 'connection') {
           // WebSocket connection confirmed
         } else if (data.type === 'pong') {
@@ -494,9 +506,7 @@ class UnifiedApiClient {
 
   // Batch requests for efficiency
   async batchRequest(requests: Array<{ url: string; options?: RequestInit }>) {
-    return Promise.all(
-      requests.map(req => this.fetchWithCache(req.url, req.options))
-    )
+    return Promise.all(requests.map((req) => this.fetchWithCache(req.url, req.options)))
   }
 
   // Prefetch critical data
@@ -505,7 +515,7 @@ class UnifiedApiClient {
       this.getAgents(),
       this.getWorkflows(),
       this.getCurrentMetrics(),
-      this.getAlerts()
+      this.getAlerts(),
     ])
   }
 
@@ -519,10 +529,14 @@ class UnifiedApiClient {
   }
 
   async controlEquipment(equipmentId: string, action: string, parameters?: any): Promise<any> {
-    return this.fetchWithCache(`/api/laboratory/equipment/${equipmentId}/control`, {
-      method: 'PUT',
-      body: JSON.stringify({ action, parameters })
-    }, 0) // No cache for control actions
+    return this.fetchWithCache(
+      `/api/laboratory/equipment/${equipmentId}/control`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ action, parameters }),
+      },
+      0
+    ) // No cache for control actions
   }
 
   async getExperiments(): Promise<Experiment[]> {
@@ -537,17 +551,25 @@ class UnifiedApiClient {
     parameters?: Record<string, any>
     notes?: string
   }): Promise<Experiment> {
-    return this.fetchWithCache('/api/laboratory/experiments', {
-      method: 'POST',
-      body: JSON.stringify(experimentData)
-    }, 0)
+    return this.fetchWithCache(
+      '/api/laboratory/experiments',
+      {
+        method: 'POST',
+        body: JSON.stringify(experimentData),
+      },
+      0
+    )
   }
 
   async updateExperimentStatus(experimentId: string, status: string): Promise<any> {
-    return this.fetchWithCache(`/api/laboratory/experiments/${experimentId}/status`, {
-      method: 'PUT',
-      body: JSON.stringify({ status })
-    }, 0)
+    return this.fetchWithCache(
+      `/api/laboratory/experiments/${experimentId}/status`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+      },
+      0
+    )
   }
 
   async getExperimentLogs(experimentId: string, limit: number = 50): Promise<any> {
@@ -566,13 +588,13 @@ class UnifiedApiClient {
         researchEfficiency: 87.5 + Math.random() * 10,
         costPerExperiment: 4250 + Math.random() * 500,
         successRate: 92.3 + Math.random() * 5,
-        timeToCompletion: 14.2 + Math.random() * 2
+        timeToCompletion: 14.2 + Math.random() * 2,
       },
       trends: {
         researchOutput: { value: 15.3, direction: 'up' },
         operationalCosts: { value: -8.7, direction: 'down' },
         agentUtilization: { value: 23.1, direction: 'up' },
-        errorRate: { value: -12.4, direction: 'down' }
+        errorRate: { value: -12.4, direction: 'down' },
       },
       performanceData: this.generateTimeSeriesData(dateRange),
       costBreakdown: [
@@ -580,64 +602,84 @@ class UnifiedApiClient {
         { value: 25, name: 'Operations' },
         { value: 20, name: 'Infrastructure' },
         { value: 15, name: 'Quality Control' },
-        { value: 5, name: 'Other' }
+        { value: 5, name: 'Other' },
       ],
-      productivityData: this.generateProductivityData(dateRange)
+      productivityData: this.generateProductivityData(dateRange),
     }
-    
+
     return baseMetrics
   }
 
   private generateTimeSeriesData(dateRange: string) {
     const points = dateRange === 'day' ? 24 : dateRange === 'week' ? 7 : 30
     const labels = this.getTimeLabels(dateRange, points)
-    
+
     return {
       labels,
       datasets: [
         {
           name: 'Research Output',
-          data: Array(points).fill(0).map((_, i) => 80 + i * 1.5 + Math.random() * 10)
+          data: Array(points)
+            .fill(0)
+            .map((_, i) => 80 + i * 1.5 + Math.random() * 10),
         },
         {
           name: 'Agent Efficiency',
-          data: Array(points).fill(0).map((_, i) => 75 + i * 2 + Math.random() * 8)
+          data: Array(points)
+            .fill(0)
+            .map((_, i) => 75 + i * 2 + Math.random() * 8),
         },
         {
           name: 'Success Rate',
-          data: Array(points).fill(0).map((_, i) => 88 + i * 0.5 + Math.random() * 5)
-        }
-      ]
+          data: Array(points)
+            .fill(0)
+            .map((_, i) => 88 + i * 0.5 + Math.random() * 5),
+        },
+      ],
     }
   }
 
   private generateProductivityData(dateRange: string) {
     const points = dateRange === 'day' ? 24 : 7
-    const labels = dateRange === 'day' 
-      ? Array(24).fill(0).map((_, i) => `${i}:00`)
-      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    
+    const labels =
+      dateRange === 'day'
+        ? Array(24)
+            .fill(0)
+            .map((_, i) => `${i}:00`)
+        : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
     return {
       labels,
-      experiments: Array(points).fill(0).map(() => Math.floor(10 + Math.random() * 10)),
-      successRate: Array(points).fill(0).map(() => 85 + Math.random() * 10)
+      experiments: Array(points)
+        .fill(0)
+        .map(() => Math.floor(10 + Math.random() * 10)),
+      successRate: Array(points)
+        .fill(0)
+        .map(() => 85 + Math.random() * 10),
     }
   }
 
   private getTimeLabels(dateRange: string, points: number): string[] {
     if (dateRange === 'day') {
-      return Array(24).fill(0).map((_, i) => `${i}:00`)
+      return Array(24)
+        .fill(0)
+        .map((_, i) => `${i}:00`)
     } else if (dateRange === 'week') {
       return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     } else {
-      return Array(points).fill(0).map((_, i) => `Day ${i + 1}`)
+      return Array(points)
+        .fill(0)
+        .map((_, i) => `Day ${i + 1}`)
     }
   }
 
-  async exportAnalyticsReport(dateRange: string, format: 'pdf' | 'csv' | 'json' = 'pdf'): Promise<Blob> {
+  async exportAnalyticsReport(
+    dateRange: string,
+    format: 'pdf' | 'csv' | 'json' = 'pdf'
+  ): Promise<Blob> {
     // Simulate export - in production, this would call a backend endpoint
     const data = await this.getAnalyticsMetrics(dateRange)
-    
+
     if (format === 'json') {
       return new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     } else if (format === 'csv') {

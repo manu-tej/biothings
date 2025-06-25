@@ -8,11 +8,10 @@ import { useMemo, useCallback, memo } from 'react'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { optimizedApiClient } from '@/lib/api/client'
 
-
 // Lazy load virtual list
 const VirtualList = dynamic(() => import('@/components/VirtualList'), {
   loading: () => <div className="animate-pulse h-96" />,
-  ssr: false
+  ssr: false,
 })
 
 const statusIcons: Record<string, React.ReactNode> = {
@@ -20,7 +19,7 @@ const statusIcons: Record<string, React.ReactNode> = {
   pending: <Clock className="w-4 h-4 text-yellow-600" />,
   completed: <CheckCircle className="w-4 h-4 text-green-600" />,
   paused: <Pause className="w-4 h-4 text-gray-600" />,
-  failed: <AlertCircle className="w-4 h-4 text-red-600" />
+  failed: <AlertCircle className="w-4 h-4 text-red-600" />,
 }
 
 const statusColors: Record<string, string> = {
@@ -28,7 +27,7 @@ const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
   completed: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
   paused: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
-  failed: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+  failed: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
 }
 
 // Memoized workflow item component
@@ -38,7 +37,7 @@ const WorkflowItem = memo(({ workflow }: { workflow: any }) => {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     })
   }, [])
 
@@ -50,16 +49,16 @@ const WorkflowItem = memo(({ workflow }: { workflow: any }) => {
             <Activity className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-              {workflow.name}
-            </h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white">{workflow.name}</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Type: {workflow.workflow_type} • ID: {workflow.id.slice(0, 8)}
             </p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1 ${statusColors[workflow.status]}`}>
+          <span
+            className={`px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1 ${statusColors[workflow.status]}`}
+          >
             {statusIcons[workflow.status]}
             <span className="capitalize">{workflow.status}</span>
           </span>
@@ -75,7 +74,7 @@ const WorkflowItem = memo(({ workflow }: { workflow: any }) => {
             </span>
           </div>
           <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-            <div 
+            <div
               className="bg-primary-600 h-2 rounded-full transition-all duration-300 relative overflow-hidden"
               style={{ width: `${workflow.progress * 100}%` }}
             >
@@ -88,15 +87,11 @@ const WorkflowItem = memo(({ workflow }: { workflow: any }) => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
         <div>
           <p className="text-gray-500 dark:text-gray-400">Created</p>
-          <p className="text-gray-900 dark:text-white">
-            {formatDate(workflow.created_at)}
-          </p>
+          <p className="text-gray-900 dark:text-white">{formatDate(workflow.created_at)}</p>
         </div>
         <div>
           <p className="text-gray-500 dark:text-gray-400">Updated</p>
-          <p className="text-gray-900 dark:text-white">
-            {formatDate(workflow.updated_at)}
-          </p>
+          <p className="text-gray-900 dark:text-white">{formatDate(workflow.updated_at)}</p>
         </div>
         <div>
           <p className="text-gray-500 dark:text-gray-400">Assigned Agents</p>
@@ -125,7 +120,7 @@ export default function OptimizedWorkflowsPage() {
     queryKey: ['workflows'],
     queryFn: () => optimizedApiClient.getWorkflows(),
     refetchInterval: 300000, // 5 minutes - reduced frequency
-    staleTime: 300000 // Consider data fresh for 5 minutes
+    staleTime: 300000, // Consider data fresh for 5 minutes
   })
 
   // Memoize stats calculation
@@ -135,7 +130,7 @@ export default function OptimizedWorkflowsPage() {
       total: workflows.length,
       running: workflows.filter((w: any) => w.status === 'running').length,
       completed: workflows.filter((w: any) => w.status === 'completed').length,
-      failed: workflows.filter((w: any) => w.status === 'failed').length
+      failed: workflows.filter((w: any) => w.status === 'failed').length,
     }
   }, [workflows])
 
@@ -156,18 +151,17 @@ export default function OptimizedWorkflowsPage() {
     )
   }
 
-  const renderWorkflow = useCallback((workflow: any) => (
-    <WorkflowItem key={workflow.id} workflow={workflow} />
-  ), [])
+  const renderWorkflow = useCallback(
+    (workflow: any) => <WorkflowItem key={workflow.id} workflow={workflow} />,
+    []
+  )
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Workflows
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Workflows</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               Monitor and manage biotech processes and experiments
             </p>

@@ -69,22 +69,26 @@ const response = await apiClient.chatWithAgent('ceo_agent', 'Hello')
 ## Key Features
 
 ### 1. Real-time Updates
+
 - WebSocket integration for live data
 - Automatic reconnection
 - Message queuing
 
 ### 2. Performance Optimization
+
 - Request caching with ETags
 - Request deduplication
 - Lazy loading
 - Code splitting
 
 ### 3. Type Safety
+
 - Full TypeScript coverage
 - Strict type checking
 - Auto-generated types from API
 
 ### 4. Testing
+
 - Unit tests with Jest
 - Component tests with React Testing Library
 - E2E tests with Playwright
@@ -133,8 +137,9 @@ npm run format:check
 #### ESLint Configuration
 
 The project enforces the following rules:
+
 - **no-console**: Warns on console usage (except warn/error)
-- **no-unused-vars**: Errors on unused variables (with _ prefix exception)
+- **no-unused-vars**: Errors on unused variables (with \_ prefix exception)
 - **no-unused-imports**: Automatically removes unused imports
 - **React Hooks rules**: Enforces correct hooks usage
 - **Import order**: Enforces consistent import organization
@@ -142,11 +147,13 @@ The project enforces the following rules:
 #### Pre-commit Hooks
 
 Husky is configured to run linting and formatting automatically before commits:
+
 - ESLint fixes are applied automatically
 - Prettier formats all staged files
 - Commits are blocked if there are unfixable lint errors
 
 To bypass pre-commit hooks in emergencies:
+
 ```bash
 git commit --no-verify -m "Emergency fix"
 ```
@@ -241,6 +248,7 @@ vercel deploy
 ## Support
 
 For questions about:
+
 - API Client usage: See [documentation](./docs/)
 - Component development: Check examples in `/components`
 - Testing: See [TESTING.md](./TESTING.md)

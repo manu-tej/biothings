@@ -1,127 +1,127 @@
 export interface KeyboardShortcut {
-  id: string;
-  name: string;
-  description: string;
-  keys: string[];
-  action: string;
-  category: 'navigation' | 'actions' | 'editing' | 'system';
-  customizable: boolean;
+  id: string
+  name: string
+  description: string
+  keys: string[]
+  action: string
+  category: 'navigation' | 'actions' | 'editing' | 'system'
+  customizable: boolean
 }
 
 export interface NotificationPreferences {
   sound: {
-    enabled: boolean;
-    volume: number;
-    alertSound: string;
-    warningSound: string;
-    errorSound: string;
-  };
+    enabled: boolean
+    volume: number
+    alertSound: string
+    warningSound: string
+    errorSound: string
+  }
   desktop: {
-    enabled: boolean;
-    showOnError: boolean;
-    showOnWarning: boolean;
-    showOnSuccess: boolean;
-    autoHide: boolean;
-    autoHideDelay: number;
-  };
+    enabled: boolean
+    showOnError: boolean
+    showOnWarning: boolean
+    showOnSuccess: boolean
+    autoHide: boolean
+    autoHideDelay: number
+  }
   email: {
-    enabled: boolean;
-    immediateAlerts: boolean;
-    dailyDigest: boolean;
-    weeklyReport: boolean;
-    emailAddress: string;
-    alertThreshold: 'all' | 'warnings' | 'errors';
-  };
+    enabled: boolean
+    immediateAlerts: boolean
+    dailyDigest: boolean
+    weeklyReport: boolean
+    emailAddress: string
+    alertThreshold: 'all' | 'warnings' | 'errors'
+  }
   inApp: {
-    showBadges: boolean;
-    showToasts: boolean;
-    persistentAlerts: boolean;
-    groupSimilar: boolean;
-  };
+    showBadges: boolean
+    showToasts: boolean
+    persistentAlerts: boolean
+    groupSimilar: boolean
+  }
 }
 
 export interface DataRetentionPolicy {
   logs: {
-    enabled: boolean;
-    duration: number; // days
-    maxSize: number; // MB
-    compressionEnabled: boolean;
-  };
+    enabled: boolean
+    duration: number // days
+    maxSize: number // MB
+    compressionEnabled: boolean
+  }
   metrics: {
-    enabled: boolean;
-    duration: number; // days
-    aggregationLevel: 'raw' | 'hourly' | 'daily';
-    maxDataPoints: number;
-  };
+    enabled: boolean
+    duration: number // days
+    aggregationLevel: 'raw' | 'hourly' | 'daily'
+    maxDataPoints: number
+  }
   exports: {
-    enabled: boolean;
-    duration: number; // days
-    maxFiles: number;
-    autoCleanup: boolean;
-  };
+    enabled: boolean
+    duration: number // days
+    maxFiles: number
+    autoCleanup: boolean
+  }
   cache: {
-    enabled: boolean;
-    maxSize: number; // MB
-    ttl: number; // minutes
-    clearOnRestart: boolean;
-  };
+    enabled: boolean
+    maxSize: number // MB
+    ttl: number // minutes
+    clearOnRestart: boolean
+  }
 }
 
 export interface AppearancePreferences {
-  theme: 'light' | 'dark' | 'auto';
-  colorScheme: 'default' | 'blue' | 'green' | 'purple' | 'orange';
-  fontSize: 'small' | 'medium' | 'large';
-  compactMode: boolean;
-  animations: boolean;
-  reducedMotion: boolean;
-  highContrast: boolean;
+  theme: 'light' | 'dark' | 'auto'
+  colorScheme: 'default' | 'blue' | 'green' | 'purple' | 'orange'
+  fontSize: 'small' | 'medium' | 'large'
+  compactMode: boolean
+  animations: boolean
+  reducedMotion: boolean
+  highContrast: boolean
 }
 
 export interface BehaviorPreferences {
-  autoSave: boolean;
-  autoSaveInterval: number; // minutes
-  confirmDeletion: boolean;
-  confirmNavigation: boolean;
-  defaultPageSize: number;
-  enableTooltips: boolean;
-  showAdvancedFeatures: boolean;
-  enableKeyboardNavigation: boolean;
+  autoSave: boolean
+  autoSaveInterval: number // minutes
+  confirmDeletion: boolean
+  confirmNavigation: boolean
+  defaultPageSize: number
+  enableTooltips: boolean
+  showAdvancedFeatures: boolean
+  enableKeyboardNavigation: boolean
 }
 
 export interface UserPreferences {
-  appearance: AppearancePreferences;
-  behavior: BehaviorPreferences;
-  notifications: NotificationPreferences;
-  dataRetention: DataRetentionPolicy;
-  keyboardShortcuts: KeyboardShortcut[];
-  lastUpdated: Date;
-  version: string;
+  appearance: AppearancePreferences
+  behavior: BehaviorPreferences
+  notifications: NotificationPreferences
+  dataRetention: DataRetentionPolicy
+  keyboardShortcuts: KeyboardShortcut[]
+  lastUpdated: Date
+  version: string
 }
 
 export interface PreferencesBackup {
-  id: string;
-  name: string;
-  preferences: UserPreferences;
-  createdAt: Date;
-  description?: string;
+  id: string
+  name: string
+  preferences: UserPreferences
+  createdAt: Date
+  description?: string
 }
 
 export class PreferencesManager {
-  private preferences: UserPreferences;
-  private backups: PreferencesBackup[] = [];
-  private listeners: Map<string, (preferences: UserPreferences) => void> = new Map();
-  private readonly storageKey = 'biothings-user-preferences';
-  private readonly backupsKey = 'biothings-preferences-backups';
+  private preferences: UserPreferences
+  private backups: PreferencesBackup[] = []
+  private listeners: Map<string, (preferences: UserPreferences) => void> = new Map()
+  private readonly storageKey = 'biothings-user-preferences'
+  private readonly backupsKey = 'biothings-preferences-backups'
 
   constructor() {
-    this.preferences = this.getDefaultPreferences();
-    this.loadFromStorage();
-    this.initializeKeyboardShortcuts();
+    this.preferences = this.getDefaultPreferences()
+    this.loadFromStorage()
+    this.initializeKeyboardShortcuts()
   }
 
   // Preferences management
   public getPreferences(): UserPreferences {
-    return { ...this.preferences };
+    return { ...this.preferences }
   }
 
   public updatePreferences(updates: Partial<UserPreferences>): void {
@@ -129,83 +129,85 @@ export class PreferencesManager {
       ...this.preferences,
       ...updates,
       lastUpdated: new Date(),
-    };
-    
-    this.saveToStorage();
-    this.notifyListeners();
+    }
+
+    this.saveToStorage()
+    this.notifyListeners()
   }
 
   public updateAppearancePreferences(appearance: Partial<AppearancePreferences>): void {
     this.updatePreferences({
       appearance: { ...this.preferences.appearance, ...appearance },
-    });
+    })
   }
 
   public updateBehaviorPreferences(behavior: Partial<BehaviorPreferences>): void {
     this.updatePreferences({
       behavior: { ...this.preferences.behavior, ...behavior },
-    });
+    })
   }
 
   public updateNotificationPreferences(notifications: Partial<NotificationPreferences>): void {
     this.updatePreferences({
       notifications: { ...this.preferences.notifications, ...notifications },
-    });
+    })
   }
 
   public updateDataRetentionPolicy(dataRetention: Partial<DataRetentionPolicy>): void {
     this.updatePreferences({
       dataRetention: { ...this.preferences.dataRetention, ...dataRetention },
-    });
+    })
   }
 
   // Keyboard shortcuts management
   public getKeyboardShortcuts(): KeyboardShortcut[] {
-    return [...this.preferences.keyboardShortcuts];
+    return [...this.preferences.keyboardShortcuts]
   }
 
-  public getKeyboardShortcutsByCategory(category: KeyboardShortcut['category']): KeyboardShortcut[] {
-    return this.preferences.keyboardShortcuts.filter(shortcut => shortcut.category === category);
+  public getKeyboardShortcutsByCategory(
+    category: KeyboardShortcut['category']
+  ): KeyboardShortcut[] {
+    return this.preferences.keyboardShortcuts.filter((shortcut) => shortcut.category === category)
   }
 
   public updateKeyboardShortcut(id: string, keys: string[]): boolean {
-    const shortcut = this.preferences.keyboardShortcuts.find(s => s.id === id);
-    if (!shortcut || !shortcut.customizable) return false;
+    const shortcut = this.preferences.keyboardShortcuts.find((s) => s.id === id)
+    if (!shortcut || !shortcut.customizable) return false
 
     // Check for conflicts
     const conflict = this.preferences.keyboardShortcuts.find(
-      s => s.id !== id && this.arraysEqual(s.keys, keys)
-    );
+      (s) => s.id !== id && this.arraysEqual(s.keys, keys)
+    )
     if (conflict) {
-      throw new Error(`Keyboard shortcut conflict with "${conflict.name}"`);
+      throw new Error(`Keyboard shortcut conflict with "${conflict.name}"`)
     }
 
-    shortcut.keys = keys;
+    shortcut.keys = keys
     this.updatePreferences({
       keyboardShortcuts: [...this.preferences.keyboardShortcuts],
-    });
-    return true;
+    })
+    return true
   }
 
   public resetKeyboardShortcut(id: string): boolean {
-    const shortcut = this.preferences.keyboardShortcuts.find(s => s.id === id);
-    if (!shortcut || !shortcut.customizable) return false;
+    const shortcut = this.preferences.keyboardShortcuts.find((s) => s.id === id)
+    if (!shortcut || !shortcut.customizable) return false
 
-    const defaultShortcuts = this.getDefaultKeyboardShortcuts();
-    const defaultShortcut = defaultShortcuts.find(s => s.id === id);
-    if (!defaultShortcut) return false;
+    const defaultShortcuts = this.getDefaultKeyboardShortcuts()
+    const defaultShortcut = defaultShortcuts.find((s) => s.id === id)
+    if (!defaultShortcut) return false
 
-    shortcut.keys = [...defaultShortcut.keys];
+    shortcut.keys = [...defaultShortcut.keys]
     this.updatePreferences({
       keyboardShortcuts: [...this.preferences.keyboardShortcuts],
-    });
-    return true;
+    })
+    return true
   }
 
   public resetAllKeyboardShortcuts(): void {
     this.updatePreferences({
       keyboardShortcuts: this.getDefaultKeyboardShortcuts(),
-    });
+    })
   }
 
   // Backup and restore
@@ -216,120 +218,124 @@ export class PreferencesManager {
       preferences: { ...this.preferences },
       createdAt: new Date(),
       description,
-    };
-
-    this.backups.unshift(backup);
-    
-    // Keep only the most recent 10 backups
-    if (this.backups.length > 10) {
-      this.backups = this.backups.slice(0, 10);
     }
 
-    this.saveBackupsToStorage();
-    return backup;
+    this.backups.unshift(backup)
+
+    // Keep only the most recent 10 backups
+    if (this.backups.length > 10) {
+      this.backups = this.backups.slice(0, 10)
+    }
+
+    this.saveBackupsToStorage()
+    return backup
   }
 
   public getBackups(): PreferencesBackup[] {
-    return [...this.backups];
+    return [...this.backups]
   }
 
   public restoreFromBackup(backupId: string): boolean {
-    const backup = this.backups.find(b => b.id === backupId);
-    if (!backup) return false;
+    const backup = this.backups.find((b) => b.id === backupId)
+    if (!backup) return false
 
-    this.preferences = { ...backup.preferences, lastUpdated: new Date() };
-    this.saveToStorage();
-    this.notifyListeners();
-    return true;
+    this.preferences = { ...backup.preferences, lastUpdated: new Date() }
+    this.saveToStorage()
+    this.notifyListeners()
+    return true
   }
 
   public deleteBackup(backupId: string): boolean {
-    const initialLength = this.backups.length;
-    this.backups = this.backups.filter(b => b.id !== backupId);
-    
+    const initialLength = this.backups.length
+    this.backups = this.backups.filter((b) => b.id !== backupId)
+
     if (this.backups.length !== initialLength) {
-      this.saveBackupsToStorage();
-      return true;
+      this.saveBackupsToStorage()
+      return true
     }
-    return false;
+    return false
   }
 
   public exportPreferences(): string {
-    return JSON.stringify({
-      preferences: this.preferences,
-      backups: this.backups,
-      exportedAt: new Date(),
-      version: '1.0.0',
-    }, null, 2);
+    return JSON.stringify(
+      {
+        preferences: this.preferences,
+        backups: this.backups,
+        exportedAt: new Date(),
+        version: '1.0.0',
+      },
+      null,
+      2
+    )
   }
 
   public importPreferences(jsonData: string): boolean {
     try {
-      const data = JSON.parse(jsonData);
-      
+      const data = JSON.parse(jsonData)
+
       if (data.preferences && this.validatePreferences(data.preferences)) {
-        this.preferences = { ...data.preferences, lastUpdated: new Date() };
-        
+        this.preferences = { ...data.preferences, lastUpdated: new Date() }
+
         if (data.backups && Array.isArray(data.backups)) {
-          this.backups = data.backups.slice(0, 10); // Limit to 10 backups
+          this.backups = data.backups.slice(0, 10) // Limit to 10 backups
         }
-        
-        this.saveToStorage();
-        this.saveBackupsToStorage();
-        this.notifyListeners();
-        return true;
+
+        this.saveToStorage()
+        this.saveBackupsToStorage()
+        this.notifyListeners()
+        return true
       }
     } catch (error) {
-      console.error('Failed to import preferences:', error);
+      console.error('Failed to import preferences:', error)
     }
-    return false;
+    return false
   }
 
   // Reset and defaults
   public resetToDefaults(): void {
-    this.preferences = this.getDefaultPreferences();
-    this.saveToStorage();
-    this.notifyListeners();
+    this.preferences = this.getDefaultPreferences()
+    this.saveToStorage()
+    this.notifyListeners()
   }
 
   public resetCategory(category: keyof UserPreferences): void {
-    const defaults = this.getDefaultPreferences();
+    const defaults = this.getDefaultPreferences()
     this.updatePreferences({
       [category]: defaults[category],
-    });
+    })
   }
 
   // Event listeners
   public addListener(id: string, callback: (preferences: UserPreferences) => void): void {
-    this.listeners.set(id, callback);
+    this.listeners.set(id, callback)
   }
 
   public removeListener(id: string): void {
-    this.listeners.delete(id);
+    this.listeners.delete(id)
   }
 
   // Theme utilities
   public applyTheme(): void {
-    const { theme, colorScheme } = this.preferences.appearance;
-    const root = document.documentElement;
-    
+    const { theme, colorScheme } = this.preferences.appearance
+    const root = document.documentElement
+
     // Apply theme
     if (theme === 'auto') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      root.setAttribute('data-theme', prefersDark ? 'dark' : 'light')
     } else {
-      root.setAttribute('data-theme', theme);
+      root.setAttribute('data-theme', theme)
     }
-    
+
     // Apply color scheme
-    root.setAttribute('data-color-scheme', colorScheme);
-    
+    root.setAttribute('data-color-scheme', colorScheme)
+
     // Apply other appearance settings
-    root.setAttribute('data-font-size', this.preferences.appearance.fontSize);
-    root.setAttribute('data-compact-mode', this.preferences.appearance.compactMode.toString());
-    root.setAttribute('data-animations', this.preferences.appearance.animations.toString());
-    root.setAttribute('data-reduced-motion', this.preferences.appearance.reducedMotion.toString());
-    root.setAttribute('data-high-contrast', this.preferences.appearance.highContrast.toString());
+    root.setAttribute('data-font-size', this.preferences.appearance.fontSize)
+    root.setAttribute('data-compact-mode', this.preferences.appearance.compactMode.toString())
+    root.setAttribute('data-animations', this.preferences.appearance.animations.toString())
+    root.setAttribute('data-reduced-motion', this.preferences.appearance.reducedMotion.toString())
+    root.setAttribute('data-high-contrast', this.preferences.appearance.highContrast.toString())
   }
 
   // Validation
@@ -344,9 +350,9 @@ export class PreferencesManager {
         preferences.notifications &&
         preferences.dataRetention &&
         Array.isArray(preferences.keyboardShortcuts)
-      );
+      )
     } catch {
-      return false;
+      return false
     }
   }
 
@@ -432,7 +438,7 @@ export class PreferencesManager {
       keyboardShortcuts: this.getDefaultKeyboardShortcuts(),
       lastUpdated: new Date(),
       version: '1.0.0',
-    };
+    }
   }
 
   private getDefaultKeyboardShortcuts(): KeyboardShortcut[] {
@@ -509,101 +515,101 @@ export class PreferencesManager {
         category: 'system',
         customizable: false,
       },
-    ];
+    ]
   }
 
   private initializeKeyboardShortcuts(): void {
     // Apply theme on initialization
-    this.applyTheme();
-    
+    this.applyTheme()
+
     // Listen for system theme changes
     if (window.matchMedia) {
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
         if (this.preferences.appearance.theme === 'auto') {
-          this.applyTheme();
+          this.applyTheme()
         }
-      });
+      })
     }
   }
 
   // Helper methods
   private notifyListeners(): void {
-    this.listeners.forEach(callback => {
+    this.listeners.forEach((callback) => {
       try {
-        callback(this.preferences);
+        callback(this.preferences)
       } catch (error) {
-        console.error('Error in preferences listener:', error);
+        console.error('Error in preferences listener:', error)
       }
-    });
+    })
   }
 
   private arraysEqual(a: string[], b: string[]): boolean {
-    return a.length === b.length && a.every((val, i) => val === b[i]);
+    return a.length === b.length && a.every((val, i) => val === b[i])
   }
 
   private generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    return Date.now().toString(36) + Math.random().toString(36).substr(2)
   }
 
   // Storage management
   private saveToStorage(): void {
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(this.preferences, this.dateReplacer));
+      localStorage.setItem(this.storageKey, JSON.stringify(this.preferences, this.dateReplacer))
     } catch (error) {
-      console.error('Failed to save preferences:', error);
+      console.error('Failed to save preferences:', error)
     }
   }
 
   private loadFromStorage(): void {
     try {
-      const data = localStorage.getItem(this.storageKey);
+      const data = localStorage.getItem(this.storageKey)
       if (data) {
-        const parsed = JSON.parse(data, this.dateReviver);
+        const parsed = JSON.parse(data, this.dateReviver)
         if (this.validatePreferences(parsed)) {
-          this.preferences = { ...this.preferences, ...parsed };
+          this.preferences = { ...this.preferences, ...parsed }
         }
       }
     } catch (error) {
-      console.error('Failed to load preferences:', error);
+      console.error('Failed to load preferences:', error)
     }
   }
 
   private saveBackupsToStorage(): void {
     try {
-      localStorage.setItem(this.backupsKey, JSON.stringify(this.backups, this.dateReplacer));
+      localStorage.setItem(this.backupsKey, JSON.stringify(this.backups, this.dateReplacer))
     } catch (error) {
-      console.error('Failed to save preferences backups:', error);
+      console.error('Failed to save preferences backups:', error)
     }
   }
 
   private loadBackupsFromStorage(): void {
     try {
-      const data = localStorage.getItem(this.backupsKey);
+      const data = localStorage.getItem(this.backupsKey)
       if (data) {
-        const parsed = JSON.parse(data, this.dateReviver);
+        const parsed = JSON.parse(data, this.dateReviver)
         if (Array.isArray(parsed)) {
-          this.backups = parsed;
+          this.backups = parsed
         }
       }
     } catch (error) {
-      console.error('Failed to load preferences backups:', error);
+      console.error('Failed to load preferences backups:', error)
     }
   }
 
   private dateReplacer(key: string, value: any): any {
     if (value instanceof Date) {
-      return { __type: 'Date', value: value.toISOString() };
+      return { __type: 'Date', value: value.toISOString() }
     }
-    return value;
+    return value
   }
 
   private dateReviver(key: string, value: any): any {
     if (value && typeof value === 'object' && value.__type === 'Date') {
-      return new Date(value.value);
+      return new Date(value.value)
     }
-    return value;
+    return value
   }
 }
 
 // Global preferences manager instance
-export const preferencesManager = new PreferencesManager();
+export const preferencesManager = new PreferencesManager()

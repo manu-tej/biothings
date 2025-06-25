@@ -1,9 +1,9 @@
-import { render, screen, fireEvent, waitFor, act } from '@/shared/test-utils';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import WorkflowStatus from '@/components/dashboard/WorkflowStatus';
-import { apiClient } from '@/lib/api/client';
+import { render, screen, fireEvent, waitFor, act } from '@/shared/test-utils'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import WorkflowStatus from '@/components/dashboard/WorkflowStatus'
+import { apiClient } from '@/lib/api/client'
 
-jest.mock('@/lib/api/client');
+jest.mock('@/lib/api/client')
 
 const mockWorkflows = [
   {
@@ -29,10 +29,10 @@ const mockWorkflows = [
     started_at: new Date(Date.now() - 3600000).toISOString(),
     error: 'Temperature out of range',
   },
-];
+]
 
 describe('WorkflowStatus', () => {
-  let queryClient: QueryClient;
+  let queryClient: QueryClient
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -40,201 +40,201 @@ describe('WorkflowStatus', () => {
         queries: { retry: false },
         mutations: { retry: false },
       },
-    });
-    (apiClient.getWorkflows as jest.Mock).mockResolvedValue(mockWorkflows);
-  });
+    })
+    ;(apiClient.getWorkflows as jest.Mock).mockResolvedValue(mockWorkflows)
+  })
 
   afterEach(() => {
-    jest.clearAllMocks();
-  });
+    jest.clearAllMocks()
+  })
 
   const renderComponent = () => {
     return render(
       <QueryClientProvider client={queryClient}>
         <WorkflowStatus />
       </QueryClientProvider>
-    );
-  };
+    )
+  }
 
   it('should render workflow list', async () => {
-    renderComponent();
+    renderComponent()
 
     await waitFor(() => {
-      expect(screen.getByText('Workflow Status')).toBeInTheDocument();
-    });
+      expect(screen.getByText('Workflow Status')).toBeInTheDocument()
+    })
 
     // Check all workflows are displayed
-    expect(screen.getByText('PCR Protocol')).toBeInTheDocument();
-    expect(screen.getByText('DNA Sequencing')).toBeInTheDocument();
-    expect(screen.getByText('Cell Culture')).toBeInTheDocument();
-  });
+    expect(screen.getByText('PCR Protocol')).toBeInTheDocument()
+    expect(screen.getByText('DNA Sequencing')).toBeInTheDocument()
+    expect(screen.getByText('Cell Culture')).toBeInTheDocument()
+  })
 
   it('should display correct status indicators', async () => {
-    renderComponent();
+    renderComponent()
 
     await waitFor(() => {
-      expect(screen.getByText('Running')).toBeInTheDocument();
-      expect(screen.getByText('Completed')).toBeInTheDocument();
-      expect(screen.getByText('Failed')).toBeInTheDocument();
-    });
-  });
+      expect(screen.getByText('Running')).toBeInTheDocument()
+      expect(screen.getByText('Completed')).toBeInTheDocument()
+      expect(screen.getByText('Failed')).toBeInTheDocument()
+    })
+  })
 
   it('should show progress bars with correct values', async () => {
-    renderComponent();
+    renderComponent()
 
     await waitFor(() => {
-      const progressBars = screen.getAllByRole('progressbar');
-      expect(progressBars).toHaveLength(3);
-    });
+      const progressBars = screen.getAllByRole('progressbar')
+      expect(progressBars).toHaveLength(3)
+    })
 
     // Check progress values
-    expect(screen.getByText('65%')).toBeInTheDocument();
-    expect(screen.getByText('100%')).toBeInTheDocument();
-    expect(screen.getByText('30%')).toBeInTheDocument();
-  });
+    expect(screen.getByText('65%')).toBeInTheDocument()
+    expect(screen.getByText('100%')).toBeInTheDocument()
+    expect(screen.getByText('30%')).toBeInTheDocument()
+  })
 
   it('should handle workflow actions', async () => {
-    const mockStopWorkflow = jest.fn().mockResolvedValue({ success: true });
-    (apiClient.stopWorkflow as jest.Mock) = mockStopWorkflow;
+    const mockStopWorkflow = jest.fn().mockResolvedValue({ success: true })
+    ;(apiClient.stopWorkflow as jest.Mock) = mockStopWorkflow
 
-    renderComponent();
+    renderComponent()
 
     await waitFor(() => {
-      expect(screen.getByText('PCR Protocol')).toBeInTheDocument();
-    });
+      expect(screen.getByText('PCR Protocol')).toBeInTheDocument()
+    })
 
     // Find and click stop button for running workflow
-    const stopButton = screen.getByTestId('stop-workflow-wf-001');
-    fireEvent.click(stopButton);
+    const stopButton = screen.getByTestId('stop-workflow-wf-001')
+    fireEvent.click(stopButton)
 
     await waitFor(() => {
-      expect(mockStopWorkflow).toHaveBeenCalledWith('wf-001');
-    });
-  });
+      expect(mockStopWorkflow).toHaveBeenCalledWith('wf-001')
+    })
+  })
 
   it('should refresh data periodically', async () => {
-    jest.useFakeTimers();
-    renderComponent();
+    jest.useFakeTimers()
+    renderComponent()
 
     await waitFor(() => {
-      expect(screen.getByText('PCR Protocol')).toBeInTheDocument();
-    });
+      expect(screen.getByText('PCR Protocol')).toBeInTheDocument()
+    })
 
-    expect(apiClient.getWorkflows).toHaveBeenCalledTimes(1);
+    expect(apiClient.getWorkflows).toHaveBeenCalledTimes(1)
 
     // Fast-forward 30 seconds (refetch interval)
     act(() => {
-      jest.advanceTimersByTime(30000);
-    });
+      jest.advanceTimersByTime(30000)
+    })
 
     await waitFor(() => {
-      expect(apiClient.getWorkflows).toHaveBeenCalledTimes(2);
-    });
+      expect(apiClient.getWorkflows).toHaveBeenCalledTimes(2)
+    })
 
-    jest.useRealTimers();
-  });
+    jest.useRealTimers()
+  })
 
   it('should filter workflows by status', async () => {
-    renderComponent();
+    renderComponent()
 
     await waitFor(() => {
-      expect(screen.getByText('PCR Protocol')).toBeInTheDocument();
-    });
+      expect(screen.getByText('PCR Protocol')).toBeInTheDocument()
+    })
 
     // Click on "Running" filter
-    const runningFilter = screen.getByRole('button', { name: /running/i });
-    fireEvent.click(runningFilter);
+    const runningFilter = screen.getByRole('button', { name: /running/i })
+    fireEvent.click(runningFilter)
 
     // Only running workflows should be visible
-    expect(screen.getByText('PCR Protocol')).toBeInTheDocument();
-    expect(screen.queryByText('DNA Sequencing')).not.toBeInTheDocument();
-    expect(screen.queryByText('Cell Culture')).not.toBeInTheDocument();
-  });
+    expect(screen.getByText('PCR Protocol')).toBeInTheDocument()
+    expect(screen.queryByText('DNA Sequencing')).not.toBeInTheDocument()
+    expect(screen.queryByText('Cell Culture')).not.toBeInTheDocument()
+  })
 
   it('should display error message for failed workflows', async () => {
-    renderComponent();
+    renderComponent()
 
     await waitFor(() => {
-      expect(screen.getByText('Temperature out of range')).toBeInTheDocument();
-    });
-  });
+      expect(screen.getByText('Temperature out of range')).toBeInTheDocument()
+    })
+  })
 
   it('should handle empty workflow list', async () => {
-    (apiClient.getWorkflows as jest.Mock).mockResolvedValue([]);
-    
-    renderComponent();
+    ;(apiClient.getWorkflows as jest.Mock).mockResolvedValue([])
+
+    renderComponent()
 
     await waitFor(() => {
-      expect(screen.getByText('No workflows running')).toBeInTheDocument();
-    });
-  });
+      expect(screen.getByText('No workflows running')).toBeInTheDocument()
+    })
+  })
 
   it('should handle API errors gracefully', async () => {
-    (apiClient.getWorkflows as jest.Mock).mockRejectedValue(new Error('Network error'));
-    
-    // Suppress console error for this test
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    ;(apiClient.getWorkflows as jest.Mock).mockRejectedValue(new Error('Network error'))
 
-    renderComponent();
+    // Suppress console error for this test
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
+
+    renderComponent()
 
     await waitFor(() => {
-      expect(screen.getByText(/Error loading workflows/i)).toBeInTheDocument();
-    });
+      expect(screen.getByText(/Error loading workflows/i)).toBeInTheDocument()
+    })
 
-    consoleSpy.mockRestore();
-  });
+    consoleSpy.mockRestore()
+  })
 
   it('should allow retrying failed workflows', async () => {
-    const mockRetryWorkflow = jest.fn().mockResolvedValue({ success: true });
-    (apiClient.retryWorkflow as jest.Mock) = mockRetryWorkflow;
+    const mockRetryWorkflow = jest.fn().mockResolvedValue({ success: true })
+    ;(apiClient.retryWorkflow as jest.Mock) = mockRetryWorkflow
 
-    renderComponent();
+    renderComponent()
 
     await waitFor(() => {
-      expect(screen.getByText('Cell Culture')).toBeInTheDocument();
-    });
+      expect(screen.getByText('Cell Culture')).toBeInTheDocument()
+    })
 
     // Find and click retry button for failed workflow
-    const retryButton = screen.getByTestId('retry-workflow-wf-003');
-    fireEvent.click(retryButton);
+    const retryButton = screen.getByTestId('retry-workflow-wf-003')
+    fireEvent.click(retryButton)
 
     await waitFor(() => {
-      expect(mockRetryWorkflow).toHaveBeenCalledWith('wf-003');
-    });
-  });
+      expect(mockRetryWorkflow).toHaveBeenCalledWith('wf-003')
+    })
+  })
 
   it('should show workflow duration', async () => {
-    renderComponent();
+    renderComponent()
 
     await waitFor(() => {
       // Should show duration for completed workflow
-      expect(screen.getByText(/Duration: \d+h \d+m/)).toBeInTheDocument();
-    });
-  });
+      expect(screen.getByText(/Duration: \d+h \d+m/)).toBeInTheDocument()
+    })
+  })
 
   it('should update progress when data changes', async () => {
-    renderComponent();
+    renderComponent()
 
     await waitFor(() => {
-      expect(screen.getByText('65%')).toBeInTheDocument();
-    });
+      expect(screen.getByText('65%')).toBeInTheDocument()
+    })
 
     // Update mock to return new data
-    (apiClient.getWorkflows as jest.Mock).mockResolvedValue([
+    ;(apiClient.getWorkflows as jest.Mock).mockResolvedValue([
       {
         ...mockWorkflows[0],
         progress: 0.85, // Updated progress
       },
       ...mockWorkflows.slice(1),
-    ]);
+    ])
 
     // Trigger refetch
     act(() => {
-      queryClient.invalidateQueries({ queryKey: ['workflows'] });
-    });
+      queryClient.invalidateQueries({ queryKey: ['workflows'] })
+    })
 
     await waitFor(() => {
-      expect(screen.getByText('85%')).toBeInTheDocument();
-    });
-  });
-});
+      expect(screen.getByText('85%')).toBeInTheDocument()
+    })
+  })
+})

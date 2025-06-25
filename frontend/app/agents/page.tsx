@@ -1,7 +1,17 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { Users, Crown, Briefcase, FlaskConical, DollarSign, Cpu, UserCheck, MessageCircle, Eye } from 'lucide-react'
+import {
+  Users,
+  Crown,
+  Briefcase,
+  FlaskConical,
+  DollarSign,
+  Cpu,
+  UserCheck,
+  MessageCircle,
+  Eye,
+} from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useState } from 'react'
 
@@ -11,7 +21,7 @@ import { apiClient } from '@/lib/api/client'
 // Lazy load heavy components
 const AgentChat = dynamic(() => import('@/components/agents/AgentChat'), {
   loading: () => <div className="animate-pulse">Loading chat...</div>,
-  ssr: false
+  ssr: false,
 })
 
 const agentIcons: Record<string, React.ReactNode> = {
@@ -21,7 +31,7 @@ const agentIcons: Record<string, React.ReactNode> = {
   CFO: <DollarSign className="w-6 h-6" />,
   CTO: <Cpu className="w-6 h-6" />,
   Manager: <UserCheck className="w-6 h-6" />,
-  Worker: <Users className="w-6 h-6" />
+  Worker: <Users className="w-6 h-6" />,
 }
 
 const statusColors: Record<string, string> = {
@@ -30,25 +40,25 @@ const statusColors: Record<string, string> = {
   thinking: 'bg-blue-500',
   executing: 'bg-yellow-500',
   monitoring: 'bg-purple-500',
-  error: 'bg-red-500'
+  error: 'bg-red-500',
 }
 
 export default function AgentsPage() {
   const [selectedAgent, setSelectedAgent] = useState<any>(null)
   const [showChat, setShowChat] = useState(false)
-  
+
   const { data: agents, isLoading } = useQuery({
     queryKey: ['agents'],
     queryFn: () => apiClient.getAgents(),
     refetchInterval: 300000, // 5 minutes - reduced frequency
-    staleTime: 300000 // Consider data fresh for 5 minutes
+    staleTime: 300000, // Consider data fresh for 5 minutes
   })
 
   const { data: hierarchy } = useQuery({
     queryKey: ['agent-hierarchy'],
     queryFn: () => apiClient.getAgentHierarchy(),
     refetchInterval: 300000, // 5 minutes - reduced frequency
-    staleTime: 300000 // Consider data fresh for 5 minutes
+    staleTime: 300000, // Consider data fresh for 5 minutes
   })
 
   if (isLoading) {
@@ -63,7 +73,7 @@ export default function AgentsPage() {
     const lastActiveDate = new Date(lastActive)
     const now = new Date()
     const diffMinutes = Math.floor((now.getTime() - lastActiveDate.getTime()) / 60000)
-    
+
     if (diffMinutes < 1) return 'Just now'
     if (diffMinutes < 60) return `${diffMinutes}m ago`
     const diffHours = Math.floor(diffMinutes / 60)
@@ -76,9 +86,7 @@ export default function AgentsPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              AI Agents
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">AI Agents</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               Manage and monitor your intelligent biotech workforce
             </p>
@@ -103,16 +111,16 @@ export default function AgentsPage() {
                     {agentIcons[agent.agent_type] || <Users className="w-6 h-6" />}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      {agent.name}
-                    </h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{agent.name}</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {agent.agent_type} • {agent.department}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className={`w-3 h-3 rounded-full ${statusColors[agent.status] || 'bg-gray-400'}`} />
+                  <span
+                    className={`w-3 h-3 rounded-full ${statusColors[agent.status] || 'bg-gray-400'}`}
+                  />
                   <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                     {agent.status}
                   </span>
@@ -138,7 +146,9 @@ export default function AgentsPage() {
 
                 {agent.capabilities?.length > 0 && (
                   <div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400 block mb-1">Capabilities:</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400 block mb-1">
+                      Capabilities:
+                    </span>
                     <div className="flex flex-wrap gap-1">
                       {agent.capabilities.slice(0, 3).map((cap: string) => (
                         <span
@@ -159,7 +169,7 @@ export default function AgentsPage() {
               </div>
 
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
-                <button 
+                <button
                   onClick={() => {
                     setSelectedAgent(agent)
                     setShowChat(true)

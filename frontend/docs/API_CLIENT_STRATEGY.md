@@ -19,6 +19,7 @@ We have identified multiple API client implementations:
 **Use the Unified API Client (`@/lib/api/client`) for all standard API calls.**
 
 This client provides:
+
 - Built-in caching with ETag support
 - Request deduplication
 - WebSocket integration
@@ -28,6 +29,7 @@ This client provides:
 ### 2. When to Use Batch Client
 
 **Use the Batch API Client only when:**
+
 - Making multiple related API calls that can be batched
 - The backend supports the `/api/batch` endpoint
 - Using React Query hooks with `useBatchQuery` or `useBatchQueries`
@@ -81,14 +83,14 @@ Migrate existing components in this order:
 
 ## API Client Features Comparison
 
-| Feature | Unified Client | Batch Client | When to Use |
-|---------|---------------|--------------|-------------|
-| Standard API calls | ✅ | ❌ | Always use unified |
-| Caching | ✅ (ETag-based) | ✅ (Time-based) | Unified for consistency |
-| Request deduplication | ✅ | ❌ | Unified prevents duplicates |
-| WebSocket support | ✅ | ❌ | Unified for real-time |
-| Request batching | ❌ | ✅ | Batch for multiple calls |
-| Type safety | ✅ | ⚠️ (Generic) | Unified for better types |
+| Feature               | Unified Client  | Batch Client    | When to Use                 |
+| --------------------- | --------------- | --------------- | --------------------------- |
+| Standard API calls    | ✅              | ❌              | Always use unified          |
+| Caching               | ✅ (ETag-based) | ✅ (Time-based) | Unified for consistency     |
+| Request deduplication | ✅              | ❌              | Unified prevents duplicates |
+| WebSocket support     | ✅              | ❌              | Unified for real-time       |
+| Request batching      | ❌              | ✅              | Batch for multiple calls    |
+| Type safety           | ✅              | ⚠️ (Generic)    | Unified for better types    |
 
 ## Code Examples
 
@@ -114,7 +116,7 @@ import { useBatchQueries } from '@/lib/api/batch-hooks'
 const queries = useBatchQueries([
   { key: ['agents'], endpoint: '/api/agents' },
   { key: ['workflows'], endpoint: '/api/workflows' },
-  { key: ['metrics'], endpoint: '/api/metrics' }
+  { key: ['metrics'], endpoint: '/api/metrics' },
 ])
 ```
 
@@ -137,11 +139,13 @@ apiClient.disconnectWebSocket()
 ## Best Practices
 
 1. **Always use typed imports:**
+
    ```typescript
    import type { Agent, Workflow } from '@/lib/api/client'
    ```
 
 2. **Handle errors properly:**
+
    ```typescript
    try {
      const data = await apiClient.getAgents()

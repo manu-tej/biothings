@@ -1,51 +1,51 @@
-'use client';
+'use client'
 
-import { 
-  Settings, 
-  Save, 
-  RotateCcw, 
-  Bell, 
-  Palette, 
-  Shield, 
+import {
+  Settings,
+  Save,
+  RotateCcw,
+  Bell,
+  Palette,
+  Shield,
   Wifi,
   Users,
-  Activity
-} from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+  Activity,
+} from 'lucide-react'
+import React, { useState, useEffect } from 'react'
 
-import { Badge } from '@/components/ui/atoms/Badge';
-import { Button } from '@/components/ui/atoms/Button';
-import { Card } from '@/components/ui/atoms/Card';
-import { Input } from '@/components/ui/atoms/Input';
-import { Select } from '@/components/ui/atoms/Select';
-import { Switch } from '@/components/ui/atoms/Switch';
-import { AlertBanner } from '@/components/ui/molecules/AlertBanner';
-import { useDashboardStore } from '@/lib/stores/dashboardStore';
-import { useUIStore } from '@/lib/stores/uiStore';
-import { useWebSocketStore } from '@/lib/stores/websocketStore';
+import { Badge } from '@/components/ui/atoms/Badge'
+import { Button } from '@/components/ui/atoms/Button'
+import { Card } from '@/components/ui/atoms/Card'
+import { Input } from '@/components/ui/atoms/Input'
+import { Select } from '@/components/ui/atoms/Select'
+import { Switch } from '@/components/ui/atoms/Switch'
+import { AlertBanner } from '@/components/ui/molecules/AlertBanner'
+import { useDashboardStore } from '@/lib/stores/dashboardStore'
+import { useUIStore } from '@/lib/stores/uiStore'
+import { useWebSocketStore } from '@/lib/stores/websocketStore'
 
 interface SettingsSection {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
+  id: string
+  title: string
+  description: string
+  icon: React.ReactNode
 }
 
 export default function SettingsPage() {
-  const { addNotification: _addNotification } = useDashboardStore();
+  const { addNotification: _addNotification } = useDashboardStore()
   const {
     preferences,
     layout: _layout,
     setTheme,
     toggleSidebar: _toggleSidebar,
-    updatePreferences
-  } = useUIStore();
-  const { getConnectionStatus } = useWebSocketStore();
-  
-  const [activeSection, setActiveSection] = useState('general');
-  const [hasChanges, setHasChanges] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+    updatePreferences,
+  } = useUIStore()
+  const { getConnectionStatus } = useWebSocketStore()
+
+  const [activeSection, setActiveSection] = useState('general')
+  const [hasChanges, setHasChanges] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
 
   // Local settings state
   const [settings, setSettings] = useState({
@@ -54,40 +54,40 @@ export default function SettingsPage() {
     refreshInterval: preferences.refreshInterval || 30,
     timezone: preferences.timezone || 'UTC',
     language: preferences.language || 'en',
-    
+
     // Notifications
     enableNotifications: true,
     emailNotifications: true,
     desktopNotifications: false,
     alertThreshold: 80,
-    
+
     // Appearance
     theme: preferences.theme || 'light',
     compactMode: preferences.compactMode || false,
     showGridLines: true,
     animationsEnabled: preferences.animations || true,
-    
+
     // WebSocket
     wsReconnectInterval: 5000,
     wsMaxRetries: 10,
     wsHeartbeatInterval: 30000,
-    
+
     // Agent Management
     defaultAgentTimeout: 30000,
     maxConcurrentAgents: 100,
     agentMetricsRetention: 7,
-    
+
     // Workflow Settings
     workflowHistoryLimit: 1000,
     autoRetryFailedWorkflows: true,
     maxWorkflowRetries: 3,
-    
+
     // Data & Security
     dataRetentionDays: 30,
     enableAuditLogging: true,
     sessionTimeout: 3600,
     requireMFA: false,
-  });
+  })
 
   const settingsSections: SettingsSection[] = [
     {
@@ -132,37 +132,37 @@ export default function SettingsPage() {
       description: 'Security and data retention settings',
       icon: <Shield className="w-5 h-5" />,
     },
-  ];
+  ]
 
   useEffect(() => {
     // Load saved settings from localStorage or API
-    const savedSettings = localStorage.getItem('dashboard-settings');
+    const savedSettings = localStorage.getItem('dashboard-settings')
     if (savedSettings) {
       try {
-        const parsed = JSON.parse(savedSettings);
-        setSettings(prev => ({ ...prev, ...parsed }));
+        const parsed = JSON.parse(savedSettings)
+        setSettings((prev) => ({ ...prev, ...parsed }))
       } catch (error) {
-        console.error('Failed to parse saved settings:', error);
+        console.error('Failed to parse saved settings:', error)
       }
     }
-  }, []);
+  }, [])
 
   const handleSettingChange = (key: string, value: any) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-    setHasChanges(true);
-  };
+    setSettings((prev) => ({ ...prev, [key]: value }))
+    setHasChanges(true)
+  }
 
   const handleSave = async () => {
-    setSaving(true);
+    setSaving(true)
     try {
       // Save to localStorage
-      localStorage.setItem('dashboard-settings', JSON.stringify(settings));
-      
+      localStorage.setItem('dashboard-settings', JSON.stringify(settings))
+
       // Update stores
       if (settings.theme !== preferences.theme) {
-        setTheme(settings.theme as 'light' | 'dark' | 'auto');
+        setTheme(settings.theme as 'light' | 'dark' | 'auto')
       }
-      
+
       // Update preferences
       updatePreferences({
         refreshInterval: settings.refreshInterval,
@@ -171,17 +171,17 @@ export default function SettingsPage() {
         animations: settings.animationsEnabled,
         timezone: settings.timezone,
         language: settings.language,
-      });
+      })
 
-      setHasChanges(false);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
+      setHasChanges(false)
+      setShowSuccess(true)
+      setTimeout(() => setShowSuccess(false), 3000)
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      console.error('Failed to save settings:', error)
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   const handleReset = () => {
     // Reset to default values
@@ -211,9 +211,9 @@ export default function SettingsPage() {
       enableAuditLogging: true,
       sessionTimeout: 3600,
       requireMFA: false,
-    });
-    setHasChanges(true);
-  };
+    })
+    setHasChanges(true)
+  }
 
   const renderGeneralSettings = () => (
     <div className="space-y-6">
@@ -227,7 +227,7 @@ export default function SettingsPage() {
           placeholder="Enter dashboard title"
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Refresh Interval (seconds)
@@ -244,7 +244,7 @@ export default function SettingsPage() {
           ]}
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Timezone
@@ -262,7 +262,7 @@ export default function SettingsPage() {
         />
       </div>
     </div>
-  );
+  )
 
   const renderNotificationSettings = () => (
     <div className="space-y-6">
@@ -280,15 +280,13 @@ export default function SettingsPage() {
           onChange={(checked) => handleSettingChange('enableNotifications', checked)}
         />
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div>
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Email Notifications
           </label>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Send notifications via email
-          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Send notifications via email</p>
         </div>
         <Switch
           checked={settings.emailNotifications}
@@ -296,15 +294,13 @@ export default function SettingsPage() {
           disabled={!settings.enableNotifications}
         />
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div>
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Desktop Notifications
           </label>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Show browser notifications
-          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Show browser notifications</p>
         </div>
         <Switch
           checked={settings.desktopNotifications}
@@ -312,7 +308,7 @@ export default function SettingsPage() {
           disabled={!settings.enableNotifications}
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Alert Threshold (%)
@@ -326,7 +322,7 @@ export default function SettingsPage() {
         />
       </div>
     </div>
-  );
+  )
 
   const renderAppearanceSettings = () => (
     <div className="space-y-6">
@@ -344,45 +340,37 @@ export default function SettingsPage() {
           ]}
         />
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div>
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Compact Mode
           </label>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Reduce spacing and padding
-          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Reduce spacing and padding</p>
         </div>
         <Switch
           checked={settings.compactMode}
           onChange={(checked) => handleSettingChange('compactMode', checked)}
         />
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div>
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Show Grid Lines
           </label>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Display grid lines in charts
-          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Display grid lines in charts</p>
         </div>
         <Switch
           checked={settings.showGridLines}
           onChange={(checked) => handleSettingChange('showGridLines', checked)}
         />
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div>
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Animations
-          </label>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Enable UI animations
-          </p>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Animations</label>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Enable UI animations</p>
         </div>
         <Switch
           checked={settings.animationsEnabled}
@@ -390,7 +378,7 @@ export default function SettingsPage() {
         />
       </div>
     </div>
-  );
+  )
 
   const renderWebSocketSettings = () => (
     <div className="space-y-6">
@@ -398,13 +386,11 @@ export default function SettingsPage() {
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
           Connection Status
         </span>
-        <Badge 
-          variant={getConnectionStatus('dashboard') === 'connected' ? 'success' : 'danger'}
-        >
+        <Badge variant={getConnectionStatus('dashboard') === 'connected' ? 'success' : 'danger'}>
           {getConnectionStatus('dashboard') === 'connected' ? 'Connected' : 'Disconnected'}
         </Badge>
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Reconnect Interval (ms)
@@ -417,7 +403,7 @@ export default function SettingsPage() {
           max={60000}
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Max Retries
@@ -430,7 +416,7 @@ export default function SettingsPage() {
           max={100}
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Heartbeat Interval (ms)
@@ -444,7 +430,7 @@ export default function SettingsPage() {
         />
       </div>
     </div>
-  );
+  )
 
   const renderAgentSettings = () => (
     <div className="space-y-6">
@@ -460,7 +446,7 @@ export default function SettingsPage() {
           max={300000}
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Max Concurrent Agents
@@ -473,7 +459,7 @@ export default function SettingsPage() {
           max={1000}
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Metrics Retention (days)
@@ -487,7 +473,7 @@ export default function SettingsPage() {
         />
       </div>
     </div>
-  );
+  )
 
   const renderWorkflowSettings = () => (
     <div className="space-y-6">
@@ -503,7 +489,7 @@ export default function SettingsPage() {
           max={10000}
         />
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div>
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -518,7 +504,7 @@ export default function SettingsPage() {
           onChange={(checked) => handleSettingChange('autoRetryFailedWorkflows', checked)}
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Max Workflow Retries
@@ -533,7 +519,7 @@ export default function SettingsPage() {
         />
       </div>
     </div>
-  );
+  )
 
   const renderSecuritySettings = () => (
     <div className="space-y-6">
@@ -549,22 +535,20 @@ export default function SettingsPage() {
           max={365}
         />
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div>
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Enable Audit Logging
           </label>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Log all user actions
-          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Log all user actions</p>
         </div>
         <Switch
           checked={settings.enableAuditLogging}
           onChange={(checked) => handleSettingChange('enableAuditLogging', checked)}
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Session Timeout (seconds)
@@ -577,15 +561,13 @@ export default function SettingsPage() {
           max={86400}
         />
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div>
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Require Multi-Factor Authentication
           </label>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Require MFA for all users
-          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Require MFA for all users</p>
         </div>
         <Switch
           checked={settings.requireMFA}
@@ -593,58 +575,47 @@ export default function SettingsPage() {
         />
       </div>
     </div>
-  );
+  )
 
   const renderSettingsContent = () => {
     switch (activeSection) {
       case 'general':
-        return renderGeneralSettings();
+        return renderGeneralSettings()
       case 'notifications':
-        return renderNotificationSettings();
+        return renderNotificationSettings()
       case 'appearance':
-        return renderAppearanceSettings();
+        return renderAppearanceSettings()
       case 'websocket':
-        return renderWebSocketSettings();
+        return renderWebSocketSettings()
       case 'agents':
-        return renderAgentSettings();
+        return renderAgentSettings()
       case 'workflows':
-        return renderWorkflowSettings();
+        return renderWorkflowSettings()
       case 'security':
-        return renderSecuritySettings();
+        return renderSecuritySettings()
       default:
-        return renderGeneralSettings();
+        return renderGeneralSettings()
     }
-  };
+  }
 
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Dashboard Settings
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard Settings</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Configure your BioThings Dashboard preferences
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          {hasChanges && (
-            <Badge variant="warning">
-              Unsaved Changes
-            </Badge>
-          )}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleReset}
-            icon={<RotateCcw />}
-          >
+          {hasChanges && <Badge variant="warning">Unsaved Changes</Badge>}
+          <Button variant="outline" size="sm" onClick={handleReset} icon={<RotateCcw />}>
             Reset
           </Button>
-          <Button 
-            variant="primary" 
-            size="sm" 
+          <Button
+            variant="primary"
+            size="sm"
             onClick={handleSave}
             loading={saving}
             disabled={!hasChanges}
@@ -700,17 +671,17 @@ export default function SettingsPage() {
           <Card className="p-6">
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                {settingsSections.find(s => s.id === activeSection)?.title}
+                {settingsSections.find((s) => s.id === activeSection)?.title}
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                {settingsSections.find(s => s.id === activeSection)?.description}
+                {settingsSections.find((s) => s.id === activeSection)?.description}
               </p>
             </div>
-            
+
             {renderSettingsContent()}
           </Card>
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,69 +1,69 @@
-'use client';
+'use client'
 
-import { 
-  Play, 
-  Pause, 
-  Square, 
-  Clock, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  Play,
+  Pause,
+  Square,
+  Clock,
+  CheckCircle,
+  AlertCircle,
   MoreHorizontal,
   Users,
   Timer,
-  Activity
-} from 'lucide-react';
-import React, { forwardRef } from 'react';
+  Activity,
+} from 'lucide-react'
+import React, { forwardRef } from 'react'
 
-import { Badge } from '../atoms/Badge';
-import { Button } from '../atoms/Button';
-import { Card, CardHeader, CardBody, CardFooter } from '../atoms/Card';
-import { Tooltip } from '../atoms/Tooltip';
+import { Badge } from '../atoms/Badge'
+import { Button } from '../atoms/Button'
+import { Card, CardHeader, CardBody, CardFooter } from '../atoms/Card'
+import { Tooltip } from '../atoms/Tooltip'
 
-import { SimpleProgressBar } from './ProgressBar';
+import { SimpleProgressBar } from './ProgressBar'
 
 export interface WorkflowStep {
-  id: string;
-  name: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
-  duration?: number;
-  agent?: string;
+  id: string
+  name: string
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped'
+  duration?: number
+  agent?: string
 }
 
 export interface WorkflowStatus {
-  status: 'draft' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
-  progress: number;
-  currentStep?: string;
-  totalSteps: number;
-  completedSteps: number;
-  startTime?: Date;
-  endTime?: Date;
-  estimatedCompletion?: Date;
+  status: 'draft' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled'
+  progress: number
+  currentStep?: string
+  totalSteps: number
+  completedSteps: number
+  startTime?: Date
+  endTime?: Date
+  estimatedCompletion?: Date
 }
 
 export interface WorkflowCardProps {
-  id: string;
-  name: string;
-  description?: string;
-  status: WorkflowStatus;
-  steps?: WorkflowStep[];
-  assignedAgents?: string[];
-  priority?: 'low' | 'medium' | 'high' | 'urgent';
-  tags?: string[];
+  id: string
+  name: string
+  description?: string
+  status: WorkflowStatus
+  steps?: WorkflowStep[]
+  assignedAgents?: string[]
+  priority?: 'low' | 'medium' | 'high' | 'urgent'
+  tags?: string[]
   actions?: {
-    onStart?: () => void;
-    onPause?: () => void;
-    onStop?: () => void;
-    onView?: () => void;
-    onEdit?: () => void;
-    onDelete?: () => void;
-  };
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'compact' | 'detailed';
-  selectable?: boolean;
-  selected?: boolean;
-  onSelect?: (selected: boolean) => void;
-  className?: string;
-  testId?: string;
+    onStart?: () => void
+    onPause?: () => void
+    onStop?: () => void
+    onView?: () => void
+    onEdit?: () => void
+    onDelete?: () => void
+  }
+  size?: 'sm' | 'md' | 'lg'
+  variant?: 'default' | 'compact' | 'detailed'
+  selectable?: boolean
+  selected?: boolean
+  onSelect?: (selected: boolean) => void
+  className?: string
+  testId?: string
 }
 
 const statusConfig = {
@@ -97,14 +97,14 @@ const statusConfig = {
     icon: Square,
     label: 'Cancelled',
   },
-};
+}
 
 const priorityConfig = {
   low: { variant: 'secondary' as const, label: 'Low' },
   medium: { variant: 'primary' as const, label: 'Medium' },
   high: { variant: 'warning' as const, label: 'High' },
   urgent: { variant: 'danger' as const, label: 'Urgent' },
-};
+}
 
 export const WorkflowCard = forwardRef<HTMLDivElement, WorkflowCardProps>(
   (
@@ -128,94 +128,74 @@ export const WorkflowCard = forwardRef<HTMLDivElement, WorkflowCardProps>(
     },
     ref
   ) => {
-    const statusInfo = statusConfig[status.status];
-    const priorityInfo = priorityConfig[priority];
-    const StatusIcon = statusInfo.icon;
+    const statusInfo = statusConfig[status.status]
+    const priorityInfo = priorityConfig[priority]
+    const StatusIcon = statusInfo.icon
 
     const formatDuration = (startTime?: Date, endTime?: Date) => {
-      if (!startTime) return '';
-      const end = endTime || new Date();
-      const diff = Math.floor((end.getTime() - startTime.getTime()) / 1000);
-      const hours = Math.floor(diff / 3600);
-      const minutes = Math.floor((diff % 3600) / 60);
-      return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-    };
+      if (!startTime) return ''
+      const end = endTime || new Date()
+      const diff = Math.floor((end.getTime() - startTime.getTime()) / 1000)
+      const hours = Math.floor(diff / 3600)
+      const minutes = Math.floor((diff % 3600) / 60)
+      return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+    }
 
     const formatEstimated = (estimatedTime?: Date) => {
-      if (!estimatedTime) return '';
-      const now = new Date();
-      const diff = Math.floor((estimatedTime.getTime() - now.getTime()) / 1000);
-      if (diff <= 0) return 'Overdue';
-      const hours = Math.floor(diff / 3600);
-      const minutes = Math.floor((diff % 3600) / 60);
-      return hours > 0 ? `${hours}h ${minutes}m remaining` : `${minutes}m remaining`;
-    };
+      if (!estimatedTime) return ''
+      const now = new Date()
+      const diff = Math.floor((estimatedTime.getTime() - now.getTime()) / 1000)
+      if (diff <= 0) return 'Overdue'
+      const hours = Math.floor(diff / 3600)
+      const minutes = Math.floor((diff % 3600) / 60)
+      return hours > 0 ? `${hours}h ${minutes}m remaining` : `${minutes}m remaining`
+    }
 
     const handleSelect = () => {
       if (selectable) {
-        onSelect?.(!selected);
+        onSelect?.(!selected)
       }
-    };
+    }
 
     const renderActions = () => {
-      if (!actions) return null;
+      if (!actions) return null
 
-      const actionButtons = [];
-      
+      const actionButtons = []
+
       if (status.status === 'draft' && actions.onStart) {
         actionButtons.push(
           <Tooltip key="start" content="Start Workflow">
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={actions.onStart}
-              icon={<Play />}
-            />
+            <Button size="xs" variant="ghost" onClick={actions.onStart} icon={<Play />} />
           </Tooltip>
-        );
+        )
       }
-      
+
       if (status.status === 'running' && actions.onPause) {
         actionButtons.push(
           <Tooltip key="pause" content="Pause Workflow">
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={actions.onPause}
-              icon={<Pause />}
-            />
+            <Button size="xs" variant="ghost" onClick={actions.onPause} icon={<Pause />} />
           </Tooltip>
-        );
+        )
       }
-      
+
       if ((status.status === 'running' || status.status === 'paused') && actions.onStop) {
         actionButtons.push(
           <Tooltip key="stop" content="Stop Workflow">
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={actions.onStop}
-              icon={<Square />}
-            />
+            <Button size="xs" variant="ghost" onClick={actions.onStop} icon={<Square />} />
           </Tooltip>
-        );
+        )
       }
 
       if (actions.onEdit) {
         actionButtons.push(
           <Tooltip key="edit" content="Edit Workflow">
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={actions.onEdit}
-              icon={<MoreHorizontal />}
-            />
+            <Button size="xs" variant="ghost" onClick={actions.onEdit} icon={<MoreHorizontal />} />
           </Tooltip>
-        );
+        )
       }
 
-      return actionButtons;
-    };
+      return actionButtons
+    }
 
     if (variant === 'compact') {
       return (
@@ -235,11 +215,7 @@ export const WorkflowCard = forwardRef<HTMLDivElement, WorkflowCardProps>(
                 <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                   {name}
                 </h3>
-                <Badge
-                  size="xs"
-                  variant={statusInfo.variant}
-                  icon={<StatusIcon />}
-                >
+                <Badge size="xs" variant={statusInfo.variant} icon={<StatusIcon />}>
                   {statusInfo.label}
                 </Badge>
                 {priority !== 'medium' && (
@@ -261,12 +237,10 @@ export const WorkflowCard = forwardRef<HTMLDivElement, WorkflowCardProps>(
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-1">
-              {renderActions()}
-            </div>
+            <div className="flex items-center gap-1">{renderActions()}</div>
           </div>
         </Card>
-      );
+      )
     }
 
     return (
@@ -284,14 +258,8 @@ export const WorkflowCard = forwardRef<HTMLDivElement, WorkflowCardProps>(
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">
-                  {name}
-                </h3>
-                <Badge
-                  size="xs"
-                  variant={statusInfo.variant}
-                  icon={<StatusIcon />}
-                >
+                <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">{name}</h3>
+                <Badge size="xs" variant={statusInfo.variant} icon={<StatusIcon />}>
                   {statusInfo.label}
                 </Badge>
                 {priority !== 'medium' && (
@@ -301,14 +269,10 @@ export const WorkflowCard = forwardRef<HTMLDivElement, WorkflowCardProps>(
                 )}
               </div>
               {description && (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {description}
-                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
               )}
             </div>
-            <div className="flex items-center gap-1">
-              {renderActions()}
-            </div>
+            <div className="flex items-center gap-1">{renderActions()}</div>
           </div>
         </CardHeader>
 
@@ -316,19 +280,12 @@ export const WorkflowCard = forwardRef<HTMLDivElement, WorkflowCardProps>(
           {/* Progress */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Progress
-              </span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Progress</span>
               <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {status.completedSteps}/{status.totalSteps} steps ({Math.round(status.progress)}%)
               </span>
             </div>
-            <SimpleProgressBar
-              value={status.progress}
-              max={100}
-              size="sm"
-              showPercentage={false}
-            />
+            <SimpleProgressBar value={status.progress} max={100} size="sm" showPercentage={false} />
             {status.currentStep && (
               <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                 Current: {status.currentStep}
@@ -342,23 +299,19 @@ export const WorkflowCard = forwardRef<HTMLDivElement, WorkflowCardProps>(
               <div>
                 <div className="flex items-center gap-1 mb-1">
                   <Timer className="w-3 h-3 text-gray-400" />
-                  <span className="text-xs text-gray-600 dark:text-gray-400">
-                    Duration
-                  </span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">Duration</span>
                 </div>
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   {formatDuration(status.startTime, status.endTime)}
                 </p>
               </div>
             )}
-            
+
             {assignedAgents.length > 0 && (
               <div>
                 <div className="flex items-center gap-1 mb-1">
                   <Users className="w-3 h-3 text-gray-400" />
-                  <span className="text-xs text-gray-600 dark:text-gray-400">
-                    Agents
-                  </span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">Agents</span>
                 </div>
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   {assignedAgents.length}
@@ -380,7 +333,7 @@ export const WorkflowCard = forwardRef<HTMLDivElement, WorkflowCardProps>(
           {/* Tags */}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {tags.map(tag => (
+              {tags.map((tag) => (
                 <Badge key={tag} size="xs" variant="secondary">
                   {tag}
                 </Badge>
@@ -392,18 +345,14 @@ export const WorkflowCard = forwardRef<HTMLDivElement, WorkflowCardProps>(
         {(status.startTime || assignedAgents.length > 0) && (
           <CardFooter separator>
             <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500">
-              {status.startTime && (
-                <span>Started: {status.startTime.toLocaleString()}</span>
-              )}
-              {assignedAgents.length > 0 && (
-                <span>Agents: {assignedAgents.join(', ')}</span>
-              )}
+              {status.startTime && <span>Started: {status.startTime.toLocaleString()}</span>}
+              {assignedAgents.length > 0 && <span>Agents: {assignedAgents.join(', ')}</span>}
             </div>
           </CardFooter>
         )}
       </Card>
-    );
+    )
   }
-);
+)
 
-WorkflowCard.displayName = 'WorkflowCard';
+WorkflowCard.displayName = 'WorkflowCard'

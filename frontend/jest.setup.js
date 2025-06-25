@@ -1,10 +1,10 @@
 // Setup file for Jest - using require for CommonJS compatibility
-require('@testing-library/jest-dom');
+require('@testing-library/jest-dom')
 
 // Polyfills
-const { TextEncoder, TextDecoder } = require('util');
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder;
+const { TextEncoder, TextDecoder } = require('util')
+global.TextEncoder = TextEncoder
+global.TextDecoder = TextDecoder
 
 // Mock fetch
 global.fetch = jest.fn(() =>
@@ -14,7 +14,7 @@ global.fetch = jest.fn(() =>
     ok: true,
     status: 200,
   })
-);
+)
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
@@ -22,7 +22,7 @@ global.IntersectionObserver = class IntersectionObserver {
   disconnect() {}
   observe() {}
   unobserve() {}
-};
+}
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
@@ -30,29 +30,29 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
   observe() {}
   unobserve() {}
-};
+}
 
 // WebSocket Mock
 class WebSocketMock {
   constructor(url) {
-    this.url = url;
-    this.readyState = WebSocket.CONNECTING;
+    this.url = url
+    this.readyState = WebSocket.CONNECTING
     setTimeout(() => {
-      this.readyState = WebSocket.OPEN;
-      this.onopen?.();
-    }, 0);
+      this.readyState = WebSocket.OPEN
+      this.onopen?.()
+    }, 0)
   }
   send(data) {
     setTimeout(() => {
-      this.onmessage?.({ data });
-    }, 0);
+      this.onmessage?.({ data })
+    }, 0)
   }
   close() {
-    this.readyState = WebSocket.CLOSED;
-    this.onclose?.();
+    this.readyState = WebSocket.CLOSED
+    this.onclose?.()
   }
 }
-global.WebSocket = WebSocketMock;
+global.WebSocket = WebSocketMock
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
@@ -62,12 +62,12 @@ jest.mock('next/navigation', () => ({
       replace: jest.fn(),
       prefetch: jest.fn(),
       back: jest.fn(),
-    };
+    }
   },
   useSearchParams() {
-    return new URLSearchParams();
+    return new URLSearchParams()
   },
   usePathname() {
-    return '/';
+    return '/'
   },
-}));
+}))

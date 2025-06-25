@@ -37,11 +37,9 @@ const workflows: Workflow[] = await apiClient.getWorkflows()
 
 ```typescript
 // Send command to agent
-const result = await apiClient.sendCommandToAgent(
-  'agent-123',
-  'analyze_data',
-  { dataset: 'experiment-001' }
-)
+const result = await apiClient.sendCommandToAgent('agent-123', 'analyze_data', {
+  dataset: 'experiment-001',
+})
 
 // Chat with agent
 const response = await apiClient.chatWithAgent(
@@ -59,7 +57,7 @@ const equipment = await apiClient.getEquipment()
 // Control equipment
 await apiClient.controlEquipment('centrifuge-01', 'start', {
   speed: 3000,
-  duration: 300
+  duration: 300,
 })
 
 // Create experiment
@@ -70,8 +68,8 @@ const experiment = await apiClient.createExperiment({
   equipment: ['centrifuge-01', 'spectrometer-02'],
   parameters: {
     temperature: 37,
-    ph: 7.4
-  }
+    ph: 7.4,
+  },
 })
 ```
 
@@ -101,10 +99,10 @@ function useAgents() {
     queryKey: ['agents'],
     queryFn: () => apiClient.getAgents(),
     retry: 3,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     onError: (error) => {
       console.error('Failed to fetch agents:', error)
-    }
+    },
   })
 }
 ```
@@ -156,8 +154,8 @@ apiClient.sendWebSocketMessage({
   target: 'agent-123',
   payload: {
     action: 'start_analysis',
-    parameters: { sample_id: 'S001' }
-  }
+    parameters: { sample_id: 'S001' },
+  },
 })
 ```
 
@@ -183,7 +181,7 @@ async function prefetchLabData() {
   await Promise.all([
     apiClient.getEquipment(),
     apiClient.getExperiments(),
-    apiClient.getLaboratoryStatus()
+    apiClient.getLaboratoryStatus(),
   ])
 }
 ```
@@ -210,15 +208,15 @@ function useDashboardData() {
   const queries = useBatchQueries([
     { key: ['agents'], endpoint: '/api/agents' },
     { key: ['workflows'], endpoint: '/api/workflows' },
-    { key: ['alerts'], endpoint: '/api/alerts', params: { limit: 10 } }
+    { key: ['alerts'], endpoint: '/api/alerts', params: { limit: 10 } },
   ])
 
   return {
     agents: queries[0].data,
     workflows: queries[1].data,
     alerts: queries[2].data,
-    isLoading: queries.some(q => q.isLoading),
-    error: queries.find(q => q.error)?.error
+    isLoading: queries.some((q) => q.isLoading),
+    error: queries.find((q) => q.error)?.error,
   }
 }
 ```
@@ -230,7 +228,7 @@ function useDashboardData() {
 const [agents, workflows, metrics] = await apiClient.batchRequest([
   { url: '/api/agents' },
   { url: '/api/workflows' },
-  { url: '/api/monitoring/metrics/current' }
+  { url: '/api/monitoring/metrics/current' },
 ])
 ```
 
@@ -245,12 +243,12 @@ import { apiClient } from '@/lib/api/client'
 // Hook for agents with real-time updates
 export function useAgentsWithUpdates() {
   const queryClient = useQueryClient()
-  
+
   // Query for agents
   const query = useQuery({
     queryKey: ['agents'],
     queryFn: () => apiClient.getAgents(),
-    staleTime: 60000 // 1 minute
+    staleTime: 60000, // 1 minute
   })
 
   // Listen for WebSocket updates
@@ -259,9 +257,7 @@ export function useAgentsWithUpdates() {
       if (data.type === 'agent_update') {
         // Update cache with new agent data
         queryClient.setQueryData(['agents'], (oldData: Agent[]) => {
-          return oldData.map(agent => 
-            agent.id === data.payload.id ? data.payload : agent
-          )
+          return oldData.map((agent) => (agent.id === data.payload.id ? data.payload : agent))
         })
       }
     })
@@ -277,7 +273,11 @@ export function useAgentCommand() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ agentId, command, parameters }: {
+    mutationFn: ({
+      agentId,
+      command,
+      parameters,
+    }: {
       agentId: string
       command: string
       parameters?: any
@@ -285,7 +285,7 @@ export function useAgentCommand() {
     onSuccess: () => {
       // Invalidate agents to refresh their status
       queryClient.invalidateQueries({ queryKey: ['agents'] })
-    }
+    },
   })
 }
 ```
@@ -297,16 +297,14 @@ export function useAgentCommand() {
 ```typescript
 // __mocks__/lib/api/client.ts
 export const apiClient = {
-  getAgents: jest.fn().mockResolvedValue([
-    { id: '1', name: 'Test Agent', status: 'active' }
-  ]),
+  getAgents: jest.fn().mockResolvedValue([{ id: '1', name: 'Test Agent', status: 'active' }]),
   getCurrentMetrics: jest.fn().mockResolvedValue({
     system: { cpu_percent: 50, memory_percent: 60 },
-    agents: { total_agents: 5, active_agents: 3 }
+    agents: { total_agents: 5, active_agents: 3 },
   }),
   connectWebSocket: jest.fn(),
   disconnectWebSocket: jest.fn(),
-  onWebSocketMessage: jest.fn().mockReturnValue(() => {})
+  onWebSocketMessage: jest.fn().mockReturnValue(() => {}),
 }
 ```
 
@@ -329,7 +327,7 @@ describe('AgentList', () => {
       { id: '1', name: 'CEO Agent', status: 'active' },
       { id: '2', name: 'CTO Agent', status: 'idle' }
     ]
-    
+
     ;(apiClient.getAgents as jest.Mock).mockResolvedValue(mockAgents)
 
     render(
@@ -349,11 +347,13 @@ describe('AgentList', () => {
 ## Best Practices Summary
 
 1. **Always import from the unified client:**
+
    ```typescript
    import { apiClient } from '@/lib/api/client'
    ```
 
 2. **Use TypeScript types for better IDE support:**
+
    ```typescript
    import type { Agent, Workflow } from '@/lib/api/client'
    ```

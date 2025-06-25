@@ -1,7 +1,17 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Activity, Play, Pause, CheckCircle, AlertCircle, Clock, Users, StopCircle, X } from 'lucide-react'
+import {
+  Activity,
+  Play,
+  Pause,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  Users,
+  StopCircle,
+  X,
+} from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
@@ -14,7 +24,7 @@ const statusIcons: Record<string, React.ReactNode> = {
   pending: <Clock className="w-4 h-4 text-yellow-600" />,
   completed: <CheckCircle className="w-4 h-4 text-green-600" />,
   paused: <Pause className="w-4 h-4 text-gray-600" />,
-  failed: <AlertCircle className="w-4 h-4 text-red-600" />
+  failed: <AlertCircle className="w-4 h-4 text-red-600" />,
 }
 
 const statusColors: Record<string, string> = {
@@ -22,19 +32,21 @@ const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
   completed: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
   paused: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
-  failed: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+  failed: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
 }
 
 export default function WorkflowsPage() {
   const [showNewWorkflow, setShowNewWorkflow] = useState(false)
-  const [quickAction, setQuickAction] = useState<'drug_discovery' | 'production_scaleup' | 'quality_control' | null>(null)
+  const [quickAction, setQuickAction] = useState<
+    'drug_discovery' | 'production_scaleup' | 'quality_control' | null
+  >(null)
   const [selectedWorkflow, setSelectedWorkflow] = useState<any>(null)
   const queryClient = useQueryClient()
 
   const { data: workflows, isLoading } = useQuery({
     queryKey: ['workflows'],
     queryFn: () => apiClient.getWorkflows(),
-    refetchInterval: 300000 // 5 minutes - rely on WebSocket for real-time updates
+    refetchInterval: 300000, // 5 minutes - rely on WebSocket for real-time updates
   })
 
   // WebSocket connection for real-time updates
@@ -60,7 +72,7 @@ export default function WorkflowsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workflows'] })
-    }
+    },
   })
 
   if (isLoading) {
@@ -76,7 +88,7 @@ export default function WorkflowsPage() {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     })
   }
 
@@ -85,14 +97,12 @@ export default function WorkflowsPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Workflows
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Workflows</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               Monitor and manage biotech processes and experiments
             </p>
           </div>
-          <button 
+          <button
             onClick={() => setShowNewWorkflow(true)}
             className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
           >
@@ -122,7 +132,9 @@ export default function WorkflowsPage() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${statusColors[workflow.status]}`}>
+                  <span
+                    className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${statusColors[workflow.status]}`}
+                  >
                     {statusIcons[workflow.status]}
                     <span className="capitalize">{workflow.status}</span>
                   </span>
@@ -146,7 +158,9 @@ export default function WorkflowsPage() {
               {/* Workflow Stages */}
               {workflow.stages && (
                 <div className="mb-4">
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Stages</h4>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Stages
+                  </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                     {workflow.stages.map((stage: any, index: number) => (
                       <div
@@ -173,8 +187,10 @@ export default function WorkflowsPage() {
                 </div>
                 <div className="flex space-x-2">
                   {workflow.status === 'running' && (
-                    <button 
-                      onClick={() => updateWorkflowStatus.mutate({ workflowId: workflow.id, status: 'paused' })}
+                    <button
+                      onClick={() =>
+                        updateWorkflowStatus.mutate({ workflowId: workflow.id, status: 'paused' })
+                      }
                       className="px-3 py-1 text-sm text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded transition-colors flex items-center space-x-1"
                     >
                       <Pause className="w-3 h-3" />
@@ -182,8 +198,10 @@ export default function WorkflowsPage() {
                     </button>
                   )}
                   {workflow.status === 'paused' && (
-                    <button 
-                      onClick={() => updateWorkflowStatus.mutate({ workflowId: workflow.id, status: 'running' })}
+                    <button
+                      onClick={() =>
+                        updateWorkflowStatus.mutate({ workflowId: workflow.id, status: 'running' })
+                      }
                       className="px-3 py-1 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition-colors flex items-center space-x-1"
                     >
                       <Play className="w-3 h-3" />
@@ -191,15 +209,20 @@ export default function WorkflowsPage() {
                     </button>
                   )}
                   {(workflow.status === 'running' || workflow.status === 'paused') && (
-                    <button 
-                      onClick={() => updateWorkflowStatus.mutate({ workflowId: workflow.id, status: 'cancelled' })}
+                    <button
+                      onClick={() =>
+                        updateWorkflowStatus.mutate({
+                          workflowId: workflow.id,
+                          status: 'cancelled',
+                        })
+                      }
                       className="px-3 py-1 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors flex items-center space-x-1"
                     >
                       <StopCircle className="w-3 h-3" />
                       <span>Cancel</span>
                     </button>
                   )}
-                  <button 
+                  <button
                     onClick={() => setSelectedWorkflow(workflow)}
                     className="px-3 py-1 text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded transition-colors"
                   >
@@ -220,7 +243,7 @@ export default function WorkflowsPage() {
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               Create your first workflow to start automating biotech processes
             </p>
-            <button 
+            <button
               onClick={() => setShowNewWorkflow(true)}
               className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
             >
@@ -235,7 +258,7 @@ export default function WorkflowsPage() {
             Quick Actions
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button 
+            <button
               onClick={() => setQuickAction('drug_discovery')}
               className="p-4 text-left rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-300 dark:hover:border-primary-600 transition-colors"
             >
@@ -243,9 +266,11 @@ export default function WorkflowsPage() {
                 <Activity className="w-6 h-6" />
               </div>
               <h3 className="font-medium text-gray-900 dark:text-white">Drug Discovery</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Start a new drug discovery pipeline</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Start a new drug discovery pipeline
+              </p>
             </button>
-            <button 
+            <button
               onClick={() => setQuickAction('production_scaleup')}
               className="p-4 text-left rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-300 dark:hover:border-primary-600 transition-colors"
             >
@@ -253,9 +278,11 @@ export default function WorkflowsPage() {
                 <Activity className="w-6 h-6" />
               </div>
               <h3 className="font-medium text-gray-900 dark:text-white">Production Scale-up</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Scale manufacturing processes</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Scale manufacturing processes
+              </p>
             </button>
-            <button 
+            <button
               onClick={() => setQuickAction('quality_control')}
               className="p-4 text-left rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-300 dark:hover:border-primary-600 transition-colors"
             >
@@ -263,18 +290,17 @@ export default function WorkflowsPage() {
                 <Activity className="w-6 h-6" />
               </div>
               <h3 className="font-medium text-gray-900 dark:text-white">Quality Control</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Run QC protocols and testing</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Run QC protocols and testing
+              </p>
             </button>
           </div>
         </div>
       </div>
 
       {/* Modals */}
-      <NewWorkflowModal 
-        isOpen={showNewWorkflow} 
-        onClose={() => setShowNewWorkflow(false)} 
-      />
-      
+      <NewWorkflowModal isOpen={showNewWorkflow} onClose={() => setShowNewWorkflow(false)} />
+
       <QuickActionModal
         isOpen={!!quickAction}
         onClose={() => setQuickAction(null)}
@@ -301,28 +327,38 @@ export default function WorkflowsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Type</p>
-                  <p className="text-gray-900 dark:text-white capitalize">{selectedWorkflow.workflow_type}</p>
+                  <p className="text-gray-900 dark:text-white capitalize">
+                    {selectedWorkflow.workflow_type}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</p>
-                  <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${statusColors[selectedWorkflow.status]}`}>
+                  <span
+                    className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${statusColors[selectedWorkflow.status]}`}
+                  >
                     {statusIcons[selectedWorkflow.status]}
                     <span className="capitalize">{selectedWorkflow.status}</span>
                   </span>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Progress</p>
-                  <p className="text-gray-900 dark:text-white">{Math.round(selectedWorkflow.progress * 100)}%</p>
+                  <p className="text-gray-900 dark:text-white">
+                    {Math.round(selectedWorkflow.progress * 100)}%
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Created</p>
-                  <p className="text-gray-900 dark:text-white">{formatDate(selectedWorkflow.created_at)}</p>
+                  <p className="text-gray-900 dark:text-white">
+                    {formatDate(selectedWorkflow.created_at)}
+                  </p>
                 </div>
               </div>
 
               {selectedWorkflow.stages && selectedWorkflow.stages.length > 0 && (
                 <div className="border-t pt-4">
-                  <h3 className="font-medium text-gray-900 dark:text-white mb-3">Workflow Stages</h3>
+                  <h3 className="font-medium text-gray-900 dark:text-white mb-3">
+                    Workflow Stages
+                  </h3>
                   <div className="space-y-2">
                     {selectedWorkflow.stages.map((stage: any, index: number) => (
                       <div
@@ -355,7 +391,9 @@ export default function WorkflowsPage() {
                       {agent}
                     </span>
                   )) || (
-                    <span className="text-gray-500 dark:text-gray-400 text-sm">No agents assigned</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-sm">
+                      No agents assigned
+                    </span>
                   )}
                 </div>
               </div>

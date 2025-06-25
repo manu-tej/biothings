@@ -17,11 +17,13 @@ We've implemented a new high-performance WebSocket connection manager that repla
 ### 1. Update Imports
 
 **Old:**
+
 ```typescript
 import { useAgentStatusWebSocket } from '@/lib/hooks/useWebSocket'
 ```
 
 **New:**
+
 ```typescript
 import { useAgentStatusWebSocket } from '@/lib/websocket/hooks'
 ```
@@ -29,6 +31,7 @@ import { useAgentStatusWebSocket } from '@/lib/websocket/hooks'
 ### 2. Update Component Usage
 
 **Old Implementation:**
+
 ```typescript
 // In AgentOverview.tsx
 const { isConnected, connectionState } = useAgentStatusWebSocket((update) => {
@@ -41,6 +44,7 @@ const { isConnected, connectionState } = useAgentStatusWebSocket((update) => {
 ```
 
 **New Implementation:**
+
 ```typescript
 // In AgentOverview.tsx
 import { useAgentStatusWebSocket } from '@/lib/websocket/hooks'
@@ -59,12 +63,16 @@ const { isConnected, connectionState } = useAgentStatusWebSocket((update) => {
 If you need direct WebSocket access:
 
 **Old:**
+
 ```typescript
 const ws = new WebSocket('ws://localhost:8000/ws')
-ws.onmessage = (event) => { /* handle */ }
+ws.onmessage = (event) => {
+  /* handle */
+}
 ```
 
 **New:**
+
 ```typescript
 import { wsManager } from '@/lib/websocket/connection-manager'
 
@@ -82,34 +90,36 @@ unsubscribe()
 ### 4. Multiple Topic Subscriptions
 
 **New Feature - Not available in old system:**
+
 ```typescript
 import { useMultipleWebSockets } from '@/lib/websocket/hooks'
 
 const { connectionStates, lastMessages } = useMultipleWebSockets({
   agents: {
     topic: 'agent-status',
-    handler: (data) => console.log('Agent update:', data)
+    handler: (data) => console.log('Agent update:', data),
   },
   workflows: {
-    topic: 'workflow-updates', 
-    handler: (data) => console.log('Workflow update:', data)
+    topic: 'workflow-updates',
+    handler: (data) => console.log('Workflow update:', data),
   },
   alerts: {
     topic: 'alerts',
-    handler: (data) => console.log('Alert:', data)
-  }
+    handler: (data) => console.log('Alert:', data),
+  },
 })
 ```
 
 ### 5. Connection Monitoring
 
 **New Feature:**
+
 ```typescript
 import { useWebSocketInfo } from '@/lib/websocket/hooks'
 
 function ConnectionMonitor() {
   const connectionsInfo = useWebSocketInfo()
-  
+
   return (
     <div>
       {connectionsInfo.map(conn => (
@@ -130,6 +140,7 @@ function ConnectionMonitor() {
 ### Core Hooks
 
 #### `useWebSocket<T>(topic, handler, options?)`
+
 - **topic**: String - The topic to subscribe to
 - **handler**: Function - Called when messages arrive
 - **options**: Object (optional)
@@ -139,6 +150,7 @@ function ConnectionMonitor() {
   - `autoReconnect`: Boolean (default: true)
 
 Returns:
+
 - `connectionState`: 'connecting' | 'connected' | 'disconnected' | 'error'
 - `lastMessage`: The last received message
 - `sendMessage`: Function to send messages
@@ -184,27 +196,29 @@ wsManager.closeAll()
 ## Example: Complete Migration
 
 ### Before (Multiple Connections):
+
 ```typescript
 function Dashboard() {
   // 3 separate WebSocket connections!
   const { isConnected: agentsConnected } = useAgentStatusWebSocket(handleAgentUpdate)
   const { isConnected: workflowsConnected } = useWorkflowWebSocket(handleWorkflowUpdate)
   const { isConnected: alertsConnected } = useAlertsWebSocket(handleAlert)
-  
+
   // Each component creates its own connection
 }
 ```
 
 ### After (Pooled Connections):
+
 ```typescript
 function Dashboard() {
   // All share the same connection pool!
   const { connectionStates } = useMultipleWebSockets({
     agents: { topic: 'agent-status', handler: handleAgentUpdate },
     workflows: { topic: 'workflow-updates', handler: handleWorkflowUpdate },
-    alerts: { topic: 'alerts', handler: handleAlert }
+    alerts: { topic: 'alerts', handler: handleAlert },
   })
-  
+
   // Max 3 connections total, messages are multiplexed
 }
 ```
@@ -212,6 +226,7 @@ function Dashboard() {
 ## Troubleshooting
 
 ### Connection Issues
+
 ```typescript
 // Check connection state
 const info = wsManager.getConnectionsInfo()
@@ -223,12 +238,14 @@ wsManager.closeAll()
 ```
 
 ### Message Not Received
+
 1. Check topic name matches exactly
 2. Verify connection state is 'connected'
 3. Check browser console for errors
 4. Use `connectionState` from hook to debug
 
 ### Performance Issues
+
 1. Reduce number of topics
 2. Batch message sends
 3. Use message throttling/debouncing
@@ -237,12 +254,14 @@ wsManager.closeAll()
 ## Backend Requirements
 
 The backend WebSocket endpoint should support:
+
 1. Topic-based routing
 2. Ping/pong heartbeat
 3. Subscribe/unsubscribe messages
 4. Message format: `{ topic, data, timestamp }`
 
 Example backend message:
+
 ```json
 {
   "topic": "agent-status",

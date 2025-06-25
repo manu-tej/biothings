@@ -6,17 +6,16 @@ import { useState } from 'react'
 
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 
-
 // Hooks
 import { EquipmentFilters } from '@/components/laboratory/equipment/EquipmentFilters'
 import { EquipmentGrid } from '@/components/laboratory/equipment/EquipmentGrid'
 import { ExperimentCard } from '@/components/laboratory/experiments/ExperimentCard'
 import { NewExperimentModal } from '@/components/laboratory/experiments/NewExperimentModal'
-import { 
-  useExperiments, 
-  useEquipment, 
-  useAnalysisResults, 
-  useSimulations 
+import {
+  useExperiments,
+  useEquipment,
+  useAnalysisResults,
+  useSimulations,
 } from '@/lib/laboratory/hooks'
 
 // Components
@@ -24,33 +23,35 @@ import {
 // Lazy load heavy components
 const DataAnalysisPanel = dynamic(
   () => import('@/components/laboratory/data-analysis/DataAnalysisPanel'),
-  { 
+  {
     loading: () => <div className="h-96 bg-gray-100 dark:bg-gray-700 animate-pulse rounded-lg" />,
-    ssr: false 
+    ssr: false,
   }
 )
 
 const SimulationPanel = dynamic(
   () => import('@/components/laboratory/simulation/SimulationPanel'),
-  { 
+  {
     loading: () => <div className="h-96 bg-gray-100 dark:bg-gray-700 animate-pulse rounded-lg" />,
-    ssr: false 
+    ssr: false,
   }
 )
 
 export default function LaboratoryPageRefactored() {
-  const [activeTab, setActiveTab] = useState<'experiments' | 'equipment' | 'analysis' | 'simulation'>('experiments')
+  const [activeTab, setActiveTab] = useState<
+    'experiments' | 'equipment' | 'analysis' | 'simulation'
+  >('experiments')
   const [showNewExperiment, setShowNewExperiment] = useState(false)
   const [selectedExperiment, setSelectedExperiment] = useState<string | null>(null)
 
   // Data hooks
-  const { 
-    experiments, 
-    activeExperiments, 
+  const {
+    experiments,
+    activeExperiments,
     completedExperiments,
     isLoading: experimentsLoading,
     createExperiment,
-    updateExperimentStatus
+    updateExperimentStatus,
   } = useExperiments()
 
   const {
@@ -58,16 +59,12 @@ export default function LaboratoryPageRefactored() {
     availableEquipment,
     filters,
     updateFilters,
-    isLoading: equipmentLoading
+    isLoading: equipmentLoading,
   } = useEquipment()
 
   const { results: analysisResults } = useAnalysisResults(selectedExperiment || undefined)
-  
-  const { 
-    simulations,
-    activeSimulations,
-    runSimulation 
-  } = useSimulations()
+
+  const { simulations, activeSimulations, runSimulation } = useSimulations()
 
   const handleCreateExperiment = async (data: any) => {
     await createExperiment.mutateAsync(data)
@@ -76,13 +73,13 @@ export default function LaboratoryPageRefactored() {
 
   const stats = {
     activeExperiments: activeExperiments.length,
-    completedToday: completedExperiments.filter(e => {
+    completedToday: completedExperiments.filter((e) => {
       const completed = new Date(e.end_date || '')
       const today = new Date()
       return completed.toDateString() === today.toDateString()
     }).length,
-    equipmentInUse: filteredEquipment.filter(e => e.status === 'in_use').length,
-    activeSimulations: activeSimulations.length
+    equipmentInUse: filteredEquipment.filter((e) => e.status === 'in_use').length,
+    activeSimulations: activeSimulations.length,
   }
 
   return (
@@ -91,14 +88,12 @@ export default function LaboratoryPageRefactored() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Laboratory
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Laboratory</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               Manage experiments, equipment, and analysis
             </p>
           </div>
-          <button 
+          <button
             onClick={() => setShowNewExperiment(true)}
             className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center"
           >
@@ -165,16 +160,17 @@ export default function LaboratoryPageRefactored() {
               { id: 'experiments', label: 'Experiments', icon: Beaker },
               { id: 'equipment', label: 'Equipment', icon: Wrench },
               { id: 'analysis', label: 'Data Analysis', icon: BarChart3 },
-              { id: 'simulation', label: 'Simulations', icon: Brain }
-            ].map(tab => (
+              { id: 'simulation', label: 'Simulations', icon: Brain },
+            ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`
                   flex items-center py-2 px-1 border-b-2 font-medium text-sm
-                  ${activeTab === tab.id
-                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                  ${
+                    activeTab === tab.id
+                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
                   }
                 `}
               >
@@ -193,22 +189,23 @@ export default function LaboratoryPageRefactored() {
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Active Experiments
               </h2>
-              
+
               {experimentsLoading ? (
                 <div className="grid gap-4">
                   {[...Array(3)].map((_, i) => (
-                    <div key={i} className="animate-pulse bg-gray-200 dark:bg-gray-700 h-32 rounded-lg" />
+                    <div
+                      key={i}
+                      className="animate-pulse bg-gray-200 dark:bg-gray-700 h-32 rounded-lg"
+                    />
                   ))}
                 </div>
               ) : activeExperiments.length > 0 ? (
                 <div className="grid gap-4">
-                  {activeExperiments.map(experiment => (
+                  {activeExperiments.map((experiment) => (
                     <ExperimentCard
                       key={experiment.id}
                       experiment={experiment}
-                      onStatusUpdate={(id, status) => 
-                        updateExperimentStatus.mutate({ id, status })
-                      }
+                      onStatusUpdate={(id, status) => updateExperimentStatus.mutate({ id, status })}
                       onViewDetails={(exp) => {
                         setSelectedExperiment(exp.id)
                         setActiveTab('analysis')
@@ -220,7 +217,7 @@ export default function LaboratoryPageRefactored() {
                 <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <Beaker className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                   <p className="text-gray-600 dark:text-gray-400">No active experiments</p>
-                  <button 
+                  <button
                     onClick={() => setShowNewExperiment(true)}
                     className="mt-4 text-primary-600 dark:text-primary-400 hover:underline"
                   >
@@ -234,14 +231,8 @@ export default function LaboratoryPageRefactored() {
           {/* Equipment Tab */}
           {activeTab === 'equipment' && (
             <div>
-              <EquipmentFilters 
-                filters={filters}
-                onFiltersChange={updateFilters}
-              />
-              <EquipmentGrid 
-                equipment={filteredEquipment}
-                loading={equipmentLoading}
-              />
+              <EquipmentFilters filters={filters} onFiltersChange={updateFilters} />
+              <EquipmentGrid equipment={filteredEquipment} loading={equipmentLoading} />
             </div>
           )}
 
@@ -272,7 +263,7 @@ export default function LaboratoryPageRefactored() {
         onClose={() => setShowNewExperiment(false)}
         onSubmit={handleCreateExperiment}
         availableAgents={['Research Agent 1', 'Research Agent 2', 'Lab Assistant']}
-        availableEquipment={availableEquipment.map(eq => ({ id: eq.id, name: eq.name }))}
+        availableEquipment={availableEquipment.map((eq) => ({ id: eq.id, name: eq.name }))}
       />
     </DashboardLayout>
   )

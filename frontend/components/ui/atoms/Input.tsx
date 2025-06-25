@@ -1,45 +1,45 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import { Search, X, AlertCircle, Check } from 'lucide-react';
-import React, { forwardRef, InputHTMLAttributes, useState } from 'react';
+import { clsx } from 'clsx'
+import { Search, X, AlertCircle, Check } from 'lucide-react'
+import React, { forwardRef, InputHTMLAttributes, useState } from 'react'
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  variant?: 'default' | 'search' | 'number';
-  inputSize?: 'sm' | 'md' | 'lg';
-  state?: 'default' | 'error' | 'success' | 'warning';
-  label?: string;
-  hint?: string;
-  error?: string;
-  success?: string;
-  warning?: string;
-  icon?: React.ReactNode;
-  iconPosition?: 'left' | 'right';
-  clearable?: boolean;
-  onClear?: () => void;
-  fullWidth?: boolean;
-  rounded?: boolean;
-  testId?: string;
+  variant?: 'default' | 'search' | 'number'
+  inputSize?: 'sm' | 'md' | 'lg'
+  state?: 'default' | 'error' | 'success' | 'warning'
+  label?: string
+  hint?: string
+  error?: string
+  success?: string
+  warning?: string
+  icon?: React.ReactNode
+  iconPosition?: 'left' | 'right'
+  clearable?: boolean
+  onClear?: () => void
+  fullWidth?: boolean
+  rounded?: boolean
+  testId?: string
 }
 
 const sizeStyles = {
   sm: 'px-3 py-1.5 text-sm',
   md: 'px-4 py-2 text-base',
   lg: 'px-5 py-3 text-lg',
-};
+}
 
 const iconSizeStyles = {
   sm: 'w-4 h-4',
   md: 'w-5 h-5',
   lg: 'w-6 h-6',
-};
+}
 
 const stateStyles = {
   default: 'border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600',
   error: 'border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-400',
   success: 'border-green-500 focus:border-green-500 focus:ring-green-500 dark:border-green-400',
   warning: 'border-yellow-500 focus:border-yellow-500 focus:ring-yellow-500 dark:border-yellow-400',
-};
+}
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
@@ -67,30 +67,35 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     },
     ref
   ) => {
-    const [internalValue, setInternalValue] = useState(value || '');
-    const hasValue = clearable && (value !== undefined ? value : internalValue);
-    
+    const [internalValue, setInternalValue] = useState(value || '')
+    const hasValue = clearable && (value !== undefined ? value : internalValue)
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!value) {
-        setInternalValue(e.target.value);
+        setInternalValue(e.target.value)
       }
-      onChange?.(e);
-    };
+      onChange?.(e)
+    }
 
     const handleClear = () => {
       if (!value) {
-        setInternalValue('');
+        setInternalValue('')
       }
-      onClear?.();
-    };
+      onClear?.()
+    }
 
-    const variantIcon = variant === 'search' ? <Search /> : icon;
-    const stateIcon = state === 'error' ? <AlertCircle /> : 
-                     state === 'success' ? <Check /> : 
-                     state === 'warning' ? <AlertCircle /> : null;
+    const variantIcon = variant === 'search' ? <Search /> : icon
+    const stateIcon =
+      state === 'error' ? (
+        <AlertCircle />
+      ) : state === 'success' ? (
+        <Check />
+      ) : state === 'warning' ? (
+        <AlertCircle />
+      ) : null
 
-    const displayIcon = variantIcon || (iconPosition === 'right' && stateIcon);
-    const rightIcon = stateIcon || (clearable && hasValue);
+    const displayIcon = variantIcon || (iconPosition === 'right' && stateIcon)
+    const rightIcon = stateIcon || (clearable && hasValue)
 
     const inputStyles = clsx(
       'block border bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100',
@@ -104,13 +109,16 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       rightIcon && 'pr-10',
       fullWidth && 'w-full',
       className
-    );
+    )
 
-    const message = error || success || warning || hint;
-    const messageColor = error ? 'text-red-600 dark:text-red-400' :
-                        success ? 'text-green-600 dark:text-green-400' :
-                        warning ? 'text-yellow-600 dark:text-yellow-400' :
-                        'text-gray-600 dark:text-gray-400';
+    const message = error || success || warning || hint
+    const messageColor = error
+      ? 'text-red-600 dark:text-red-400'
+      : success
+        ? 'text-green-600 dark:text-green-400'
+        : warning
+          ? 'text-yellow-600 dark:text-yellow-400'
+          : 'text-gray-600 dark:text-gray-400'
 
     return (
       <div className={clsx(fullWidth && 'w-full')}>
@@ -121,10 +129,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative">
           {displayIcon && iconPosition === 'left' && (
-            <div className={clsx(
-              'absolute left-3 top-1/2 -translate-y-1/2 text-gray-400',
-              iconSizeStyles[inputSize]
-            )}>
+            <div
+              className={clsx(
+                'absolute left-3 top-1/2 -translate-y-1/2 text-gray-400',
+                iconSizeStyles[inputSize]
+              )}
+            >
               {displayIcon}
             </div>
           )}
@@ -143,12 +153,18 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           {rightIcon && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
               {stateIcon && !clearable && (
-                <span className={clsx(
-                  iconSizeStyles[inputSize],
-                  state === 'error' ? 'text-red-500' :
-                  state === 'success' ? 'text-green-500' :
-                  state === 'warning' ? 'text-yellow-500' : ''
-                )}>
+                <span
+                  className={clsx(
+                    iconSizeStyles[inputSize],
+                    state === 'error'
+                      ? 'text-red-500'
+                      : state === 'success'
+                        ? 'text-green-500'
+                        : state === 'warning'
+                          ? 'text-yellow-500'
+                          : ''
+                  )}
+                >
                   {stateIcon}
                 </span>
               )}
@@ -170,16 +186,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {message && (
-          <p 
-            id={`${testId}-message`}
-            className={clsx('mt-1 text-sm', messageColor)}
-          >
+          <p id={`${testId}-message`} className={clsx('mt-1 text-sm', messageColor)}>
             {message}
           </p>
         )}
       </div>
-    );
+    )
   }
-);
+)
 
-Input.displayName = 'Input';
+Input.displayName = 'Input'

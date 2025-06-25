@@ -5,6 +5,7 @@ This document summarizes the React performance optimizations that were applied t
 ## 1. Fixed React.memo Comparison in Dashboard Page
 
 ### Before:
+
 ```typescript
 }, (prevProps, nextProps) => {
   // Custom comparison function for React.memo optimization
@@ -14,6 +15,7 @@ This document summarizes the React performance optimizations that were applied t
 ```
 
 ### After:
+
 ```typescript
 }, (prevProps, nextProps) => {
   // Custom comparison function for React.memo optimization using deep comparison
@@ -27,28 +29,36 @@ This document summarizes the React performance optimizations that were applied t
 ## 2. Optimized Chart Options in SystemHealthWidget
 
 ### Before:
+
 ```typescript
-const chartData = useMemo(() => ({
-  // Static chart configuration
-}), []);
+const chartData = useMemo(
+  () => ({
+    // Static chart configuration
+  }),
+  []
+)
 ```
 
 ### After:
+
 ```typescript
-const chartData = useMemo(() => ({
-  // Chart configuration with dynamic data
-  series: [
-    {
-      name: 'CPU Usage',
-      data: performanceData?.cpuHistory || [45, 52, 48, 55, 50],
-    },
-    {
-      name: 'Memory Usage',
-      data: performanceData?.memoryHistory || [62, 68, 65, 72, 70],
-    }
-  ],
-  // Additional optimization options
-}), [performanceData]);
+const chartData = useMemo(
+  () => ({
+    // Chart configuration with dynamic data
+    series: [
+      {
+        name: 'CPU Usage',
+        data: performanceData?.cpuHistory || [45, 52, 48, 55, 50],
+      },
+      {
+        name: 'Memory Usage',
+        data: performanceData?.memoryHistory || [62, 68, 65, 72, 70],
+      },
+    ],
+    // Additional optimization options
+  }),
+  [performanceData]
+)
 ```
 
 **Improvement**: Added proper dependencies to `useMemo` and incorporated dynamic performance data into the chart. This ensures the chart only re-renders when the performance data actually changes.
@@ -56,36 +66,39 @@ const chartData = useMemo(() => ({
 ## 3. Fixed Performance Monitoring Intervals
 
 ### Before:
+
 ```typescript
 useEffect(() => {
   const interval = setInterval(() => {
     // monitoring logic
-  }, 2000);
-  
-  return () => clearInterval(interval);
-}, []);
+  }, 2000)
+
+  return () => clearInterval(interval)
+}, [])
 ```
 
 ### After:
+
 ```typescript
 useEffect(() => {
-  let intervalId: NodeJS.Timeout | null = null;
-  
+  let intervalId: NodeJS.Timeout | null = null
+
   const monitorPerformance = () => {
     // monitoring logic
-  };
-  
-  intervalId = setInterval(monitorPerformance, 2000);
+  }
+
+  intervalId = setInterval(monitorPerformance, 2000)
 
   return () => {
     if (intervalId) {
-      clearInterval(intervalId);
+      clearInterval(intervalId)
     }
-  };
-}, []);
+  }
+}, [])
 ```
 
-**Improvement**: 
+**Improvement**:
+
 - Added proper null checks before clearing intervals
 - Stored interval IDs in properly typed variables
 - Added performance history tracking for charts
@@ -96,40 +109,49 @@ useEffect(() => {
 ### Key Optimizations:
 
 1. **Memoized Search Filter Function**:
+
 ```typescript
 const filterBySearch = useCallback((workflow: WorkflowListItem, query: string) => {
   // Search logic
-}, []);
+}, [])
 ```
 
 2. **Memoized Sort Comparator**:
+
 ```typescript
-const sortComparator = useCallback((a: WorkflowListItem, b: WorkflowListItem) => {
-  // Sort logic
-}, [sortField, sortDirection]);
+const sortComparator = useCallback(
+  (a: WorkflowListItem, b: WorkflowListItem) => {
+    // Sort logic
+  },
+  [sortField, sortDirection]
+)
 ```
 
 3. **Memoized Total Pages Calculation**:
+
 ```typescript
-const totalPages = useMemo(() => 
-  Math.ceil(processedWorkflows.length / pageSize),
+const totalPages = useMemo(
+  () => Math.ceil(processedWorkflows.length / pageSize),
   [processedWorkflows.length, pageSize]
-);
+)
 ```
 
 4. **Memoized Selection State**:
+
 ```typescript
 const { allCurrentPageSelected, someCurrentPageSelected } = useMemo(() => {
   // Selection state calculations
-}, [paginatedWorkflows, selectedWorkflows]);
+}, [paginatedWorkflows, selectedWorkflows])
 ```
 
 5. **Memoized Render Functions**:
+
 - `renderHeader` with proper dependencies
-- `renderContent` with proper dependencies  
+- `renderContent` with proper dependencies
 - `renderPagination` with proper dependencies
 
 **Improvements**:
+
 - Prevents unnecessary recalculations of expensive operations
 - Optimizes sorting and filtering operations
 - Reduces re-renders by memoizing render functions

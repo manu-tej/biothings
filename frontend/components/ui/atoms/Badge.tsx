@@ -1,18 +1,18 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import React, { forwardRef, HTMLAttributes } from 'react';
+import { clsx } from 'clsx'
+import React, { forwardRef, HTMLAttributes } from 'react'
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
-  size?: 'xs' | 'sm' | 'md' | 'lg';
-  rounded?: boolean;
-  outline?: boolean;
-  dot?: boolean;
-  dotColor?: string;
-  icon?: React.ReactNode;
-  iconPosition?: 'left' | 'right';
-  testId?: string;
+  variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info'
+  size?: 'xs' | 'sm' | 'md' | 'lg'
+  rounded?: boolean
+  outline?: boolean
+  dot?: boolean
+  dotColor?: string
+  icon?: React.ReactNode
+  iconPosition?: 'left' | 'right'
+  testId?: string
 }
 
 const variantStyles = {
@@ -44,14 +44,14 @@ const variantStyles = {
     solid: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200',
     outline: 'border-blue-300 text-blue-700 dark:border-blue-600 dark:text-blue-300',
   },
-};
+}
 
 const sizeStyles = {
   xs: 'text-xs px-2 py-0.5',
   sm: 'text-sm px-2.5 py-0.5',
   md: 'text-sm px-3 py-1',
   lg: 'text-base px-4 py-1.5',
-};
+}
 
 const dotColors = {
   default: 'bg-gray-400',
@@ -61,7 +61,7 @@ const dotColors = {
   warning: 'bg-yellow-400',
   danger: 'bg-red-400',
   info: 'bg-blue-400',
-};
+}
 
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   (
@@ -88,7 +88,7 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
       outline ? variantStyles[variant].outline : variantStyles[variant].solid,
       sizeStyles[size],
       className
-    );
+    )
 
     const dotElement = dot && (
       <span
@@ -99,7 +99,7 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
           iconPosition === 'right' && children ? 'ml-1.5' : ''
         )}
       />
-    );
+    )
 
     const iconElement = icon && (
       <span
@@ -111,15 +111,10 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
       >
         {icon}
       </span>
-    );
+    )
 
     return (
-      <span
-        ref={ref}
-        className={baseStyles}
-        data-testid={testId}
-        {...props}
-      >
+      <span ref={ref} className={baseStyles} data-testid={testId} {...props}>
         {(dot || icon) && iconPosition === 'left' && (
           <>
             {dot && dotElement}
@@ -134,16 +129,16 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
           </>
         )}
       </span>
-    );
+    )
   }
-);
+)
 
-Badge.displayName = 'Badge';
+Badge.displayName = 'Badge'
 
 // Compound component for badge groups
 export interface BadgeGroupProps extends HTMLAttributes<HTMLDivElement> {
-  spacing?: 'xs' | 'sm' | 'md' | 'lg';
-  wrap?: boolean;
+  spacing?: 'xs' | 'sm' | 'md' | 'lg'
+  wrap?: boolean
 }
 
 export const BadgeGroup = forwardRef<HTMLDivElement, BadgeGroupProps>(
@@ -153,7 +148,7 @@ export const BadgeGroup = forwardRef<HTMLDivElement, BadgeGroupProps>(
       sm: 'gap-2',
       md: 'gap-3',
       lg: 'gap-4',
-    };
+    }
 
     return (
       <div
@@ -166,8 +161,8 @@ export const BadgeGroup = forwardRef<HTMLDivElement, BadgeGroupProps>(
         )}
         {...props}
       />
-    );
+    )
   }
-);
+)
 
-BadgeGroup.displayName = 'BadgeGroup';
+BadgeGroup.displayName = 'BadgeGroup'

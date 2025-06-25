@@ -37,11 +37,7 @@
         },
         "phase3": {
           "timeline": "4 weeks",
-          "tasks": [
-            "Tree-shake imports",
-            "Implement service worker",
-            "Add request batching"
-          ],
+          "tasks": ["Tree-shake imports", "Implement service worker", "Add request batching"],
           "expected_impact": "40% improvement"
         }
       }

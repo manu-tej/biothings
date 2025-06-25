@@ -1,65 +1,65 @@
-'use client';
+'use client'
 
-import { clsx } from 'clsx';
-import { 
-  Bell, 
-  BellOff, 
-  X, 
-  Check, 
-  AlertCircle, 
-  Info, 
-  CheckCircle, 
+import { clsx } from 'clsx'
+import {
+  Bell,
+  BellOff,
+  X,
+  Check,
+  AlertCircle,
+  Info,
+  CheckCircle,
   XCircle,
   Settings,
   Search,
-  Trash2
-} from 'lucide-react';
-import React, { forwardRef, useState, useMemo, useCallback, useEffect } from 'react';
+  Trash2,
+} from 'lucide-react'
+import React, { forwardRef, useState, useMemo, useCallback, useEffect } from 'react'
 
-import { Badge } from '../atoms/Badge';
-import { Button } from '../atoms/Button';
-import { Card } from '../atoms/Card';
-import { Checkbox } from '../atoms/Checkbox';
-import { Input } from '../atoms/Input';
-import { Select, SelectOption } from '../atoms/Select';
-import { Tooltip } from '../atoms/Tooltip';
+import { Badge } from '../atoms/Badge'
+import { Button } from '../atoms/Button'
+import { Card } from '../atoms/Card'
+import { Checkbox } from '../atoms/Checkbox'
+import { Input } from '../atoms/Input'
+import { Select, SelectOption } from '../atoms/Select'
+import { Tooltip } from '../atoms/Tooltip'
 
 export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  timestamp: Date;
-  read: boolean;
-  persistent?: boolean;
+  id: string
+  title: string
+  message: string
+  type: 'info' | 'success' | 'warning' | 'error'
+  timestamp: Date
+  read: boolean
+  persistent?: boolean
   actions?: {
-    label: string;
-    action: () => void;
-    variant?: 'primary' | 'secondary' | 'danger';
-  }[];
-  source?: string;
-  category?: string;
-  priority?: 'low' | 'medium' | 'high' | 'urgent';
-  metadata?: Record<string, any>;
+    label: string
+    action: () => void
+    variant?: 'primary' | 'secondary' | 'danger'
+  }[]
+  source?: string
+  category?: string
+  priority?: 'low' | 'medium' | 'high' | 'urgent'
+  metadata?: Record<string, any>
 }
 
 export interface NotificationCenterProps {
-  notifications: Notification[];
-  onNotificationUpdate?: (notification: Partial<Notification> & { id: string }) => void;
-  onNotificationRemove?: (notificationId: string) => void;
-  onNotificationsClear?: (filter?: 'all' | 'read' | 'unread') => void;
-  onMarkAllRead?: () => void;
-  maxHeight?: number;
-  showSearch?: boolean;
-  showFilters?: boolean;
-  groupByDate?: boolean;
-  groupByCategory?: boolean;
-  autoMarkReadOnView?: boolean;
-  dismissTimeout?: number;
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'center';
-  variant?: 'popover' | 'sidebar' | 'inline';
-  className?: string;
-  testId?: string;
+  notifications: Notification[]
+  onNotificationUpdate?: (notification: Partial<Notification> & { id: string }) => void
+  onNotificationRemove?: (notificationId: string) => void
+  onNotificationsClear?: (filter?: 'all' | 'read' | 'unread') => void
+  onMarkAllRead?: () => void
+  maxHeight?: number
+  showSearch?: boolean
+  showFilters?: boolean
+  groupByDate?: boolean
+  groupByCategory?: boolean
+  autoMarkReadOnView?: boolean
+  dismissTimeout?: number
+  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'center'
+  variant?: 'popover' | 'sidebar' | 'inline'
+  className?: string
+  testId?: string
 }
 
 const typeIcons = {
@@ -67,27 +67,27 @@ const typeIcons = {
   success: CheckCircle,
   warning: AlertCircle,
   error: XCircle,
-};
+}
 
 const typeVariants = {
   info: 'info' as const,
   success: 'success' as const,
   warning: 'warning' as const,
   error: 'danger' as const,
-};
+}
 
 const priorityColors = {
   low: 'text-gray-500',
   medium: 'text-blue-500',
   high: 'text-orange-500',
   urgent: 'text-red-500',
-};
+}
 
 const filterOptions: SelectOption[] = [
   { value: 'all', label: 'All Notifications' },
   { value: 'unread', label: 'Unread Only' },
   { value: 'read', label: 'Read Only' },
-];
+]
 
 const typeFilterOptions: SelectOption[] = [
   { value: '', label: 'All Types' },
@@ -95,7 +95,7 @@ const typeFilterOptions: SelectOption[] = [
   { value: 'success', label: 'Success' },
   { value: 'warning', label: 'Warning' },
   { value: 'error', label: 'Error' },
-];
+]
 
 export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterProps>(
   (
@@ -119,148 +119,170 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
     },
     ref
   ) => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [typeFilter, setTypeFilter] = useState('');
-    const [selectedNotifications, setSelectedNotifications] = useState<Set<string>>(new Set());
-    const [isExpanded, setIsExpanded] = useState(variant === 'inline');
+    const [searchQuery, setSearchQuery] = useState('')
+    const [statusFilter, setStatusFilter] = useState('all')
+    const [typeFilter, setTypeFilter] = useState('')
+    const [selectedNotifications, setSelectedNotifications] = useState<Set<string>>(new Set())
+    const [isExpanded, setIsExpanded] = useState(variant === 'inline')
 
     // Auto-dismiss notifications
     useEffect(() => {
-      if (dismissTimeout <= 0) return;
+      if (dismissTimeout <= 0) return
 
       const timers = notifications
-        .filter(notification => !notification.persistent && !notification.read)
-        .map(notification => {
-          const timeElapsed = Date.now() - notification.timestamp.getTime();
-          const remainingTime = Math.max(0, dismissTimeout - timeElapsed);
-          
+        .filter((notification) => !notification.persistent && !notification.read)
+        .map((notification) => {
+          const timeElapsed = Date.now() - notification.timestamp.getTime()
+          const remainingTime = Math.max(0, dismissTimeout - timeElapsed)
+
           return setTimeout(() => {
             if (autoMarkReadOnView) {
-              onNotificationUpdate?.({ id: notification.id, read: true });
+              onNotificationUpdate?.({ id: notification.id, read: true })
             } else {
-              onNotificationRemove?.(notification.id);
+              onNotificationRemove?.(notification.id)
             }
-          }, remainingTime);
-        });
+          }, remainingTime)
+        })
 
       return () => {
-        timers.forEach(timer => clearTimeout(timer));
-      };
-    }, [notifications, dismissTimeout, autoMarkReadOnView, onNotificationUpdate, onNotificationRemove]);
+        timers.forEach((timer) => clearTimeout(timer))
+      }
+    }, [
+      notifications,
+      dismissTimeout,
+      autoMarkReadOnView,
+      onNotificationUpdate,
+      onNotificationRemove,
+    ])
 
     // Filter and group notifications
     const { filteredNotifications, groupedNotifications } = useMemo(() => {
-      let filtered = notifications;
+      let filtered = notifications
 
       // Search filter
       if (searchQuery) {
-        filtered = filtered.filter(notification =>
-          notification.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          notification.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          notification.source?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          notification.category?.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        filtered = filtered.filter(
+          (notification) =>
+            notification.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            notification.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            notification.source?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            notification.category?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
       }
 
       // Status filter
       if (statusFilter === 'read') {
-        filtered = filtered.filter(notification => notification.read);
+        filtered = filtered.filter((notification) => notification.read)
       } else if (statusFilter === 'unread') {
-        filtered = filtered.filter(notification => !notification.read);
+        filtered = filtered.filter((notification) => !notification.read)
       }
 
       // Type filter
       if (typeFilter) {
-        filtered = filtered.filter(notification => notification.type === typeFilter);
+        filtered = filtered.filter((notification) => notification.type === typeFilter)
       }
 
       // Sort by timestamp (newest first)
-      filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
 
       // Group notifications
-      const grouped: Record<string, Notification[]> = {};
+      const grouped: Record<string, Notification[]> = {}
 
       if (groupByCategory) {
-        filtered.forEach(notification => {
-          const key = notification.category || 'Other';
-          if (!grouped[key]) grouped[key] = [];
-          grouped[key].push(notification);
-        });
+        filtered.forEach((notification) => {
+          const key = notification.category || 'Other'
+          if (!grouped[key]) grouped[key] = []
+          grouped[key].push(notification)
+        })
       } else if (groupByDate) {
-        filtered.forEach(notification => {
-          const date = notification.timestamp.toDateString();
-          if (!grouped[date]) grouped[date] = [];
-          grouped[date].push(notification);
-        });
+        filtered.forEach((notification) => {
+          const date = notification.timestamp.toDateString()
+          if (!grouped[date]) grouped[date] = []
+          grouped[date].push(notification)
+        })
       } else {
-        grouped['All'] = filtered;
+        grouped['All'] = filtered
       }
 
-      return { filteredNotifications: filtered, groupedNotifications: grouped };
-    }, [notifications, searchQuery, statusFilter, typeFilter, groupByDate, groupByCategory]);
+      return { filteredNotifications: filtered, groupedNotifications: grouped }
+    }, [notifications, searchQuery, statusFilter, typeFilter, groupByDate, groupByCategory])
 
-    const unreadCount = notifications.filter(n => !n.read).length;
+    const unreadCount = notifications.filter((n) => !n.read).length
 
-    const handleNotificationClick = useCallback((notification: Notification) => {
-      if (!notification.read && autoMarkReadOnView) {
-        onNotificationUpdate?.({ id: notification.id, read: true });
-      }
-    }, [autoMarkReadOnView, onNotificationUpdate]);
-
-    const handleNotificationAction = useCallback((notificationId: string, action: () => void) => {
-      action();
-      // Optionally mark as read after action
-      onNotificationUpdate?.({ id: notificationId, read: true });
-    }, [onNotificationUpdate]);
-
-    const handleSelectNotification = useCallback((notificationId: string, selected: boolean) => {
-      const newSelection = new Set(selectedNotifications);
-      if (selected) {
-        newSelection.add(notificationId);
-      } else {
-        newSelection.delete(notificationId);
-      }
-      setSelectedNotifications(newSelection);
-    }, [selectedNotifications]);
-
-    const handleSelectAll = useCallback((selected: boolean) => {
-      if (selected) {
-        const allIds = new Set(filteredNotifications.map(n => n.id));
-        setSelectedNotifications(allIds);
-      } else {
-        setSelectedNotifications(new Set());
-      }
-    }, [filteredNotifications]);
-
-    const handleBulkAction = useCallback((action: 'read' | 'unread' | 'remove' | 'archive') => {
-      const selectedIds = Array.from(selectedNotifications);
-      
-      selectedIds.forEach(id => {
-        switch (action) {
-          case 'read':
-            onNotificationUpdate?.({ id, read: true });
-            break;
-          case 'unread':
-            onNotificationUpdate?.({ id, read: false });
-            break;
-          case 'remove':
-            onNotificationRemove?.(id);
-            break;
-          case 'archive':
-            // Custom archive logic
-            onNotificationUpdate?.({ id, read: true, metadata: { archived: true } });
-            break;
+    const handleNotificationClick = useCallback(
+      (notification: Notification) => {
+        if (!notification.read && autoMarkReadOnView) {
+          onNotificationUpdate?.({ id: notification.id, read: true })
         }
-      });
-      
-      setSelectedNotifications(new Set());
-    }, [selectedNotifications, onNotificationUpdate, onNotificationRemove]);
+      },
+      [autoMarkReadOnView, onNotificationUpdate]
+    )
+
+    const handleNotificationAction = useCallback(
+      (notificationId: string, action: () => void) => {
+        action()
+        // Optionally mark as read after action
+        onNotificationUpdate?.({ id: notificationId, read: true })
+      },
+      [onNotificationUpdate]
+    )
+
+    const handleSelectNotification = useCallback(
+      (notificationId: string, selected: boolean) => {
+        const newSelection = new Set(selectedNotifications)
+        if (selected) {
+          newSelection.add(notificationId)
+        } else {
+          newSelection.delete(notificationId)
+        }
+        setSelectedNotifications(newSelection)
+      },
+      [selectedNotifications]
+    )
+
+    const handleSelectAll = useCallback(
+      (selected: boolean) => {
+        if (selected) {
+          const allIds = new Set(filteredNotifications.map((n) => n.id))
+          setSelectedNotifications(allIds)
+        } else {
+          setSelectedNotifications(new Set())
+        }
+      },
+      [filteredNotifications]
+    )
+
+    const handleBulkAction = useCallback(
+      (action: 'read' | 'unread' | 'remove' | 'archive') => {
+        const selectedIds = Array.from(selectedNotifications)
+
+        selectedIds.forEach((id) => {
+          switch (action) {
+            case 'read':
+              onNotificationUpdate?.({ id, read: true })
+              break
+            case 'unread':
+              onNotificationUpdate?.({ id, read: false })
+              break
+            case 'remove':
+              onNotificationRemove?.(id)
+              break
+            case 'archive':
+              // Custom archive logic
+              onNotificationUpdate?.({ id, read: true, metadata: { archived: true } })
+              break
+          }
+        })
+
+        setSelectedNotifications(new Set())
+      },
+      [selectedNotifications, onNotificationUpdate, onNotificationRemove]
+    )
 
     const renderNotification = (notification: Notification) => {
-      const TypeIcon = typeIcons[notification.type];
-      const isSelected = selectedNotifications.has(notification.id);
-      
+      const TypeIcon = typeIcons[notification.type]
+      const isSelected = selectedNotifications.has(notification.id)
+
       return (
         <div
           key={notification.id}
@@ -275,20 +297,22 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
           <Checkbox
             checked={isSelected}
             onChange={(e) => {
-              e.stopPropagation();
-              handleSelectNotification(notification.id, e.target.checked);
+              e.stopPropagation()
+              handleSelectNotification(notification.id, e.target.checked)
             }}
             checkboxSize="sm"
             className="mt-1"
           />
-          
-          <div className={clsx(
-            'flex-shrink-0 w-5 h-5 mt-1',
-            typeVariants[notification.type] === 'info' && 'text-blue-500',
-            typeVariants[notification.type] === 'success' && 'text-green-500',
-            typeVariants[notification.type] === 'warning' && 'text-yellow-500',
-            typeVariants[notification.type] === 'danger' && 'text-red-500'
-          )}>
+
+          <div
+            className={clsx(
+              'flex-shrink-0 w-5 h-5 mt-1',
+              typeVariants[notification.type] === 'info' && 'text-blue-500',
+              typeVariants[notification.type] === 'success' && 'text-green-500',
+              typeVariants[notification.type] === 'warning' && 'text-yellow-500',
+              typeVariants[notification.type] === 'danger' && 'text-red-500'
+            )}
+          >
             <TypeIcon className="w-full h-full" />
           </div>
 
@@ -296,10 +320,14 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
             <div className="flex items-start justify-between">
               <div className="flex-1 mr-2">
                 <div className="flex items-center gap-2">
-                  <h4 className={clsx(
-                    'text-sm font-medium',
-                    notification.read ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-gray-100'
-                  )}>
+                  <h4
+                    className={clsx(
+                      'text-sm font-medium',
+                      notification.read
+                        ? 'text-gray-700 dark:text-gray-300'
+                        : 'text-gray-900 dark:text-gray-100'
+                    )}
+                  >
                     {notification.title}
                   </h4>
                   {!notification.read && (
@@ -308,16 +336,26 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
                   {notification.priority && notification.priority !== 'medium' && (
                     <Badge
                       size="xs"
-                      variant={notification.priority === 'urgent' ? 'danger' : notification.priority === 'high' ? 'warning' : 'secondary'}
+                      variant={
+                        notification.priority === 'urgent'
+                          ? 'danger'
+                          : notification.priority === 'high'
+                            ? 'warning'
+                            : 'secondary'
+                      }
                     >
                       {notification.priority}
                     </Badge>
                   )}
                 </div>
-                <p className={clsx(
-                  'text-sm mt-1',
-                  notification.read ? 'text-gray-600 dark:text-gray-400' : 'text-gray-700 dark:text-gray-300'
-                )}>
+                <p
+                  className={clsx(
+                    'text-sm mt-1',
+                    notification.read
+                      ? 'text-gray-600 dark:text-gray-400'
+                      : 'text-gray-700 dark:text-gray-300'
+                  )}
+                >
                   {notification.message}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
@@ -334,7 +372,7 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 {!notification.read && (
                   <Tooltip content="Mark as read">
@@ -342,21 +380,21 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
                       size="xs"
                       variant="ghost"
                       onClick={(e) => {
-                        e.stopPropagation();
-                        onNotificationUpdate?.({ id: notification.id, read: true });
+                        e.stopPropagation()
+                        onNotificationUpdate?.({ id: notification.id, read: true })
                       }}
                       icon={<Check />}
                     />
                   </Tooltip>
                 )}
-                
+
                 <Tooltip content="Remove">
                   <Button
                     size="xs"
                     variant="ghost"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      onNotificationRemove?.(notification.id);
+                      e.stopPropagation()
+                      onNotificationRemove?.(notification.id)
                     }}
                     icon={<X />}
                     className="text-red-500 hover:text-red-600"
@@ -374,8 +412,8 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
                     size="xs"
                     variant={action.variant || 'outline'}
                     onClick={(e) => {
-                      e.stopPropagation();
-                      handleNotificationAction(notification.id, action.action);
+                      e.stopPropagation()
+                      handleNotificationAction(notification.id, action.action)
                     }}
                   >
                     {action.label}
@@ -385,8 +423,8 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
             )}
           </div>
         </div>
-      );
-    };
+      )
+    }
 
     const renderHeader = () => (
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -405,12 +443,7 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
           <div className="flex items-center gap-1">
             {onMarkAllRead && unreadCount > 0 && (
               <Tooltip content="Mark all as read">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={onMarkAllRead}
-                  icon={<Check />}
-                />
+                <Button size="sm" variant="ghost" onClick={onMarkAllRead} icon={<Check />} />
               </Tooltip>
             )}
             {onNotificationsClear && (
@@ -424,11 +457,7 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
               </Tooltip>
             )}
             <Tooltip content="Settings">
-              <Button
-                size="sm"
-                variant="ghost"
-                icon={<Settings />}
-              />
+              <Button size="sm" variant="ghost" icon={<Settings />} />
             </Tooltip>
           </div>
         </div>
@@ -446,7 +475,7 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
                 onClear={() => setSearchQuery('')}
               />
             )}
-            
+
             {showFilters && (
               <div className="flex gap-2">
                 <Select
@@ -474,7 +503,10 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
             <div className="flex items-center gap-2">
               <Checkbox
                 checked={selectedNotifications.size === filteredNotifications.length}
-                indeterminate={selectedNotifications.size > 0 && selectedNotifications.size < filteredNotifications.length}
+                indeterminate={
+                  selectedNotifications.size > 0 &&
+                  selectedNotifications.size < filteredNotifications.length
+                }
                 onChange={(e) => handleSelectAll(e.target.checked)}
                 checkboxSize="sm"
               />
@@ -483,25 +515,17 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
               </span>
             </div>
             <div className="flex gap-1">
-              <Button
-                size="xs"
-                variant="outline"
-                onClick={() => handleBulkAction('read')}
-              >
+              <Button size="xs" variant="outline" onClick={() => handleBulkAction('read')}>
                 Mark Read
               </Button>
-              <Button
-                size="xs"
-                variant="outline"
-                onClick={() => handleBulkAction('remove')}
-              >
+              <Button size="xs" variant="outline" onClick={() => handleBulkAction('remove')}>
                 Remove
               </Button>
             </div>
           </div>
         )}
       </div>
-    );
+    )
 
     const renderContent = () => {
       if (filteredNotifications.length === 0) {
@@ -514,14 +538,11 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
                 : 'No notifications'}
             </p>
           </div>
-        );
+        )
       }
 
       return (
-        <div 
-          className="overflow-auto"
-          style={{ maxHeight: maxHeight }}
-        >
+        <div className="overflow-auto" style={{ maxHeight: maxHeight }}>
           {Object.entries(groupedNotifications).map(([group, groupNotifications]) => (
             <div key={group}>
               {(groupByDate || groupByCategory) && Object.keys(groupedNotifications).length > 1 && (
@@ -533,8 +554,8 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
             </div>
           ))}
         </div>
-      );
-    };
+      )
+    }
 
     return (
       <Card
@@ -552,8 +573,8 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
         {renderHeader()}
         {renderContent()}
       </Card>
-    );
+    )
   }
-);
+)
 
-NotificationCenter.displayName = 'NotificationCenter';
+NotificationCenter.displayName = 'NotificationCenter'

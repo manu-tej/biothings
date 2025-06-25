@@ -7,11 +7,11 @@ import { optimizedApiClient } from '@/lib/api/client'
 import Providers from './providers'
 
 // Optimize font loading
-const inter = Inter({ 
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   preload: true,
-  fallback: ['system-ui', 'arial']
+  fallback: ['system-ui', 'arial'],
 })
 
 export const metadata: Metadata = {
@@ -20,11 +20,7 @@ export const metadata: Metadata = {
 }
 
 // Prefetch data at the layout level
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Start prefetching critical data
   if (typeof window === 'undefined') {
     // Server-side: initiate prefetch

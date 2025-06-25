@@ -1,12 +1,12 @@
-import { 
-  Activity, 
-  Users, 
-  FlaskConical, 
-  BarChart3, 
+import {
+  Activity,
+  Users,
+  FlaskConical,
+  BarChart3,
   Settings,
   Bell,
   Command,
-  Home
+  Home,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -43,28 +43,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center space-x-3">
                 <Command className="w-8 h-8 text-primary-600" />
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  BioThings AI
-                </h1>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">BioThings AI</h1>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               {/* Notifications */}
               <button className="relative p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800" />
               </button>
-              
+
               {/* User Menu */}
               <div className="flex items-center space-x-3">
                 <div className="text-right">
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
                     Board Director
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Executive Access
-                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Executive Access</p>
                 </div>
                 <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold">
                   BD
@@ -88,9 +84,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       href={item.href}
                       className={`
                         flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors
-                        ${isActive 
-                          ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' 
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ${
+                          isActive
+                            ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                         }
                       `}
                     >
@@ -112,9 +109,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </span>
                 <span className="flex items-center space-x-1">
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-xs text-green-600 dark:text-green-400">
-                    Operational
-                  </span>
+                  <span className="text-xs text-green-600 dark:text-green-400">Operational</span>
                 </span>
               </div>
               <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
@@ -133,9 +128,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto">
-          <div className="p-8">
-            {children}
-          </div>
+          <div className="p-8">{children}</div>
         </main>
       </div>
     </div>

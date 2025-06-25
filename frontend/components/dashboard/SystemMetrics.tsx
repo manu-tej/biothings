@@ -3,14 +3,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import * as echarts from 'echarts'
 import type { EChartsOption } from 'echarts'
-import { 
-  Cpu, 
-  HardDrive, 
-  Activity, 
-  Zap,
-  TrendingUp,
-  TrendingDown
-} from 'lucide-react'
+import { Cpu, HardDrive, Activity, Zap, TrendingUp, TrendingDown } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { apiClient } from '@/lib/api/client'
@@ -29,15 +22,13 @@ function MetricCard({ title, value, unit, icon, trend, status = 'good' }: Metric
   const statusColors = {
     good: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
     warning: 'text-yellow-600 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-    critical: 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/20'
+    critical: 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
   }
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between mb-4">
-        <div className={`p-2 rounded-lg ${statusColors[status]}`}>
-          {icon}
-        </div>
+        <div className={`p-2 rounded-lg ${statusColors[status]}`}>{icon}</div>
         {trend !== undefined && (
           <div className="flex items-center space-x-1 text-sm">
             {trend > 0 ? (
@@ -57,7 +48,9 @@ function MetricCard({ title, value, unit, icon, trend, status = 'good' }: Metric
       <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</h3>
       <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
         {value}
-        {unit && <span className="text-lg font-normal text-gray-500 dark:text-gray-400 ml-1">{unit}</span>}
+        {unit && (
+          <span className="text-lg font-normal text-gray-500 dark:text-gray-400 ml-1">{unit}</span>
+        )}
       </p>
     </div>
   )
@@ -73,7 +66,7 @@ export default function SystemMetrics() {
   const { data: metrics, isLoading } = useQuery({
     queryKey: ['system-metrics'],
     queryFn: () => apiClient.getMetrics(),
-    refetchInterval: 300000 // 5 minutes - reduced frequency since we have WebSocket
+    refetchInterval: 300000, // 5 minutes - reduced frequency since we have WebSocket
   })
 
   // Generate initial historical data for chart
@@ -90,12 +83,12 @@ export default function SystemMetrics() {
           cpu_percent: 25 + Math.random() * 20, // 25-45%
           memory_percent: 45 + Math.random() * 15, // 45-60%
           active_agents: 5,
-          active_workflows: 2
+          active_workflows: 2,
         })
       }
       return mockHistory
     },
-    refetchInterval: false // Don't refetch, we'll use WebSocket for updates
+    refetchInterval: false, // Don't refetch, we'll use WebSocket for updates
   })
 
   // Initialize metrics history
@@ -113,22 +106,22 @@ export default function SystemMetrics() {
       agents: newMetrics.agents || {
         total_agents: newMetrics.total_agents || 5,
         active_agents: newMetrics.active_agents || 5,
-        agent_types: newMetrics.agent_types || {}
+        agent_types: newMetrics.agent_types || {},
       },
       websocket_connections: newMetrics.websocket_connections || 1,
-      timestamp: newMetrics.timestamp || new Date().toISOString()
+      timestamp: newMetrics.timestamp || new Date().toISOString(),
     })
 
     // Update metrics history for chart
-    setMetricsHistory(prev => {
+    setMetricsHistory((prev) => {
       const newEntry = {
         timestamp: newMetrics.timestamp || new Date().toISOString(),
         cpu_percent: newMetrics.system?.cpu_percent || newMetrics.cpu_percent || 0,
         memory_percent: newMetrics.system?.memory_percent || newMetrics.memory_percent || 0,
         active_agents: newMetrics.agents?.active_agents || newMetrics.active_agents || 0,
-        active_workflows: newMetrics.active_workflows || 0
+        active_workflows: newMetrics.active_workflows || 0,
       }
-      
+
       // Keep last 30 entries
       const updated = [...prev.slice(-29), newEntry]
       return updated
@@ -142,7 +135,7 @@ export default function SystemMetrics() {
       chartInstance.current = echarts.init(chartRef.current, 'dark')
     }
 
-    const timestamps = metricsHistory.map((item: any) => 
+    const timestamps = metricsHistory.map((item: any) =>
       new Date(item.timestamp).toLocaleTimeString()
     )
     const cpuData = metricsHistory.map((item: any) => item.cpu_percent)
@@ -153,46 +146,46 @@ export default function SystemMetrics() {
       tooltip: {
         trigger: 'axis',
         axisPointer: {
-          type: 'cross'
-        }
+          type: 'cross',
+        },
       },
       legend: {
         data: ['CPU Usage', 'Memory Usage'],
         textStyle: {
-          color: '#9CA3AF'
-        }
+          color: '#9CA3AF',
+        },
       },
       grid: {
         left: '3%',
         right: '4%',
         bottom: '3%',
-        containLabel: true
+        containLabel: true,
       },
       xAxis: {
         type: 'category',
         boundaryGap: false,
         data: timestamps,
         axisLabel: {
-          color: '#9CA3AF'
+          color: '#9CA3AF',
         },
         axisLine: {
           lineStyle: {
-            color: '#374151'
-          }
-        }
+            color: '#374151',
+          },
+        },
       },
       yAxis: {
         type: 'value',
         max: 100,
         axisLabel: {
           formatter: '{value}%',
-          color: '#9CA3AF'
+          color: '#9CA3AF',
         },
         splitLine: {
           lineStyle: {
-            color: '#374151'
-          }
-        }
+            color: '#374151',
+          },
+        },
       },
       series: [
         {
@@ -201,7 +194,7 @@ export default function SystemMetrics() {
           data: cpuData,
           smooth: true,
           itemStyle: {
-            color: '#3B82F6'
+            color: '#3B82F6',
           },
           areaStyle: {
             color: {
@@ -212,10 +205,10 @@ export default function SystemMetrics() {
               y2: 1,
               colorStops: [
                 { offset: 0, color: 'rgba(59, 130, 246, 0.5)' },
-                { offset: 1, color: 'rgba(59, 130, 246, 0)' }
-              ]
-            }
-          }
+                { offset: 1, color: 'rgba(59, 130, 246, 0)' },
+              ],
+            },
+          },
         },
         {
           name: 'Memory Usage',
@@ -223,7 +216,7 @@ export default function SystemMetrics() {
           data: memoryData,
           smooth: true,
           itemStyle: {
-            color: '#10B981'
+            color: '#10B981',
           },
           areaStyle: {
             color: {
@@ -234,12 +227,12 @@ export default function SystemMetrics() {
               y2: 1,
               colorStops: [
                 { offset: 0, color: 'rgba(16, 185, 129, 0.5)' },
-                { offset: 1, color: 'rgba(16, 185, 129, 0)' }
-              ]
-            }
-          }
-        }
-      ]
+                { offset: 1, color: 'rgba(16, 185, 129, 0)' },
+              ],
+            },
+          },
+        },
+      ],
     }
 
     chartInstance.current.setOption(option)
@@ -275,18 +268,24 @@ export default function SystemMetrics() {
               System Performance
             </h2>
             {/* Connection status indicator */}
-            <div className={`w-2 h-2 rounded-full ${
-              connectionState === 'connected' ? 'bg-green-500' :
-              connectionState === 'connecting' ? 'bg-yellow-500 animate-pulse' :
-              connectionState === 'error' ? 'bg-red-500' :
-              'bg-gray-400'
-            }`} title={`WebSocket: ${connectionState}`} />
+            <div
+              className={`w-2 h-2 rounded-full ${
+                connectionState === 'connected'
+                  ? 'bg-green-500'
+                  : connectionState === 'connecting'
+                    ? 'bg-yellow-500 animate-pulse'
+                    : connectionState === 'error'
+                      ? 'bg-red-500'
+                      : 'bg-gray-400'
+              }`}
+              title={`WebSocket: ${connectionState}`}
+            />
           </div>
           <span className="text-xs text-gray-500 dark:text-gray-400">
             {isConnected ? 'Live' : 'Polling'}
           </span>
         </div>
-        
+
         {/* Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <MetricCard

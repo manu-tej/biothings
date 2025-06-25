@@ -1,9 +1,9 @@
 /**
  * @deprecated This file is deprecated and will be removed in the next major version.
  * Please import from '@/lib/api/client' instead:
- * 
+ *
  * import { apiClient } from '@/lib/api/client'
- * 
+ *
  * Re-export unified API client for backward compatibility
  * This file is maintained for imports that reference '@/lib/optimized-api-client'
  */

@@ -17,24 +17,27 @@ export function VirtualList<T>({
   itemHeight,
   renderItem,
   overscan = 5,
-  className = ''
+  className = '',
 }: VirtualListProps<T>) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [scrollTop, setScrollTop] = useState(0)
-  
+
   // Calculate item heights
-  const getItemHeight = useCallback((index: number) => {
-    return typeof itemHeight === 'function' ? itemHeight(index) : itemHeight
-  }, [itemHeight])
-  
+  const getItemHeight = useCallback(
+    (index: number) => {
+      return typeof itemHeight === 'function' ? itemHeight(index) : itemHeight
+    },
+    [itemHeight]
+  )
+
   // Calculate which items are visible
   const calculateVisibleRange = useCallback(() => {
     if (!items.length) return { start: 0, end: 0 }
-    
+
     let accumulatedHeight = 0
     let start = 0
     let end = items.length
-    
+
     // Find start index
     for (let i = 0; i < items.length; i++) {
       const height = getItemHeight(i)
@@ -44,7 +47,7 @@ export function VirtualList<T>({
       }
       accumulatedHeight += height
     }
-    
+
     // Find end index
     accumulatedHeight = 0
     for (let i = start; i < items.length; i++) {
@@ -54,15 +57,15 @@ export function VirtualList<T>({
       }
       accumulatedHeight += getItemHeight(i)
     }
-    
+
     return { start, end }
   }, [items.length, scrollTop, height, overscan, getItemHeight])
-  
+
   const { start, end } = calculateVisibleRange()
-  
+
   // Calculate total height
   const totalHeight = items.reduce((acc, _, index) => acc + getItemHeight(index), 0)
-  
+
   // Calculate offset for visible items
   const getItemOffset = (index: number) => {
     let offset = 0
@@ -71,11 +74,11 @@ export function VirtualList<T>({
     }
     return offset
   }
-  
+
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop)
   }, [])
-  
+
   return (
     <div
       ref={scrollRef}
@@ -87,14 +90,14 @@ export function VirtualList<T>({
         style={{
           height: totalHeight,
           position: 'relative',
-          width: '100%'
+          width: '100%',
         }}
       >
         {items.slice(start, end).map((item, index) => {
           const actualIndex = start + index
           const offset = getItemOffset(actualIndex)
           const height = getItemHeight(actualIndex)
-          
+
           return (
             <div
               key={actualIndex}
@@ -103,7 +106,7 @@ export function VirtualList<T>({
                 top: offset,
                 left: 0,
                 right: 0,
-                height
+                height,
               }}
             >
               {renderItem(item, actualIndex)}

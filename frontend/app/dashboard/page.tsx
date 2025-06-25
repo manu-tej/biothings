@@ -1,17 +1,17 @@
-'use client';
+'use client'
 
-import isEqual from 'lodash/isEqual';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import isEqual from 'lodash/isEqual'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 
-import { Badge } from '@/components/ui/atoms/Badge';
-import { Button } from '@/components/ui/atoms/Button';
-import { Card } from '@/components/ui/atoms/Card';
-import { ErrorBoundary, AsyncBoundary } from '@/components/ui/ErrorBoundary';
-import { useWebSocket } from '@/lib/hooks/useWebSocketNew';
-import { useDashboardStore } from '@/lib/stores/dashboardStore';
+import { Badge } from '@/components/ui/atoms/Badge'
+import { Button } from '@/components/ui/atoms/Button'
+import { Card } from '@/components/ui/atoms/Card'
+import { ErrorBoundary, AsyncBoundary } from '@/components/ui/ErrorBoundary'
+import { useWebSocket } from '@/lib/hooks/useWebSocketNew'
+import { useDashboardStore } from '@/lib/stores/dashboardStore'
 
 // Dynamic imports for bundle size optimization - Phase 5 improvement
-const EChartsLazy = React.lazy(() => import('echarts-for-react'));
+const EChartsLazy = React.lazy(() => import('echarts-for-react'))
 
 // Mock data (to be replaced with real API calls)
 const mockSystemMetrics = {
@@ -23,18 +23,28 @@ const mockSystemMetrics = {
   cpuUsage: 45,
   memoryUsage: 62,
   networkLatency: 23,
-};
+}
 
 const mockAlerts = [
-  { id: '1', type: 'warning', message: 'High CPU usage detected on Agent-7', timestamp: new Date() },
-  { id: '2', type: 'info', message: 'Workflow "Data Processing Pipeline" completed successfully', timestamp: new Date() },
+  {
+    id: '1',
+    type: 'warning',
+    message: 'High CPU usage detected on Agent-7',
+    timestamp: new Date(),
+  },
+  {
+    id: '2',
+    type: 'info',
+    message: 'Workflow "Data Processing Pipeline" completed successfully',
+    timestamp: new Date(),
+  },
   { id: '3', type: 'error', message: 'Connection timeout for Agent-12', timestamp: new Date() },
-];
+]
 
 // Loading skeleton components - Phase 5 optimization
 const LoadingSkeleton = ({ className = '' }: { className?: string }) => (
   <div className={`animate-pulse bg-gray-200 dark:bg-gray-700 rounded ${className}`} />
-);
+)
 
 const DashboardSkeleton = () => (
   <div className="space-y-6">
@@ -45,147 +55,153 @@ const DashboardSkeleton = () => (
     </div>
     <LoadingSkeleton className="h-96" />
   </div>
-);
+)
 
 // Custom debounced value hook - Phase 5 performance optimization
 function useDebouncedValue<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
+      setDebouncedValue(value)
+    }, delay)
 
     return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
+      clearTimeout(handler)
+    }
+  }, [value, delay])
 
-  return debouncedValue;
+  return debouncedValue
 }
 
 // Performance monitoring hook - Phase 5 optimization
 function usePerformanceMonitoring(_componentName: string) {
-  const [renderCount, setRenderCount] = useState(0);
-  const [renderTimes, setRenderTimes] = useState<number[]>([]);
+  const [renderCount, setRenderCount] = useState(0)
+  const [renderTimes, setRenderTimes] = useState<number[]>([])
 
   useEffect(() => {
-    const startTime = performance.now();
-    setRenderCount(prev => prev + 1);
+    const startTime = performance.now()
+    setRenderCount((prev) => prev + 1)
 
     return () => {
-      const endTime = performance.now();
-      const renderTime = endTime - startTime;
-      setRenderTimes(prev => [...prev.slice(-9), renderTime]); // Keep last 10 render times
-    };
-  });
+      const endTime = performance.now()
+      const renderTime = endTime - startTime
+      setRenderTimes((prev) => [...prev.slice(-9), renderTime]) // Keep last 10 render times
+    }
+  })
 
   const averageRenderTime = useMemo(() => {
-    return renderTimes.length > 0 
-      ? renderTimes.reduce((sum, time) => sum + time, 0) / renderTimes.length 
-      : 0;
-  }, [renderTimes]);
+    return renderTimes.length > 0
+      ? renderTimes.reduce((sum, time) => sum + time, 0) / renderTimes.length
+      : 0
+  }, [renderTimes])
 
-  return { renderCount, averageRenderTime };
+  return { renderCount, averageRenderTime }
 }
 
 // Memoized Widget Components - Phase 5 optimization with React.memo()
-const SystemMetricsWidget = React.memo<{ 
-  isFullscreen?: boolean; 
-  metrics?: typeof mockSystemMetrics 
-}>(({ isFullscreen, metrics = mockSystemMetrics }) => {
-  const debouncedMetrics = useDebouncedValue(metrics, 300); // 300ms debounce
-  const { renderCount, averageRenderTime } = usePerformanceMonitoring('SystemMetricsWidget');
+const SystemMetricsWidget = React.memo<{
+  isFullscreen?: boolean
+  metrics?: typeof mockSystemMetrics
+}>(
+  ({ isFullscreen, metrics = mockSystemMetrics }) => {
+    const debouncedMetrics = useDebouncedValue(metrics, 300) // 300ms debounce
+    const { renderCount, averageRenderTime } = usePerformanceMonitoring('SystemMetricsWidget')
 
-  return (
-    <Card className={`p-4 ${isFullscreen ? 'col-span-full' : ''}`}>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">System Metrics</h3>
-        <div className="text-xs text-gray-500">
-          Renders: {renderCount} | Avg: {averageRenderTime.toFixed(1)}ms
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-blue-600">
-            {debouncedMetrics.totalAgents}
+    return (
+      <Card className={`p-4 ${isFullscreen ? 'col-span-full' : ''}`}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">System Metrics</h3>
+          <div className="text-xs text-gray-500">
+            Renders: {renderCount} | Avg: {averageRenderTime.toFixed(1)}ms
           </div>
-          <div className="text-sm text-gray-600">Total Agents</div>
         </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-green-600">
-            {debouncedMetrics.activeAgents}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-600">{debouncedMetrics.totalAgents}</div>
+            <div className="text-sm text-gray-600">Total Agents</div>
           </div>
-          <div className="text-sm text-gray-600">Active Agents</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-orange-600">
-            {debouncedMetrics.runningWorkflows}
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-600">{debouncedMetrics.activeAgents}</div>
+            <div className="text-sm text-gray-600">Active Agents</div>
           </div>
-          <div className="text-sm text-gray-600">Running Workflows</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-purple-600">
-            {debouncedMetrics.completedToday}
+          <div className="text-center">
+            <div className="text-2xl font-bold text-orange-600">
+              {debouncedMetrics.runningWorkflows}
+            </div>
+            <div className="text-sm text-gray-600">Running Workflows</div>
           </div>
-          <div className="text-sm text-gray-600">Completed Today</div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-purple-600">
+              {debouncedMetrics.completedToday}
+            </div>
+            <div className="text-sm text-gray-600">Completed Today</div>
+          </div>
         </div>
-      </div>
-    </Card>
-  );
-}, (prevProps, nextProps) => {
-  // Custom comparison function for React.memo optimization using deep comparison
-  return isEqual(prevProps.metrics, nextProps.metrics) &&
-         prevProps.isFullscreen === nextProps.isFullscreen;
-});
+      </Card>
+    )
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison function for React.memo optimization using deep comparison
+    return (
+      isEqual(prevProps.metrics, nextProps.metrics) &&
+      prevProps.isFullscreen === nextProps.isFullscreen
+    )
+  }
+)
 
-const SystemHealthWidget = React.memo<{ 
-  health?: number; 
-  performanceData?: any 
+const SystemHealthWidget = React.memo<{
+  health?: number
+  performanceData?: any
 }>(({ health = mockSystemMetrics.systemHealth, performanceData }) => {
-  const debouncedHealth = useDebouncedValue(health, 500); // 500ms debounce for charts
+  const debouncedHealth = useDebouncedValue(health, 500) // 500ms debounce for charts
 
   // Chart options - properly memoized with correct dependencies
-  const chartData = useMemo(() => ({
-    xAxis: {
-      type: 'category',
-      data: ['12:00', '12:15', '12:30', '12:45', '13:00']
-    },
-    yAxis: {
-      type: 'value'
-    },
-    series: [
-      {
-        name: 'CPU Usage',
-        type: 'line',
-        data: performanceData?.cpuHistory || [45, 52, 48, 55, 50],
-        smooth: true,
+  const chartData = useMemo(
+    () => ({
+      xAxis: {
+        type: 'category',
+        data: ['12:00', '12:15', '12:30', '12:45', '13:00'],
       },
-      {
-        name: 'Memory Usage',
-        type: 'line',
-        data: performanceData?.memoryHistory || [62, 68, 65, 72, 70],
-        smooth: true,
-      }
-    ],
-    tooltip: {
-      trigger: 'axis'
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
-    }
-  }), [performanceData]);
+      yAxis: {
+        type: 'value',
+      },
+      series: [
+        {
+          name: 'CPU Usage',
+          type: 'line',
+          data: performanceData?.cpuHistory || [45, 52, 48, 55, 50],
+          smooth: true,
+        },
+        {
+          name: 'Memory Usage',
+          type: 'line',
+          data: performanceData?.memoryHistory || [62, 68, 65, 72, 70],
+          smooth: true,
+        },
+      ],
+      tooltip: {
+        trigger: 'axis',
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true,
+      },
+    }),
+    [performanceData]
+  )
 
   return (
     <Card className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">System Health</h3>
-        <Badge variant="success" size="sm">{debouncedHealth}%</Badge>
+        <Badge variant="success" size="sm">
+          {debouncedHealth}%
+        </Badge>
       </div>
-      <AsyncBoundary 
+      <AsyncBoundary
         fallback={<LoadingSkeleton className="h-40" />}
         isolate
         onError={(_error) => {
@@ -200,111 +216,113 @@ const SystemHealthWidget = React.memo<{
         />
       </AsyncBoundary>
     </Card>
-  );
-});
+  )
+})
 
-const RecentAlertsWidget = React.memo<{ alerts?: typeof mockAlerts }>(
-  ({ alerts = mockAlerts }) => {
-    const debouncedAlerts = useDebouncedValue(alerts, 200); // 200ms debounce for alerts
+const RecentAlertsWidget = React.memo<{ alerts?: typeof mockAlerts }>(({ alerts = mockAlerts }) => {
+  const debouncedAlerts = useDebouncedValue(alerts, 200) // 200ms debounce for alerts
 
-    return (
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold mb-4">Recent Alerts</h3>
-        <div className="space-y-2 max-h-32 overflow-y-auto">
-          {debouncedAlerts.map((alert) => (
-            <div key={alert.id} className="flex items-center gap-2 text-sm">
-              <Badge 
-                variant={alert.type === 'error' ? 'danger' : alert.type === 'warning' ? 'warning' : 'info'}
-                size="sm"
-              >
-                {alert.type}
-              </Badge>
-              <span className="truncate">{alert.message}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
-    );
-  }
-);
-
-const PerformanceMonitoringWidget = React.memo<{ performanceData?: any }>(
-  ({ performanceData }) => {
-    const [systemMetrics, setSystemMetrics] = useState({
-      memoryUsage: 0,
-      cpuUsage: 0,
-      renderTime: 0,
-    });
-
-    useEffect(() => {
-      // Monitor system performance with proper cleanup
-      let intervalId: NodeJS.Timeout | null = null;
-      
-      const monitorPerformance = () => {
-        if (typeof window !== 'undefined' && 'performance' in window) {
-          const memory = (performance as any).memory;
-          const renderTime = performance.now();
-          
-          setSystemMetrics({
-            memoryUsage: memory ? Math.round((memory.usedJSHeapSize / memory.totalJSHeapSize) * 100) : 0,
-            cpuUsage: Math.floor(Math.random() * 100), // Mock CPU usage
-            renderTime: Math.round(renderTime % 1000),
-          });
-        }
-      };
-      
-      intervalId = setInterval(monitorPerformance, 2000);
-
-      return () => {
-        if (intervalId) {
-          clearInterval(intervalId);
-        }
-      };
-    }, []);
-
-    return (
-      <Card className="p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Performance Monitor</h3>
-          <Badge variant="info" size="sm">
-            Live
-          </Badge>
-        </div>
-        <div className="space-y-3">
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-600">Memory Usage:</span>
-            <span className="text-sm font-medium">{systemMetrics.memoryUsage}%</span>
+  return (
+    <Card className="p-4">
+      <h3 className="text-lg font-semibold mb-4">Recent Alerts</h3>
+      <div className="space-y-2 max-h-32 overflow-y-auto">
+        {debouncedAlerts.map((alert) => (
+          <div key={alert.id} className="flex items-center gap-2 text-sm">
+            <Badge
+              variant={
+                alert.type === 'error' ? 'danger' : alert.type === 'warning' ? 'warning' : 'info'
+              }
+              size="sm"
+            >
+              {alert.type}
+            </Badge>
+            <span className="truncate">{alert.message}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-600">CPU Usage:</span>
-            <span className="text-sm font-medium">{systemMetrics.cpuUsage}%</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-600">Render Time:</span>
-            <span className="text-sm font-medium">{systemMetrics.renderTime}ms</span>
-          </div>
-          {performanceData?.alerts && performanceData.alerts.length > 0 && (
-            <div className="mt-4 space-y-1">
-              <div className="text-xs font-medium text-yellow-600">Active Alerts:</div>
-              {performanceData.alerts.slice(0, 3).map((alert: any, idx: number) => (
-                <div key={idx} className="text-xs bg-yellow-50 p-2 rounded">
-                  {alert.message}
-                </div>
-              ))}
-            </div>
-          )}
+        ))}
+      </div>
+    </Card>
+  )
+})
+
+const PerformanceMonitoringWidget = React.memo<{ performanceData?: any }>(({ performanceData }) => {
+  const [systemMetrics, setSystemMetrics] = useState({
+    memoryUsage: 0,
+    cpuUsage: 0,
+    renderTime: 0,
+  })
+
+  useEffect(() => {
+    // Monitor system performance with proper cleanup
+    let intervalId: NodeJS.Timeout | null = null
+
+    const monitorPerformance = () => {
+      if (typeof window !== 'undefined' && 'performance' in window) {
+        const memory = (performance as any).memory
+        const renderTime = performance.now()
+
+        setSystemMetrics({
+          memoryUsage: memory
+            ? Math.round((memory.usedJSHeapSize / memory.totalJSHeapSize) * 100)
+            : 0,
+          cpuUsage: Math.floor(Math.random() * 100), // Mock CPU usage
+          renderTime: Math.round(renderTime % 1000),
+        })
+      }
+    }
+
+    intervalId = setInterval(monitorPerformance, 2000)
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId)
+      }
+    }
+  }, [])
+
+  return (
+    <Card className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Performance Monitor</h3>
+        <Badge variant="info" size="sm">
+          Live
+        </Badge>
+      </div>
+      <div className="space-y-3">
+        <div className="flex justify-between">
+          <span className="text-sm text-gray-600">Memory Usage:</span>
+          <span className="text-sm font-medium">{systemMetrics.memoryUsage}%</span>
         </div>
-      </Card>
-    );
-  }
-);
+        <div className="flex justify-between">
+          <span className="text-sm text-gray-600">CPU Usage:</span>
+          <span className="text-sm font-medium">{systemMetrics.cpuUsage}%</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-sm text-gray-600">Render Time:</span>
+          <span className="text-sm font-medium">{systemMetrics.renderTime}ms</span>
+        </div>
+        {performanceData?.alerts && performanceData.alerts.length > 0 && (
+          <div className="mt-4 space-y-1">
+            <div className="text-xs font-medium text-yellow-600">Active Alerts:</div>
+            {performanceData.alerts.slice(0, 3).map((alert: any, idx: number) => (
+              <div key={idx} className="text-xs bg-yellow-50 p-2 rounded">
+                {alert.message}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </Card>
+  )
+})
 
 // Main Dashboard Component - Phase 5 optimized
 export default function DashboardPage() {
   // State management
-  const [isLoading, setIsLoading] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
-  const [performanceData, setPerformanceData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true)
+  const [connectionStatus, setConnectionStatus] = useState<
+    'connecting' | 'connected' | 'disconnected'
+  >('connecting')
+  const [performanceData, setPerformanceData] = useState<any>(null)
 
   // Dashboard store
   const {
@@ -315,86 +333,89 @@ export default function DashboardPage() {
     isLoading: _storeLoading,
     error,
     setLoading,
-  } = useDashboardStore();
+  } = useDashboardStore()
 
   // WebSocket connection - Phase 5 optimization
-  const { isConnected, connectionState: _connectionState, sendMessage: _sendMessage } = useWebSocket();
+  const {
+    isConnected,
+    connectionState: _connectionState,
+    sendMessage: _sendMessage,
+  } = useWebSocket()
 
   // WebSocket batching state - Phase 5 optimization
-  const [pendingUpdates, setPendingUpdates] = useState<any[]>([]);
+  const [pendingUpdates, setPendingUpdates] = useState<any[]>([])
 
   const processBatchedUpdates = useCallback(() => {
-    if (pendingUpdates.length === 0) return;
-    
+    if (pendingUpdates.length === 0) return
+
     // Process all pending updates at once - Phase 5 batching optimization
-    setPendingUpdates([]);
-  }, [pendingUpdates]);
+    setPendingUpdates([])
+  }, [pendingUpdates])
 
   // Batch WebSocket updates with 100ms window - Phase 5 optimization
   useEffect(() => {
-    if (pendingUpdates.length === 0) return;
-    
-    const timer = setTimeout(processBatchedUpdates, 100);
-    return () => clearTimeout(timer);
-  }, [pendingUpdates.length, processBatchedUpdates]);
+    if (pendingUpdates.length === 0) return
+
+    const timer = setTimeout(processBatchedUpdates, 100)
+    return () => clearTimeout(timer)
+  }, [pendingUpdates.length, processBatchedUpdates])
 
   // Dashboard initialization - Phase 5 optimization
   useEffect(() => {
     const initializeDashboard = async () => {
-      setLoading(true);
-      
+      setLoading(true)
+
       try {
         // Simulate initialization
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        setConnectionStatus(isConnected ? 'connected' : 'disconnected');
-        
-      } catch (_error) {
-        setConnectionStatus('disconnected');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+        await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    initializeDashboard();
-  }, [isConnected, setLoading]);
+        setConnectionStatus(isConnected ? 'connected' : 'disconnected')
+      } catch (_error) {
+        setConnectionStatus('disconnected')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    initializeDashboard()
+  }, [isConnected, setLoading])
 
   // Performance monitoring setup with proper cleanup
   useEffect(() => {
-    let intervalId: NodeJS.Timeout | null = null;
-    const performanceHistory: number[][] = [];
-    
+    let intervalId: NodeJS.Timeout | null = null
+    const performanceHistory: number[][] = []
+
     const collectPerformanceMetrics = () => {
       if (typeof window !== 'undefined' && 'performance' in window) {
         const metrics = {
           renderTime: performance.now(),
           memoryUsage: (performance as any).memory?.usedJSHeapSize || 0,
-        };
-        
+        }
+
         // Keep last 5 data points for history
-        const cpuData = Math.floor(Math.random() * 100);
-        const memData = Math.round((metrics.memoryUsage / 1024 / 1024) % 100);
-        
-        performanceHistory[0] = (performanceHistory[0] || []).concat(cpuData).slice(-5);
-        performanceHistory[1] = (performanceHistory[1] || []).concat(memData).slice(-5);
-        
-        setPerformanceData({ 
+        const cpuData = Math.floor(Math.random() * 100)
+        const memData = Math.round((metrics.memoryUsage / 1024 / 1024) % 100)
+
+        performanceHistory[0] = (performanceHistory[0] || []).concat(cpuData).slice(-5)
+        performanceHistory[1] = (performanceHistory[1] || []).concat(memData).slice(-5)
+
+        setPerformanceData({
           metrics: [metrics],
           cpuHistory: performanceHistory[0],
           memoryHistory: performanceHistory[1],
-          alerts: metrics.renderTime > 16.67 ? [{ message: 'Slow render detected' }] : [] 
-        });
+          alerts: metrics.renderTime > 16.67 ? [{ message: 'Slow render detected' }] : [],
+        })
       }
-    };
-    
-    intervalId = setInterval(collectPerformanceMetrics, 5000);
+    }
+
+    intervalId = setInterval(collectPerformanceMetrics, 5000)
 
     return () => {
       if (intervalId) {
-        clearInterval(intervalId);
+        clearInterval(intervalId)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   // Export handlers - Phase 5 with dynamic imports
   const handleExportDashboard = useCallback(async () => {
@@ -405,59 +426,58 @@ export default function DashboardPage() {
         workflows,
         alerts: mockAlerts,
         timestamp: new Date().toISOString(),
-      };
+      }
 
       // Create downloadable JSON
-      const dataStr = JSON.stringify(dashboardData, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-      
-      const exportFileDefaultName = `dashboard-export-${new Date().toISOString().split('T')[0]}.json`;
-      
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', exportFileDefaultName);
-      linkElement.click();
-      
+      const dataStr = JSON.stringify(dashboardData, null, 2)
+      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr)
+
+      const exportFileDefaultName = `dashboard-export-${new Date().toISOString().split('T')[0]}.json`
+
+      const linkElement = document.createElement('a')
+      linkElement.setAttribute('href', dataUri)
+      linkElement.setAttribute('download', exportFileDefaultName)
+      linkElement.click()
     } catch (_error) {
       // Handle export error silently
     }
-  }, [agents, workflows]);
+  }, [agents, workflows])
 
   const handleExportPDF = useCallback(async () => {
     try {
       // Dynamic import for PDF functionality - Phase 5 bundle optimization
-      const { default: html2canvas } = await import('html2canvas');
-      const { jsPDF } = await import('jspdf');
-      
-      const element = document.querySelector('.dashboard-content');
+      const { default: html2canvas } = await import('html2canvas')
+      const { jsPDF } = await import('jspdf')
+
+      const element = document.querySelector('.dashboard-content')
       if (element) {
-        const canvas = await html2canvas(element as HTMLElement);
-        const imgData = canvas.toDataURL('image/png');
-        
-        const pdf = new jsPDF();
-        const imgWidth = 210;
-        const pageHeight = 295;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        
-        let position = 0;
-        
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-        
+        const canvas = await html2canvas(element as HTMLElement)
+        const imgData = canvas.toDataURL('image/png')
+
+        const pdf = new jsPDF()
+        const imgWidth = 210
+        const pageHeight = 295
+        const imgHeight = (canvas.height * imgWidth) / canvas.width
+        let heightLeft = imgHeight
+
+        let position = 0
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+        heightLeft -= pageHeight
+
         while (heightLeft >= 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
+          position = heightLeft - imgHeight
+          pdf.addPage()
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+          heightLeft -= pageHeight
         }
-        
-        pdf.save(`dashboard-report-${new Date().toISOString().split('T')[0]}.pdf`);
+
+        pdf.save(`dashboard-report-${new Date().toISOString().split('T')[0]}.pdf`)
       }
     } catch (_error) {
       // Handle PDF export error silently
     }
-  }, []);
+  }, [])
 
   if (isLoading) {
     return (
@@ -466,7 +486,7 @@ export default function DashboardPage() {
           <DashboardSkeleton />
         </div>
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -477,12 +497,10 @@ export default function DashboardPage() {
           <p className="text-gray-700 dark:text-gray-300 mb-6">
             {error.message || 'Failed to load dashboard data'}
           </p>
-          <Button onClick={() => window.location.reload()}>
-            Retry Loading
-          </Button>
+          <Button onClick={() => window.location.reload()}>Retry Loading</Button>
         </Card>
       </div>
-    );
+    )
   }
 
   return (
@@ -495,34 +513,32 @@ export default function DashboardPage() {
               BioThings Dashboard v2.0
             </h1>
             <div className="flex items-center gap-2 mt-2">
-              <div 
+              <div
                 className={`w-2 h-2 rounded-full ${
-                  connectionStatus === 'connected' ? 'bg-green-500 animate-pulse' : 
-                  connectionStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' : 
-                  'bg-red-500'
+                  connectionStatus === 'connected'
+                    ? 'bg-green-500 animate-pulse'
+                    : connectionStatus === 'connecting'
+                      ? 'bg-yellow-500 animate-pulse'
+                      : 'bg-red-500'
                 }`}
               />
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                {connectionStatus === 'connected' ? 'Live' : 
-                 connectionStatus === 'connecting' ? 'Connecting...' : 
-                 'Offline'}
+                {connectionStatus === 'connected'
+                  ? 'Live'
+                  : connectionStatus === 'connecting'
+                    ? 'Connecting...'
+                    : 'Offline'}
               </span>
-              <Badge variant="info" size="sm">Phase 5 Optimized</Badge>
+              <Badge variant="info" size="sm">
+                Phase 5 Optimized
+              </Badge>
             </div>
           </div>
           <div className="flex gap-2">
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={handleExportDashboard}
-            >
+            <Button size="sm" variant="outline" onClick={handleExportDashboard}>
               Export JSON
             </Button>
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={handleExportPDF}
-            >
+            <Button size="sm" variant="outline" onClick={handleExportPDF}>
               Export PDF
             </Button>
           </div>
@@ -582,9 +598,7 @@ export default function DashboardPage() {
 
         {/* Dashboard Footer */}
         <div className="mt-8 flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
-          <div>
-            Phase 5 Optimized | Last updated: {new Date().toLocaleTimeString()}
-          </div>
+          <div>Phase 5 Optimized | Last updated: {new Date().toLocaleTimeString()}</div>
           <div className="flex gap-4">
             <span>Bundle optimized: ✅</span>
             <span>Performance monitored: ✅</span>
@@ -593,5 +607,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

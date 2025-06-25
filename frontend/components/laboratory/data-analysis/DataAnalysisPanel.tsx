@@ -16,33 +16,30 @@ export default function DataAnalysisPanel({
   experiments,
   selectedExperiment,
   onExperimentSelect,
-  analysisResults
+  analysisResults,
 }: DataAnalysisPanelProps) {
-  const completedExperiments = experiments.filter(e => e.status === 'completed')
+  const completedExperiments = experiments.filter((e) => e.status === 'completed')
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Experiment Selector */}
       <div className="lg:col-span-1">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-          Select Experiment
-        </h3>
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Select Experiment</h3>
         <div className="space-y-2">
-          {completedExperiments.map(exp => (
+          {completedExperiments.map((exp) => (
             <button
               key={exp.id}
               onClick={() => onExperimentSelect(exp.id)}
               className={`
                 w-full text-left p-3 rounded-lg border transition-colors
-                ${selectedExperiment === exp.id
-                  ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                  : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                ${
+                  selectedExperiment === exp.id
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                    : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
                 }
               `}
             >
-              <p className="font-medium text-gray-900 dark:text-white">
-                {exp.name}
-              </p>
+              <p className="font-medium text-gray-900 dark:text-white">{exp.name}</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Completed {new Date(exp.end_date!).toLocaleDateString()}
               </p>
@@ -55,9 +52,7 @@ export default function DataAnalysisPanel({
       <div className="lg:col-span-2">
         {selectedExperiment ? (
           <div className="space-y-6">
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-              Analysis Results
-            </h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Analysis Results</h3>
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -94,16 +89,15 @@ export default function DataAnalysisPanel({
 
             {/* Results List */}
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-4">
-                Recent Analysis
-              </h4>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4">Recent Analysis</h4>
               <div className="space-y-3">
-                {analysisResults.slice(0, 5).map(result => (
-                  <div key={result.id} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                {analysisResults.slice(0, 5).map((result) => (
+                  <div
+                    key={result.id}
+                    className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                  >
                     <div>
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        {result.type}
-                      </p>
+                      <p className="font-medium text-gray-900 dark:text-white">{result.type}</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {new Date(result.timestamp).toLocaleString()}
                       </p>

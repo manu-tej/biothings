@@ -19,7 +19,7 @@ export function NewExperimentModal({
   onClose,
   onSubmit,
   availableAgents = [],
-  availableEquipment = []
+  availableEquipment = [],
 }: NewExperimentModalProps) {
   const [formData, setFormData] = useState<ExperimentFormData>({
     name: '',
@@ -27,7 +27,7 @@ export function NewExperimentModal({
     description: '',
     parameters: {},
     agents: [],
-    equipment: []
+    equipment: [],
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -43,7 +43,7 @@ export function NewExperimentModal({
       description: '',
       parameters: {},
       agents: [],
-      equipment: []
+      equipment: [],
     })
     onClose()
   }
@@ -54,9 +54,7 @@ export function NewExperimentModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            New Experiment
-          </h2>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">New Experiment</h2>
           <button
             onClick={handleClose}
             className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -90,7 +88,7 @@ export function NewExperimentModal({
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
             >
-              {experimentTypes.map(type => (
+              {experimentTypes.map((type) => (
                 <option key={type.value} value={type.value}>
                   {type.label}
                 </option>
@@ -117,7 +115,7 @@ export function NewExperimentModal({
               Assign Agents
             </label>
             <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg p-2">
-              {availableAgents.map(agent => (
+              {availableAgents.map((agent) => (
                 <label key={agent} className="flex items-center">
                   <input
                     type="checkbox"
@@ -126,7 +124,10 @@ export function NewExperimentModal({
                       if (e.target.checked) {
                         setFormData({ ...formData, agents: [...formData.agents, agent] })
                       } else {
-                        setFormData({ ...formData, agents: formData.agents.filter(a => a !== agent) })
+                        setFormData({
+                          ...formData,
+                          agents: formData.agents.filter((a) => a !== agent),
+                        })
                       }
                     }}
                     className="mr-2"
@@ -143,7 +144,7 @@ export function NewExperimentModal({
               Select Equipment
             </label>
             <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg p-2">
-              {availableEquipment.map(eq => (
+              {availableEquipment.map((eq) => (
                 <label key={eq.id} className="flex items-center">
                   <input
                     type="checkbox"
@@ -152,7 +153,10 @@ export function NewExperimentModal({
                       if (e.target.checked) {
                         setFormData({ ...formData, equipment: [...formData.equipment, eq.id] })
                       } else {
-                        setFormData({ ...formData, equipment: formData.equipment.filter(id => id !== eq.id) })
+                        setFormData({
+                          ...formData,
+                          equipment: formData.equipment.filter((id) => id !== eq.id),
+                        })
                       }
                     }}
                     className="mr-2"
