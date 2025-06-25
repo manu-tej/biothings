@@ -109,7 +109,7 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
       : undefined,
     tooltip: {
       position: 'top',
-      formatter: function (params: any) {
+      formatter: function (params: { data: [number | string, number | string, number] }) {
         const [x, y, value] = params.data
         const dataPoint = data.find((d) => d.x === x && d.y === y)
         return `${config.xAxisLabels[x]} - ${config.yAxisLabels[y]}<br/>Value: ${value}${dataPoint?.label ? `<br/>${dataPoint.label}` : ''}`
@@ -165,7 +165,7 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
           show: config.showValues || false,
           fontSize: 10,
           color: '#000',
-          formatter: function (params: any) {
+          formatter: function (params: { data: [number | string, number | string, number] }) {
             return params.data[2].toFixed(1)
           },
         },
@@ -182,9 +182,9 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
   }
 
   const handleEvents = {
-    click: (params: any) => {
+    click: (params: { data: [number | string, number | string, number] }) => {
       if (onCellClick) {
-        const [x, y, value] = params.data
+        const [x, y, _value] = params.data
         const dataPoint = data.find((d) => d.x === x && d.y === y)
         if (dataPoint) {
           onCellClick(dataPoint)

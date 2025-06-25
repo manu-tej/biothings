@@ -140,7 +140,7 @@ export const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(
           )}
         >
           <div className="flex h-full">
-            {segmentsWithPercentages.map((segment, index) => {
+            {segmentsWithPercentages.map((segment, _index) => {
               const { style, className: segmentClassName } = getSegmentStyle(segment)
 
               return (

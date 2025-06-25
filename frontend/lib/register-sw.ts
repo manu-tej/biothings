@@ -4,6 +4,7 @@ export function registerServiceWorker() {
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {
+          // eslint-disable-next-line no-console
           console.log('SW registered: ', registration)
 
           // Check for updates periodically
@@ -12,6 +13,7 @@ export function registerServiceWorker() {
           }, 60000) // Check every minute
         })
         .catch((registrationError) => {
+          // eslint-disable-next-line no-console
           console.log('SW registration failed: ', registrationError)
         })
     })

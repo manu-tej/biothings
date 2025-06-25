@@ -21,7 +21,7 @@ export function CustomFallbackExample() {
       fallback={
         <div className="p-4 bg-red-50 rounded">
           <h3>Oops! Something went wrong</h3>
-          <p>We're working on fixing this issue.</p>
+          <p>We&apos;re working on fixing this issue.</p>
         </div>
       }
     >
@@ -46,10 +46,11 @@ export function IsolatedErrorBoundaryExample() {
 export function ErrorLoggingExample() {
   return (
     <ErrorBoundary
-      onError={(error, errorInfo) => {
+      onError={(error, _errorInfo) => {
         // Send to monitoring service
+        // eslint-disable-next-line no-console
         console.error('Component error:', error)
-        // TODO: logToSentry(error, errorInfo);
+        // TODO: logToSentry(error, _errorInfo);
       }}
       showDetails={process.env.NODE_ENV === 'development'}
     >
@@ -60,7 +61,7 @@ export function ErrorLoggingExample() {
 
 // Example 5: Reset keys - Error boundary resets when keys change
 export function ResetKeysExample() {
-  const [userId, setUserId] = React.useState('123')
+  const [userId, _setUserId] = React.useState('123')
 
   return (
     <ErrorBoundary resetKeys={[userId]} resetOnPropsChange>
@@ -135,7 +136,7 @@ export function DashboardWithErrorBoundaries() {
   return (
     <ErrorBoundary
       showDetails={process.env.NODE_ENV === 'development'}
-      onError={(error, errorInfo) => {
+      onError={(_error, _errorInfo) => {
         // Log to monitoring service in production
         if (process.env.NODE_ENV === 'production') {
           // TODO: Send to monitoring service

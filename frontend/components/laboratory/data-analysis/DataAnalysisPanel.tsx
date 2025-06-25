@@ -41,7 +41,7 @@ export default function DataAnalysisPanel({
             >
               <p className="font-medium text-gray-900 dark:text-white">{exp.name}</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Completed {new Date(exp.end_date!).toLocaleDateString()}
+                Completed {exp.end_date ? new Date(exp.end_date).toLocaleDateString() : 'N/A'}
               </p>
             </button>
           ))}

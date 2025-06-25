@@ -100,13 +100,14 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
     const statusStyles = clsx(
       'absolute rounded-full border-white dark:border-gray-900',
       statusSizeStyles[size],
-      statusColorStyles[status!],
+      status ? statusColorStyles[status] : '',
       statusPositionStyles[statusPosition]
     )
 
     const renderContent = () => {
       if (src && !imageError) {
         return (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={src}
             alt={alt || name || 'Avatar'}

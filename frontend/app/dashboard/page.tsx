@@ -88,7 +88,7 @@ function usePerformanceMonitoring(_componentName: string) {
       const renderTime = endTime - startTime
       setRenderTimes((prev) => [...prev.slice(-9), renderTime]) // Keep last 10 render times
     }
-  })
+  }, [])
 
   const averageRenderTime = useMemo(() => {
     return renderTimes.length > 0
@@ -150,9 +150,15 @@ const SystemMetricsWidget = React.memo<{
   }
 )
 
+interface PerformanceData {
+  cpuHistory?: number[]
+  memoryHistory?: number[]
+  alerts?: Array<{ message: string }>
+}
+
 const SystemHealthWidget = React.memo<{
   health?: number
-  performanceData?: any
+  performanceData?: PerformanceData
 }>(({ health = mockSystemMetrics.systemHealth, performanceData }) => {
   const debouncedHealth = useDebouncedValue(health, 500) // 500ms debounce for charts
 
@@ -244,7 +250,7 @@ const RecentAlertsWidget = React.memo<{ alerts?: typeof mockAlerts }>(({ alerts 
   )
 })
 
-const PerformanceMonitoringWidget = React.memo<{ performanceData?: any }>(({ performanceData }) => {
+const PerformanceMonitoringWidget = React.memo<{ performanceData?: PerformanceData }>(({ performanceData }) => {
   const [systemMetrics, setSystemMetrics] = useState({
     memoryUsage: 0,
     cpuUsage: 0,
@@ -257,7 +263,7 @@ const PerformanceMonitoringWidget = React.memo<{ performanceData?: any }>(({ per
 
     const monitorPerformance = () => {
       if (typeof window !== 'undefined' && 'performance' in window) {
-        const memory = (performance as any).memory
+        const memory = (performance as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number } }).memory
         const renderTime = performance.now()
 
         setSystemMetrics({
@@ -303,7 +309,7 @@ const PerformanceMonitoringWidget = React.memo<{ performanceData?: any }>(({ per
         {performanceData?.alerts && performanceData.alerts.length > 0 && (
           <div className="mt-4 space-y-1">
             <div className="text-xs font-medium text-yellow-600">Active Alerts:</div>
-            {performanceData.alerts.slice(0, 3).map((alert: any, idx: number) => (
+            {performanceData.alerts.slice(0, 3).map((alert: { message: string }, idx: number) => (
               <div key={idx} className="text-xs bg-yellow-50 p-2 rounded">
                 {alert.message}
               </div>
@@ -322,7 +328,7 @@ export default function DashboardPage() {
   const [connectionStatus, setConnectionStatus] = useState<
     'connecting' | 'connected' | 'disconnected'
   >('connecting')
-  const [performanceData, setPerformanceData] = useState<any>(null)
+  const [performanceData, setPerformanceData] = useState<PerformanceData | null>(null)
 
   // Dashboard store
   const {
@@ -343,7 +349,7 @@ export default function DashboardPage() {
   } = useWebSocket()
 
   // WebSocket batching state - Phase 5 optimization
-  const [pendingUpdates, setPendingUpdates] = useState<any[]>([])
+  const [pendingUpdates, setPendingUpdates] = useState<unknown[]>([])
 
   const processBatchedUpdates = useCallback(() => {
     if (pendingUpdates.length === 0) return
@@ -389,7 +395,7 @@ export default function DashboardPage() {
       if (typeof window !== 'undefined' && 'performance' in window) {
         const metrics = {
           renderTime: performance.now(),
-          memoryUsage: (performance as any).memory?.usedJSHeapSize || 0,
+          memoryUsage: (performance as { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize || 0,
         }
 
         // Keep last 5 data points for history

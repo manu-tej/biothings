@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 
+import { JSONValue, WebSocketPayload } from '../types/common.types'
+
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected' | 'error'
 
 export interface ConnectionInfo {
@@ -19,7 +21,7 @@ export interface ConnectionInfo {
 
 export interface QueuedMessage {
   topic: string
-  data: any
+  data: WebSocketPayload
   timestamp: Date
 }
 
@@ -37,9 +39,9 @@ export interface WebSocketMessage {
   id: string
   topic: string
   type: MessageType
-  data: any
+  data: WebSocketPayload
   timestamp: Date
-  metadata?: Record<string, any>
+  metadata?: Record<string, JSONValue>
 }
 
 export type MessageType =
@@ -76,8 +78,8 @@ export interface WebSocketState {
   unsubscribe: (topic: string, handler: MessageHandler) => void
   unsubscribeAll: (topic: string) => void
 
-  send: (topic: string, data: any, connectionId?: string) => void
-  broadcast: (topic: string, data: any) => void
+  send: (topic: string, data: WebSocketPayload, connectionId?: string) => void
+  broadcast: (topic: string, data: WebSocketPayload) => void
 
   getConnectionStatus: (connectionId: string) => ConnectionStatus | null
   getActiveConnections: () => ConnectionInfo[]
@@ -275,6 +277,7 @@ export const useWebSocketStore = create<WebSocketState>()(
           const connection = state.connections.get(connectionId)
           if (connection?.status === 'connected' && connection.socket) {
             // Send would be handled by WebSocketManager
+            // eslint-disable-next-line no-console
             console.log(`Sending to ${connectionId}:`, message)
           } else {
             // Queue message if not connected
@@ -294,6 +297,7 @@ export const useWebSocketStore = create<WebSocketState>()(
           )
 
           if (activeConnection) {
+            // eslint-disable-next-line no-console
             console.log(`Sending to ${activeConnection.id}:`, message)
           }
         }
@@ -427,7 +431,7 @@ export const useMessageHistory = () => useWebSocketStore((state) => state.messag
 export const useConnectionStats = () => useWebSocketStore((state) => state.stats)
 
 // Utility function to create typed subscription
-export function createSubscription<T = any>(
+export function createSubscription<T = WebSocketPayload>(
   topic: string,
   handler: (data: T) => void,
   filter?: (message: WebSocketMessage) => boolean

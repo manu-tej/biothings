@@ -15,7 +15,7 @@ import { useWebSocketStore } from '@/lib/stores/websocketStore'
 
 // Chart series interface for MetricChart
 interface ChartDataPoint {
-  x: any
+  x: string | number | Date
   y: number
   label?: string
   color?: string

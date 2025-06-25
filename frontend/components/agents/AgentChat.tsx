@@ -94,10 +94,10 @@ export default function AgentChat({ agent, isOpen, onClose }: AgentChatProps) {
   // WebSocket connection for real-time chat
   const {
     isConnected,
-    connectionState,
+    connectionState: _connectionState,
     sendMessage: sendWebSocketMessage,
     registerHandler,
-    subscribeToChannel,
+    subscribeToChannel: _subscribeToChannel,
   } = useWebSocket({
     channels: [`chat-${agent.id}`, `agent-${agent.id}`],
     onConnect: () => {

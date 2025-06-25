@@ -3,8 +3,11 @@
  * Immediate actions to make the UI snappy on M1 MacBooks
  */
 
+import { useVirtualizer } from '@tanstack/react-virtual'
 import dynamic from 'next/dynamic'
-import React, { memo, useCallback, ComponentType, MemoExoticComponent } from 'react'
+import React, { memo, useCallback, ComponentType, MemoExoticComponent, useRef } from 'react'
+
+import { JSONValue, WebSocketPayload } from '../types/common.types'
 
 // ============================================
 // 1. MEMOIZATION UTILITIES
@@ -49,16 +52,14 @@ function defaultPropsAreEqual<P extends object>(prevProps: P, nextProps: P): boo
   return true
 }
 
-function isReactElement(value: any): boolean {
-  return value && typeof value === 'object' && '$$typeof' in value
+function isReactElement(value: unknown): boolean {
+  return value && typeof value === 'object' && value !== null && '$$typeof' in value
 }
 
 // ============================================
 // 2. VIRTUAL LIST COMPONENT
 // ============================================
 
-import { useVirtualizer } from '@tanstack/react-virtual'
-import { useRef } from 'react'
 
 interface VirtualListProps<T> {
   items: T[]
@@ -119,7 +120,7 @@ export function VirtualList<T>({
 // 3. WEBSOCKET MANAGER
 // ============================================
 
-type MessageHandler = (data: any) => void
+type MessageHandler = (data: WebSocketPayload) => void
 type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'error'
 
 interface WebSocketConfig {
@@ -158,7 +159,10 @@ export class WebSocketManager {
     if (!this.subscribers.has(topic)) {
       this.subscribers.set(topic, new Set())
     }
-    this.subscribers.get(topic)!.add(handler)
+    const topicSubs = this.subscribers.get(topic)
+    if (topicSubs) {
+      topicSubs.add(handler)
+    }
 
     // Return unsubscribe function
     return () => {
@@ -190,6 +194,7 @@ export class WebSocketManager {
     ws.onopen = () => {
       this.connectionStates.set(key, 'connected')
       this.reconnectAttempts.set(key, 0)
+      // eslint-disable-next-line no-console
       console.log(`WebSocket ${key} connected`)
     }
 
@@ -247,6 +252,7 @@ export class WebSocketManager {
     if (attempts < maxAttempts) {
       setTimeout(
         () => {
+          // eslint-disable-next-line no-console
           console.log(`Attempting reconnection ${key} (${attempts + 1}/${maxAttempts})`)
           this.reconnectAttempts.set(key, attempts + 1)
           this.createConnection(key, config)
@@ -266,7 +272,7 @@ export class WebSocketManager {
     }
   }
 
-  send(topic: string, data: any) {
+  send(topic: string, data: WebSocketPayload) {
     const connectionKey = this.getConnectionKey(topic)
     const ws = this.connections.get(connectionKey)
 
@@ -301,13 +307,13 @@ interface RequestConfig extends RequestInit {
 }
 
 export class OptimizedAPIClient {
-  private cache = new Map<string, CacheEntry<any>>()
-  private pending = new Map<string, Promise<any>>()
-  private batchQueue: Array<{ url: string; resolve: Function; reject: Function }> = []
+  private cache = new Map<string, CacheEntry<JSONValue>>()
+  private pending = new Map<string, Promise<JSONValue>>()
+  private batchQueue: Array<{ url: string; resolve: (value: JSONValue) => void; reject: (reason?: Error) => void }> = []
   private batchTimer: NodeJS.Timeout | null = null
   private readonly DEFAULT_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
-  async get<T = any>(url: string, config: RequestConfig = {}): Promise<T> {
+  async get<T = JSONValue>(url: string, config: RequestConfig = {}): Promise<T> {
     // Check cache first
     if (config.cache !== false) {
       const cached = this.getFromCache<T>(url)
@@ -506,6 +512,7 @@ export class PerformanceMonitor {
   }
 
   logMetrics() {
+    // eslint-disable-next-line no-console
     console.table(this.measures)
   }
 }
@@ -520,7 +527,7 @@ interface LazyComponentOptions {
   suspense?: boolean
 }
 
-export function lazyWithPreload<T extends ComponentType<any>>(
+export function lazyWithPreload<T extends ComponentType<unknown>>(
   factory: () => Promise<{ default: T }>,
   options: LazyComponentOptions = {}
 ) {
@@ -531,13 +538,13 @@ export function lazyWithPreload<T extends ComponentType<any>>(
   })
 
   // Add preload method
-  ;(LazyComponent as any).preload = factory
+  ;(LazyComponent as typeof LazyComponent & { preload?: () => Promise<{ default: T }> }).preload = factory
 
   return LazyComponent
 }
 
 // Preload on hover/focus
-export function usePreloadOnInteraction(component: any, delay: number = 200) {
+export function usePreloadOnInteraction(component: { preload?: () => void }, delay: number = 200) {
   const timeoutRef = useRef<NodeJS.Timeout>()
 
   const handleInteractionStart = useCallback(() => {

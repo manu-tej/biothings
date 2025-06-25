@@ -2,6 +2,8 @@
  * Laboratory Types and Interfaces
  */
 
+import { JSONValue, StringRecord } from '../types/common.types'
+
 export interface Experiment {
   id: string
   name: string
@@ -10,8 +12,8 @@ export interface Experiment {
   end_date?: string
   progress: number
   assigned_agents: string[]
-  parameters?: Record<string, any>
-  results?: Record<string, any>
+  parameters?: StringRecord<JSONValue>
+  results?: StringRecord<JSONValue>
 }
 
 export interface Equipment {
@@ -21,7 +23,7 @@ export interface Equipment {
   status: 'available' | 'in_use' | 'maintenance'
   last_maintenance: string
   current_experiment?: string
-  specifications?: Record<string, any>
+  specifications?: StringRecord<JSONValue>
 }
 
 export interface AnalysisResult {
@@ -29,7 +31,7 @@ export interface AnalysisResult {
   experiment_id: string
   timestamp: string
   type: string
-  data: any
+  data: JSONValue
   confidence?: number
   notes?: string
 }
@@ -39,10 +41,10 @@ export interface SimulationRun {
   name: string
   status: 'running' | 'completed' | 'failed'
   progress: number
-  parameters: Record<string, any>
+  parameters: Record<string, unknown>
   start_time: string
   end_time?: string
-  results?: any
+  results?: JSONValue
 }
 
 export interface EquipmentFilters {
@@ -55,7 +57,7 @@ export interface ExperimentFormData {
   name: string
   type: string
   description: string
-  parameters: Record<string, any>
+  parameters: Record<string, unknown>
   agents: string[]
   equipment: string[]
 }

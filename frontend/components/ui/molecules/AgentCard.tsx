@@ -104,7 +104,7 @@ const sizeStyles = {
 export const AgentCard = forwardRef<HTMLDivElement, AgentCardProps>(
   (
     {
-      id,
+      id: _id,
       name,
       type,
       description,

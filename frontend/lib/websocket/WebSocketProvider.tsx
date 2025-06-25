@@ -8,6 +8,7 @@ import {
   MessageHandler,
   MessageFilter,
 } from '../stores/websocketStore'
+import { WebSocketPayload } from '../types/common.types'
 
 import { wsManager, WebSocketConfig } from './WebSocketManager'
 
@@ -15,7 +16,7 @@ export interface WebSocketContextValue {
   status: ConnectionStatus
   connect: (connectionId: string, config: WebSocketConfig) => Promise<void>
   disconnect: (connectionId?: string) => void
-  send: (topic: string, data: any, connectionId?: string) => void
+  send: (topic: string, data: WebSocketPayload, connectionId?: string) => void
   subscribe: (topic: string, handler: MessageHandler, filter?: MessageFilter) => () => void
   unsubscribe: (topic: string, handler: MessageHandler) => void
   getConnectionStatus: (connectionId: string) => ConnectionStatus | null
@@ -131,7 +132,7 @@ export function useWebSocket() {
 }
 
 // Convenience hook for subscribing to a specific topic
-export function useWebSocketSubscription<T = any>(
+export function useWebSocketSubscription<T = WebSocketPayload>(
   topic: string,
   handler: (data: T) => void,
   deps: React.DependencyList = []
@@ -169,7 +170,7 @@ export function useWebSocketSend() {
   const [error, setError] = React.useState<Error | null>(null)
 
   const sendMessage = React.useCallback(
-    async (topic: string, data: any, options?: { connectionId?: string; retries?: number }) => {
+    async (topic: string, data: WebSocketPayload, options?: { connectionId?: string; retries?: number }) => {
       setSending(true)
       setError(null)
 
@@ -188,7 +189,7 @@ export function useWebSocketSend() {
         // Retry logic if specified
         if (options?.retries && options.retries > 0) {
           setTimeout(() => {
-            sendMessage(topic, data, { ...options, retries: options.retries! - 1 })
+            sendMessage(topic, data, { ...options, retries: (options.retries || 1) - 1 })
           }, 1000)
         }
       }

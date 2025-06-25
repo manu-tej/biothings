@@ -15,6 +15,7 @@ import { useState } from 'react'
 
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { apiClient } from '@/lib/api/client'
+import { StringRecord, JSONValue } from '@/lib/types/common.types'
 
 // Lazy load chart components
 const PerformanceChart = dynamic(
@@ -92,7 +93,7 @@ export default function AnalyticsPage() {
 
     // Analyze trends
     const positiveMetrics = Object.entries(metrics.trends)
-      .filter(([_, trend]: [string, any]) => trend.direction === 'up' && trend.value > 10)
+      .filter(([_, trend]: [string, StringRecord<JSONValue>]) => trend.direction === 'up' && (trend.value as number) > 10)
       .map(([key]) => key.replace(/([A-Z])/g, ' $1').trim())
 
     if (positiveMetrics.length > 0) {
@@ -245,7 +246,7 @@ export default function AnalyticsPage() {
         {/* Trend Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {metrics?.trends &&
-            Object.entries(metrics.trends).map(([key, trend]: [string, any]) => (
+            Object.entries(metrics.trends).map(([key, trend]: [string, StringRecord<JSONValue>]) => (
               <div
                 key={key}
                 className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700"

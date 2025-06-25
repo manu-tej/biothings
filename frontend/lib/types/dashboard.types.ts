@@ -1,4 +1,7 @@
 // Dashboard-specific types
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { JSONValue, StringRecord } from './common.types'
 
 export interface DashboardMetrics {
   totalAgents: number
@@ -44,7 +47,7 @@ export interface AgentHistoryEntry {
   id: string
   timestamp: Date
   event: AgentEvent
-  details: Record<string, any>
+  details: StringRecord<JSONValue>
   duration?: number
 }
 

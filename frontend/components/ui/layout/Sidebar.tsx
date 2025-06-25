@@ -119,7 +119,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
       }
     }
 
-    const renderItem = (item: SidebarItem, level = 0, parentCollapsed = false) => {
+    const renderItem = (item: SidebarItem, level = 0, _parentCollapsed = false) => {
       const hasChildren = item.children && item.children.length > 0
       const isExpanded = expandedItems.has(item.id)
       const showChildren = hasChildren && isExpanded && !collapsed
@@ -196,7 +196,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(
 
           {showChildren && (
             <div className="mt-1 space-y-1">
-              {item.children!.map((child) => renderItem(child, level + 1))}
+              {item.children?.map((child) => renderItem(child, level + 1))}
             </div>
           )}
         </div>

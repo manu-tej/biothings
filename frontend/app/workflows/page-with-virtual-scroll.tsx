@@ -36,10 +36,27 @@ const statusColors: Record<string, string> = {
   failed: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
 }
 
+interface WorkflowStage {
+  name: string
+  status: string
+}
+
+interface WorkflowData {
+  id: string
+  name: string
+  workflow_type: string
+  status: string
+  progress: number
+  created_at: string
+  updated_at: string
+  assigned_agents?: string[]
+  stages?: WorkflowStage[]
+}
+
 interface WorkflowCardProps {
-  workflow: any
+  workflow: WorkflowData
   onStatusUpdate: (workflowId: string, status: string) => void
-  onViewDetails: (workflow: any) => void
+  onViewDetails: (workflow: WorkflowData) => void
 }
 
 // Memoized workflow card component
@@ -110,7 +127,7 @@ const WorkflowCard = memo(
           <div className="mb-4">
             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Stages</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-              {workflow.stages.map((stage: any, index: number) => (
+              {workflow.stages.map((stage: WorkflowStage, index: number) => (
                 <div
                   key={index}
                   className="flex items-center space-x-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-700"
@@ -184,7 +201,7 @@ const WorkflowCard = memo(
 // Memoized Quick Action Button
 const QuickActionButton = memo(
   ({
-    type,
+    type: _type,
     title,
     description,
     onClick,
@@ -212,7 +229,7 @@ export default function WorkflowsPage() {
   const [quickAction, setQuickAction] = useState<
     'drug_discovery' | 'production_scaleup' | 'quality_control' | null
   >(null)
-  const [selectedWorkflow, setSelectedWorkflow] = useState<any>(null)
+  const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowData | null>(null)
   const queryClient = useQueryClient()
 
   const { data: workflows, isLoading } = useQuery({
@@ -263,7 +280,7 @@ export default function WorkflowsPage() {
     [updateWorkflowStatus]
   )
 
-  const handleViewDetails = useCallback((workflow: any) => {
+  const handleViewDetails = useCallback((workflow: WorkflowData) => {
     setSelectedWorkflow(workflow)
   }, [])
 
@@ -436,7 +453,7 @@ export default function WorkflowsPage() {
                     Workflow Stages
                   </h3>
                   <div className="space-y-2">
-                    {selectedWorkflow.stages.map((stage: any, index: number) => (
+                    {selectedWorkflow.stages.map((stage: WorkflowStage, index: number) => (
                       <div
                         key={index}
                         className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"

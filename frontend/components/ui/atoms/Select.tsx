@@ -55,7 +55,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
       error,
       selectSize = 'md',
       searchable = false,
-      clearable = false,
+      clearable: _clearable = false,
       disabled = false,
       fullWidth = false,
       rounded = false,
@@ -160,6 +160,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
             role="combobox"
             aria-expanded={isOpen}
             aria-haspopup="listbox"
+            aria-controls={isOpen ? 'select-dropdown' : undefined}
             aria-disabled={disabled}
             data-testid={testId}
           >
@@ -184,7 +185,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
           </div>
 
           {isOpen && (
-            <div className={dropdownStyles}>
+            <div id="select-dropdown" className={dropdownStyles}>
               {searchable && (
                 <div className="p-2 border-b border-gray-200 dark:border-gray-700">
                   <div className="relative">

@@ -1,10 +1,12 @@
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 
+import { JSONValue, StringRecord } from '../types/common.types'
+
 export interface ExportData {
   type: 'agents' | 'workflows' | 'metrics' | 'reports' | 'custom'
   format: ExportFormat
-  data: any
+  data: JSONValue
   metadata: ExportMetadata
 }
 
@@ -14,7 +16,7 @@ export interface ExportMetadata {
   timestamp: Date
   source: string
   version: string
-  filters?: Record<string, any>
+  filters?: StringRecord<JSONValue>
   dateRange?: {
     start: Date
     end: Date
@@ -31,7 +33,7 @@ export interface ExportOptions {
     start: Date
     end: Date
   }
-  filters?: Record<string, any>
+  filters?: StringRecord<JSONValue>
   customFields?: string[]
   filename?: string
 }
@@ -60,7 +62,7 @@ export interface ExportSchedule {
 export interface ExportDataQuery {
   type: ExportData['type']
   source: string
-  parameters: Record<string, any>
+  parameters: StringRecord<JSONValue>
 }
 
 export interface ImportResult {
@@ -70,15 +72,15 @@ export interface ImportResult {
   warnings: string[]
   imported: number
   skipped: number
-  data?: any
+  data?: JSONValue
 }
 
 export interface ImportValidationRule {
   field: string
   required: boolean
   type: 'string' | 'number' | 'date' | 'boolean' | 'array' | 'object'
-  validator?: (value: any) => boolean
-  transform?: (value: any) => any
+  validator?: (value: unknown) => boolean
+  transform?: (value: unknown) => unknown
 }
 
 export class ExportManager {
@@ -92,7 +94,7 @@ export class ExportManager {
   }
 
   // Export functions
-  public async exportToJSON(data: any, options: ExportOptions): Promise<Blob> {
+  public async exportToJSON(data: JSONValue, options: ExportOptions): Promise<Blob> {
     const exportData: ExportData = {
       type: 'custom',
       format: 'json',
@@ -109,7 +111,7 @@ export class ExportManager {
     })
   }
 
-  public async exportToCSV(data: any[], options: ExportOptions): Promise<Blob> {
+  public async exportToCSV(data: StringRecord<JSONValue>[], options: ExportOptions): Promise<Blob> {
     if (!Array.isArray(data) || data.length === 0) {
       throw new Error('Data must be a non-empty array for CSV export')
     }
@@ -380,7 +382,7 @@ export class ExportManager {
   }
 
   // Private helper methods
-  private processDataForExport(data: any, options: ExportOptions): any {
+  private processDataForExport(data: JSONValue, options: ExportOptions): JSONValue {
     let processedData = data
 
     // Apply date range filter if specified
@@ -388,7 +390,7 @@ export class ExportManager {
       processedData = data.filter((item) => {
         const itemDate = this.extractDateFromItem(item)
         return (
-          itemDate && itemDate >= options.dateRange!.start && itemDate <= options.dateRange!.end
+          itemDate && options.dateRange && itemDate >= options.dateRange.start && itemDate <= options.dateRange.end
         )
       })
     }
@@ -396,12 +398,15 @@ export class ExportManager {
     // Apply custom field selection if specified
     if (options.customFields && Array.isArray(processedData)) {
       processedData = processedData.map((item) => {
-        const filtered: any = {}
-        options.customFields!.forEach((field) => {
-          if (item.hasOwnProperty(field)) {
-            filtered[field] = item[field]
-          }
-        })
+        const filtered: StringRecord<JSONValue> = {}
+        const customFields = options.customFields
+        if (customFields) {
+          customFields.forEach((field) => {
+            if (item.hasOwnProperty(field)) {
+              filtered[field] = item[field]
+            }
+          })
+        }
         return filtered
       })
     }
@@ -409,7 +414,7 @@ export class ExportManager {
     return processedData
   }
 
-  private convertToCSV(data: any[]): string {
+  private convertToCSV(data: StringRecord<JSONValue>[]): string {
     if (data.length === 0) return ''
 
     const headers = Object.keys(data[0])
@@ -433,7 +438,7 @@ export class ExportManager {
     return csvRows.join('\n')
   }
 
-  private parseCSV(content: string): any[] {
+  private parseCSV(content: string): StringRecord<JSONValue>[] {
     const lines = content.split('\n').filter((line) => line.trim())
     if (lines.length === 0) return []
 
@@ -442,7 +447,7 @@ export class ExportManager {
 
     for (let i = 1; i < lines.length; i++) {
       const values = lines[i].split(',').map((value) => value.trim())
-      const item: any = {}
+      const item: StringRecord<JSONValue> = {}
 
       headers.forEach((header, index) => {
         item[header] = values[index] || ''
@@ -454,7 +459,7 @@ export class ExportManager {
     return data
   }
 
-  private validateImportData(data: any, rules: ImportValidationRule[]): ImportResult {
+  private validateImportData(data: JSONValue, rules: ImportValidationRule[]): ImportResult {
     const errors: string[] = []
     const warnings: string[] = []
     let validItems = 0
@@ -528,7 +533,7 @@ export class ExportManager {
     }
   }
 
-  private validateFieldType(value: any, type: ImportValidationRule['type']): boolean {
+  private validateFieldType(value: unknown, type: ImportValidationRule['type']): boolean {
     switch (type) {
       case 'string':
         return typeof value === 'string'
@@ -558,7 +563,7 @@ export class ExportManager {
     }
   }
 
-  private extractDateFromItem(item: any): Date | null {
+  private extractDateFromItem(item: StringRecord<JSONValue>): Date | null {
     // Try common date field names
     const dateFields = ['date', 'timestamp', 'createdAt', 'updatedAt', 'lastActivity']
 
@@ -667,10 +672,10 @@ export class ExportManager {
     }
   }
 
-  private async executeScheduledExport(scheduledExport: ScheduledExport): Promise<void> {
+  private async executeScheduledExport(_scheduledExport: ScheduledExport): Promise<void> {
     // This would need to be implemented based on the specific data sources
     // For now, just log the execution
-    console.log(`Executing scheduled export: ${scheduledExport.name}`)
+    // TODO: Implement scheduled export execution for ${scheduledExport.name}
 
     // Example implementation would fetch data based on dataQuery
     // and then export it using the specified options
@@ -710,14 +715,14 @@ export class ExportManager {
     }
   }
 
-  private dateReplacer(key: string, value: any): any {
+  private dateReplacer(key: string, value: unknown): unknown {
     if (value instanceof Date) {
       return { __type: 'Date', value: value.toISOString() }
     }
     return value
   }
 
-  private dateReviver(key: string, value: any): any {
+  private dateReviver(key: string, value: unknown): unknown {
     if (value && typeof value === 'object' && value.__type === 'Date') {
       return new Date(value.value)
     }

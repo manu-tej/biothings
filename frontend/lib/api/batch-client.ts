@@ -4,25 +4,30 @@
  * Reduces network overhead and improves performance
  */
 
+import type {
+  JSONValue,
+  StringRecord
+} from '../types/common.types'
+
 interface BatchRequest {
   id: string
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
   endpoint: string
-  params?: any
-  body?: any
+  params?: StringRecord<JSONValue>
+  body?: JSONValue
 }
 
 interface BatchResponse {
   id: string
   status: number
-  data?: any
+  data?: JSONValue
   error?: string
 }
 
 interface PendingRequest {
   request: BatchRequest
-  resolve: (data: any) => void
-  reject: (error: any) => void
+  resolve: (data: JSONValue) => void
+  reject: (error: Error) => void
 }
 
 export class BatchAPIClient {
@@ -31,7 +36,7 @@ export class BatchAPIClient {
   private readonly BATCH_SIZE = 10
   private readonly BATCH_DELAY = 10 // ms
   private readonly MAX_BATCH_DELAY = 100 // ms
-  private cache = new Map<string, { data: any; timestamp: number }>()
+  private cache = new Map<string, { data: JSONValue; timestamp: number }>()
   private readonly CACHE_TTL = 5 * 60 * 1000 // 5 minutes
   private baseUrl: string
 
@@ -42,12 +47,12 @@ export class BatchAPIClient {
   /**
    * Make a batched GET request
    */
-  async get<T = any>(endpoint: string, params?: any): Promise<T> {
+  async get<T = JSONValue>(endpoint: string, params?: StringRecord<JSONValue>): Promise<T> {
     // Check cache first
     const cacheKey = this.getCacheKey('GET', endpoint, params)
     const cached = this.getFromCache(cacheKey)
     if (cached !== null) {
-      return cached
+      return cached as T
     }
 
     return this.addToBatch<T>({
@@ -55,13 +60,13 @@ export class BatchAPIClient {
       method: 'GET',
       endpoint,
       params,
-    })
+    }) as Promise<T>
   }
 
   /**
    * Make a batched POST request
    */
-  async post<T = any>(endpoint: string, body?: any): Promise<T> {
+  async post<T = JSONValue>(endpoint: string, body?: JSONValue): Promise<T> {
     return this.addToBatch<T>({
       id: this.generateRequestId(),
       method: 'POST',
@@ -73,7 +78,7 @@ export class BatchAPIClient {
   /**
    * Make a batched PUT request
    */
-  async put<T = any>(endpoint: string, body?: any): Promise<T> {
+  async put<T = JSONValue>(endpoint: string, body?: JSONValue): Promise<T> {
     return this.addToBatch<T>({
       id: this.generateRequestId(),
       method: 'PUT',
@@ -85,7 +90,7 @@ export class BatchAPIClient {
   /**
    * Make a batched DELETE request
    */
-  async delete<T = any>(endpoint: string): Promise<T> {
+  async delete<T = JSONValue>(endpoint: string): Promise<T> {
     return this.addToBatch<T>({
       id: this.generateRequestId(),
       method: 'DELETE',
@@ -96,7 +101,7 @@ export class BatchAPIClient {
   /**
    * Execute multiple requests in parallel (non-batched)
    */
-  async parallel<T extends Record<string, Promise<any>>>(
+  async parallel<T extends Record<string, Promise<JSONValue>>>(
     requests: T
   ): Promise<{ [K in keyof T]: Awaited<T[K]> }> {
     const entries = Object.entries(requests)
@@ -111,8 +116,12 @@ export class BatchAPIClient {
    * Add request to batch queue
    */
   private addToBatch<T>(request: BatchRequest): Promise<T> {
-    return new Promise((resolve, reject) => {
-      this.batchQueue.push({ request, resolve, reject })
+    return new Promise<T>((resolve, reject) => {
+      this.batchQueue.push({ 
+        request, 
+        resolve: resolve as (data: JSONValue) => void, 
+        reject 
+      })
 
       // If we've reached the batch size, process immediately
       if (this.batchQueue.length >= this.BATCH_SIZE) {
@@ -189,7 +198,7 @@ export class BatchAPIClient {
             const cacheKey = this.getCacheKey(request.method, request.endpoint, request.params)
             this.setCache(cacheKey, result.data)
           }
-          resolve(result.data)
+          (resolve as (data: JSONValue) => void)(result.data)
         }
       })
     } catch (error) {
@@ -208,7 +217,7 @@ export class BatchAPIClient {
   /**
    * Generate cache key
    */
-  private getCacheKey(method: string, endpoint: string, params?: any): string {
+  private getCacheKey(method: string, endpoint: string, params?: StringRecord<JSONValue>): string {
     const paramStr = params ? JSON.stringify(params) : ''
     return `${method}:${endpoint}:${paramStr}`
   }
@@ -216,7 +225,7 @@ export class BatchAPIClient {
   /**
    * Get data from cache
    */
-  private getFromCache(key: string): any | null {
+  private getFromCache(key: string): JSONValue | null {
     const entry = this.cache.get(key)
     if (!entry) return null
 
@@ -232,7 +241,7 @@ export class BatchAPIClient {
   /**
    * Set cache data
    */
-  private setCache(key: string, data: any): void {
+  private setCache(key: string, data: JSONValue): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -250,11 +259,11 @@ export class BatchAPIClient {
    */
   clearCache(pattern?: RegExp): void {
     if (pattern) {
-      for (const [key] of this.cache) {
+      Array.from(this.cache.keys()).forEach(key => {
         if (pattern.test(key)) {
           this.cache.delete(key)
         }
-      }
+      })
     } else {
       this.cache.clear()
     }

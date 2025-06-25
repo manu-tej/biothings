@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/atoms/Button'
 import { Card } from '@/components/ui/atoms/Card'
 import { SearchBar } from '@/components/ui/molecules/SearchBar'
 import { WorkflowCard } from '@/components/ui/molecules/WorkflowCard'
-import { useDashboardStore } from '@/lib/stores/dashboardStore'
-import { WorkflowStatus } from '@/lib/stores/dashboardStore'
+import { useDashboardStore, WorkflowStatus } from '@/lib/stores/dashboardStore'
 import { useWebSocketStore } from '@/lib/stores/websocketStore'
 
 export default function WorkflowsPage() {
@@ -66,23 +65,23 @@ export default function WorkflowsPage() {
   }
 
   const handleCreateWorkflow = () => {
-    console.log('Create new workflow')
+    // TODO: Implement workflow creation
   }
 
   const handleStartAll = () => {
-    console.log('Start all pending workflows')
+    // TODO: Implement start all workflows
   }
 
   const handlePauseAll = () => {
-    console.log('Pause all running workflows')
+    // TODO: Implement pause all workflows
   }
 
   const handleExportWorkflows = () => {
-    console.log('Export workflows data')
+    // TODO: Implement workflows export
   }
 
   const handleRefresh = () => {
-    console.log('Refresh workflows')
+    // TODO: Implement workflows refresh
   }
 
   if (isLoading) {
@@ -258,19 +257,19 @@ export default function WorkflowsPage() {
                 onStart:
                   workflow.status === 'pending'
                     ? () => {
-                        console.log(`Start workflow ${workflow.id}`)
+                        // TODO: Implement workflow start
                       }
                     : undefined,
                 onPause:
                   workflow.status === 'running'
                     ? () => {
-                        console.log(`Pause workflow ${workflow.id}`)
+                        // TODO: Implement workflow pause
                       }
                     : undefined,
                 onStop:
                   workflow.status === 'running' || workflow.status === 'pending'
                     ? () => {
-                        console.log(`Stop workflow ${workflow.id}`)
+                        // TODO: Implement workflow stop
                       }
                     : undefined,
                 onView: () => handleWorkflowSelect(workflow),

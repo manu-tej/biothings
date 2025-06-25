@@ -4,6 +4,7 @@ import {
   type MessageType,
   type ConnectionStatus,
 } from '../stores/websocketStore'
+import { WebSocketPayload } from '../types/common.types'
 
 export interface WebSocketConfig {
   url: string
@@ -102,7 +103,7 @@ class WebSocketManager {
     store.disconnectAll()
   }
 
-  send(connectionId: string, topic: string, data: any, type: MessageType = 'update'): void {
+  send(connectionId: string, topic: string, data: WebSocketPayload, type: MessageType = 'update'): void {
     const connection = this.connections.get(connectionId)
     if (!connection) {
       return
@@ -118,7 +119,7 @@ class WebSocketManager {
     connection.send(message)
   }
 
-  broadcast(topic: string, data: any, type: MessageType = 'update'): void {
+  broadcast(topic: string, data: WebSocketPayload, type: MessageType = 'update'): void {
     const message: Omit<WebSocketMessage, 'id'> = {
       topic,
       type,

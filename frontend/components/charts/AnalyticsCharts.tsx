@@ -22,7 +22,7 @@ interface ChartData {
   }
 }
 
-interface AnalyticsChartsProps {
+interface _AnalyticsChartsProps {
   data: ChartData
 }
 

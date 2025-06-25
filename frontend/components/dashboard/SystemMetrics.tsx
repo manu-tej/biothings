@@ -8,6 +8,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { apiClient } from '@/lib/api/client'
 import { useMetricsWebSocket } from '@/lib/hooks/useWebSocketNew'
+import { StringRecord, JSONValue } from '@/lib/types/common.types'
 
 interface MetricCardProps {
   title: string
@@ -60,7 +61,7 @@ export default function SystemMetrics() {
   const chartRef = useRef<HTMLDivElement>(null)
   const chartInstance = useRef<echarts.ECharts | null>(null)
   const queryClient = useQueryClient()
-  const [metricsHistory, setMetricsHistory] = useState<any[]>([])
+  const [metricsHistory, setMetricsHistory] = useState<StringRecord<JSONValue>[]>([])
 
   // Fetch current metrics
   const { data: metrics, isLoading } = useQuery({
@@ -135,11 +136,11 @@ export default function SystemMetrics() {
       chartInstance.current = echarts.init(chartRef.current, 'dark')
     }
 
-    const timestamps = metricsHistory.map((item: any) =>
-      new Date(item.timestamp).toLocaleTimeString()
+    const timestamps = metricsHistory.map((item: StringRecord<JSONValue>) =>
+      new Date(item.timestamp as string).toLocaleTimeString()
     )
-    const cpuData = metricsHistory.map((item: any) => item.cpu_percent)
-    const memoryData = metricsHistory.map((item: any) => item.memory_percent)
+    const cpuData = metricsHistory.map((item: StringRecord<JSONValue>) => item.cpu_percent as number)
+    const memoryData = metricsHistory.map((item: StringRecord<JSONValue>) => item.memory_percent as number)
 
     const option: EChartsOption = {
       backgroundColor: 'transparent',

@@ -535,14 +535,14 @@ export class PerformanceOptimizationSwarm {
     }
   }
 
-  private extractRounds(messages: BaseMessage[]): RoundMemory[] {
+  private extractRounds(_messages: BaseMessage[]): RoundMemory[] {
     // Group messages by round and extract insights
     const rounds: RoundMemory[] = []
     // Implementation details...
     return rounds
   }
 
-  private extractAgentMemory(messages: BaseMessage[], agentName: string): AgentMemory {
+  private extractAgentMemory(_messages: BaseMessage[], _agentName: string): AgentMemory {
     // Extract agent-specific insights
     return {
       insights: [],

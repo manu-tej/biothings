@@ -1,4 +1,7 @@
 // WebSocket message types and interfaces
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { JSONValue } from './common.types'
 
 export interface WebSocketConfig {
   url: string
@@ -14,7 +17,7 @@ export interface WebSocketConfig {
   connectionTimeout?: number
 }
 
-export interface WebSocketMessage<T = any> {
+export interface WebSocketMessage<T = JSONValue> {
   id: string
   topic: string
   type: WebSocketMessageType

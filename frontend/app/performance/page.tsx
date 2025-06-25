@@ -2,7 +2,7 @@
 
 import { Zap, Clock, Database, Wifi, Activity, BarChart3, AlertCircle } from 'lucide-react'
 import dynamic from 'next/dynamic'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { batchClient } from '@/lib/api/batch-client'
@@ -41,6 +41,7 @@ export default function PerformanceMonitoringPage() {
     }>
   >([])
 
+  const currentFpsRef = useRef(60)
   const wsInfo = useWebSocketInfo()
   const cacheStats = batchClient.getCacheStats()
 
@@ -67,6 +68,7 @@ export default function PerformanceMonitoringPage() {
         requestAnimationFrame(() => {
           const fps = measureFPS()
           if (fps !== null) {
+            currentFpsRef.current = fps
             setMetrics((prev) => ({ ...prev, fps }))
           }
         })
@@ -74,8 +76,8 @@ export default function PerformanceMonitoringPage() {
 
       // Memory monitoring
       const memoryInterval = setInterval(() => {
-        if ('memory' in performance && (performance as any).memory) {
-          const memoryUsage = Math.round((performance as any).memory.usedJSHeapSize / 1048576) // Convert to MB
+        if ('memory' in performance && (performance as { memory?: { usedJSHeapSize: number } }).memory) {
+          const memoryUsage = Math.round((performance as { memory: { usedJSHeapSize: number } }).memory.usedJSHeapSize / 1048576) // Convert to MB
           setMetrics((prev) => ({ ...prev, memoryUsage }))
 
           // Add to history
@@ -84,7 +86,7 @@ export default function PerformanceMonitoringPage() {
               ...prev,
               {
                 timestamp: new Date(),
-                fps: metrics.fps,
+                fps: currentFpsRef.current,
                 memory: memoryUsage,
               },
             ]
@@ -300,7 +302,7 @@ export default function PerformanceMonitoringPage() {
             WebSocket Connections
           </h2>
           <div className="space-y-3">
-            {wsInfo.map((conn, index) => (
+            {wsInfo.map((conn, _index) => (
               <div
                 key={conn.key}
                 className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded"

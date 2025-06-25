@@ -4,6 +4,14 @@
  */
 
 import { config } from '../config'
+import type {
+  JSONValue,
+  StringRecord,
+  WebSocketPayload,
+  AgentCommandParams,
+  EquipmentParams,
+  ExperimentParams
+} from '../types/common.types'
 
 // Types
 export interface Agent {
@@ -71,7 +79,7 @@ export interface Message {
   sender_id: string
   recipient_id?: string
   message_type: string
-  payload: any
+  payload: WebSocketPayload
   timestamp: string
   priority?: string
 }
@@ -85,7 +93,7 @@ export interface Equipment {
   speed?: number
   progress: number
   time_remaining?: string
-  parameters?: Record<string, any>
+  parameters?: EquipmentParams
 }
 
 export interface Experiment {
@@ -97,7 +105,7 @@ export interface Experiment {
   estimated_completion: string
   researcher: string
   equipment: string[]
-  parameters?: Record<string, any>
+  parameters?: ExperimentParams
   progress: number
   notes?: string
 }
@@ -124,17 +132,17 @@ export interface LaboratoryStatus {
 }
 
 interface CacheEntry {
-  data: any
+  data: JSONValue
   timestamp: number
   etag?: string
 }
 
 class UnifiedApiClient {
   private cache = new Map<string, CacheEntry>()
-  private pendingRequests = new Map<string, Promise<any>>()
+  private pendingRequests = new Map<string, Promise<JSONValue>>()
   private cacheTimeout = 300000 // 5 minutes default cache
   private wsConnection: WebSocket | null = null
-  private wsCallbacks: Map<string, (data: any) => void> = new Map()
+  private wsCallbacks: Map<string, EventHandler<WebSocketPayload>> = new Map()
   private reconnectAttempts = 0
   private maxReconnectAttempts = 5
   private heartbeatInterval: NodeJS.Timeout | null = null
@@ -164,7 +172,7 @@ class UnifiedApiClient {
     })
   }
 
-  private async fetchWithCache<T>(
+  private async fetchWithCache<T = JSONValue>(
     endpoint: string,
     options: RequestInit = {},
     cacheTime: number = this.cacheTimeout
@@ -174,13 +182,13 @@ class UnifiedApiClient {
 
     // Check if request is already pending (deduplication)
     if (this.pendingRequests.has(cacheKey)) {
-      return this.pendingRequests.get(cacheKey)
+      return this.pendingRequests.get(cacheKey) as Promise<T>
     }
 
     // Check cache
     const cached = this.cache.get(cacheKey)
     if (cached && Date.now() - cached.timestamp < cacheTime) {
-      return cached.data
+      return cached.data as T
     }
 
     // Add ETag if we have one
@@ -203,7 +211,7 @@ class UnifiedApiClient {
         // Handle 304 Not Modified
         if (response.status === 304 && cached) {
           cached.timestamp = Date.now()
-          return cached.data
+          return cached.data as T
         }
 
         if (!response.ok) {
@@ -220,44 +228,44 @@ class UnifiedApiClient {
           etag: etag || undefined,
         })
 
-        return data
+        return data as T
       })
       .finally(() => {
         // Remove from pending requests
         this.pendingRequests.delete(cacheKey)
       })
 
-    this.pendingRequests.set(cacheKey, pendingRequest)
+    this.pendingRequests.set(cacheKey, pendingRequest as Promise<JSONValue>)
     return pendingRequest
   }
 
-  private transformAgent(agent: any): Agent {
+  private transformAgent(agent: StringRecord<unknown>): Agent {
     return {
-      id: agent.agent_id || agent.id,
-      name: agent.name || `${agent.agent_type} Agent`,
-      agent_type: agent.agent_type,
-      status: agent.active ? 'active' : agent.status || 'idle',
-      parent_id: agent.parent_id || (agent.agent_type === 'CEO' ? null : 'ceo_agent'),
-      subordinates: agent.subordinates || [],
-      department: agent.department || agent.agent_type,
-      last_active: agent.last_active || new Date().toISOString(),
-      capabilities: agent.capabilities || [],
+      id: (agent.agent_id as string) || (agent.id as string),
+      name: (agent.name as string) || `${agent.agent_type as string} Agent`,
+      agent_type: agent.agent_type as string,
+      status: agent.active ? 'active' : ((agent.status as Agent['status']) || 'idle'),
+      parent_id: (agent.parent_id as string) || (agent.agent_type === 'CEO' ? null : 'ceo_agent'),
+      subordinates: (agent.subordinates as string[]) || [],
+      department: (agent.department as string) || (agent.agent_type as string),
+      last_active: (agent.last_active as string) || new Date().toISOString(),
+      capabilities: (agent.capabilities as string[]) || [],
     }
   }
 
   // Agent APIs
   async getAgents(): Promise<Agent[]> {
-    const data = await this.fetchWithCache<any>('/api/agents', {}, 60000) // 1 minute cache
-    const agents = data.agents || data || []
-    return agents.map((agent: any) => this.transformAgent(agent))
+    const data = await this.fetchWithCache<{ agents?: StringRecord<unknown>[] } | StringRecord<unknown>[]>('/api/agents', {}, 60000) // 1 minute cache
+    const agents = Array.isArray(data) ? data : (data.agents || [])
+    return agents.map((agent: StringRecord<unknown>) => this.transformAgent(agent))
   }
 
   async getAgent(agentId: string): Promise<Agent> {
-    const data = await this.fetchWithCache<any>(`/api/agents/${agentId}`)
+    const data = await this.fetchWithCache<StringRecord<unknown>>(`/api/agents/${agentId}`)
     return this.transformAgent(data)
   }
 
-  async sendCommandToAgent(agentId: string, command: string, parameters?: any): Promise<any> {
+  async sendCommandToAgent(agentId: string, command: string, parameters?: AgentCommandParams['parameters']): Promise<JSONValue> {
     return this.fetchWithCache(
       `/api/agents/${agentId}/command`,
       {
@@ -273,7 +281,7 @@ class UnifiedApiClient {
   }
 
   // Chat API
-  async chatWithAgent(agentId: string, message: string): Promise<any> {
+  async chatWithAgent(agentId: string, message: string): Promise<{ message: string; [key: string]: JSONValue }> {
     const endpoint = '/api/chat'
     const response = await fetch(`${this.apiBaseUrl}${endpoint}`, {
       method: 'POST',
@@ -299,26 +307,27 @@ class UnifiedApiClient {
   }
 
   // Alias for compatibility
-  async chat(agentId: string, message: string): Promise<any> {
+  async chat(agentId: string, message: string): Promise<{ message: string; [key: string]: JSONValue }> {
     return this.chatWithAgent(agentId, message)
   }
 
   // Monitoring APIs
   async getCurrentMetrics(): Promise<SystemMetrics> {
-    const data = await this.fetchWithCache<any>('/api/monitoring/metrics/current', {}, 10000)
+    const data = await this.fetchWithCache<{ metrics?: StringRecord<unknown>; timestamp?: string }>('/api/monitoring/metrics/current', {}, 10000)
 
     // Transform to match frontend expectations
+    const metrics = data.metrics || {}
     return {
       system: {
-        cpu_percent: data.metrics?.cpu_percent || 35 + Math.random() * 20,
-        memory_percent: data.metrics?.memory_percent || 55 + Math.random() * 15,
-        memory_used_gb: data.metrics?.memory_used_gb || 8.5,
-        memory_total_gb: data.metrics?.memory_total_gb || 16,
+        cpu_percent: (metrics.cpu_percent as number) || 35 + Math.random() * 20,
+        memory_percent: (metrics.memory_percent as number) || 55 + Math.random() * 15,
+        memory_used_gb: (metrics.memory_used_gb as number) || 8.5,
+        memory_total_gb: (metrics.memory_total_gb as number) || 16,
       },
       agents: {
-        total_agents: data.metrics?.agents_online || 5,
-        active_agents: data.metrics?.agents_online || 5,
-        agent_types: data.metrics?.agent_types || {
+        total_agents: (metrics.agents_online as number) || 5,
+        active_agents: (metrics.agents_online as number) || 5,
+        agent_types: (metrics.agent_types as Record<string, number>) || {
           CEO: 1,
           CSO: 1,
           CFO: 1,
@@ -326,7 +335,7 @@ class UnifiedApiClient {
           COO: 1,
         },
       },
-      websocket_connections: data.metrics?.websocket_connections || 1,
+      websocket_connections: (metrics.websocket_connections as number) || 1,
       timestamp: data.timestamp || new Date().toISOString(),
     }
   }
@@ -337,7 +346,7 @@ class UnifiedApiClient {
   }
 
   async getAlerts(): Promise<Alert[]> {
-    const data = await this.fetchWithCache<any>('/api/monitoring/alerts', {}, 5000)
+    const data = await this.fetchWithCache<{ alerts?: StringRecord<unknown>[] }>('/api/monitoring/alerts', {}, 5000)
     const alerts = data.alerts || []
 
     if (alerts.length === 0) {
@@ -353,19 +362,19 @@ class UnifiedApiClient {
       ]
     }
 
-    return alerts.map((alert: any) => ({
-      id: alert.id || `alert-${Date.now()}`,
-      severity: alert.severity || 'info',
-      type: alert.type || 'system',
-      message: alert.message || '',
-      timestamp: alert.timestamp || new Date().toISOString(),
+    return alerts.map((alert: StringRecord<unknown>) => ({
+      id: (alert.id as string) || `alert-${Date.now()}`,
+      severity: (alert.severity as Alert['severity']) || 'info',
+      type: (alert.type as string) || 'system',
+      message: (alert.message as string) || '',
+      timestamp: (alert.timestamp as string) || new Date().toISOString(),
     }))
   }
 
   // Workflow APIs
   async getWorkflows(): Promise<Workflow[]> {
-    const data = await this.fetchWithCache<any>('/api/workflows', {}, 30000)
-    const workflows = data.workflows || data || []
+    const data = await this.fetchWithCache<{ workflows?: (StringRecord<unknown> | string)[] } | (StringRecord<unknown> | string)[]>('/api/workflows', {}, 30000)
+    const workflows = Array.isArray(data) ? data : ((data as { workflows?: (StringRecord<unknown> | string)[] }).workflows || [])
 
     if (Array.isArray(workflows) && workflows.length > 0 && typeof workflows[0] === 'string') {
       // Transform string array to workflow objects
@@ -381,10 +390,10 @@ class UnifiedApiClient {
       }))
     }
 
-    return workflows
+    return workflows as unknown as Workflow[]
   }
 
-  async simulateWorkflow(type: string): Promise<any> {
+  async simulateWorkflow(type: string): Promise<JSONValue> {
     return this.fetchWithCache(
       '/api/workflows/simulate',
       {
@@ -395,7 +404,7 @@ class UnifiedApiClient {
     )
   }
 
-  async updateWorkflowStatus(workflowId: string, status: string): Promise<any> {
+  async updateWorkflowStatus(workflowId: string, status: string): Promise<JSONValue> {
     return this.fetchWithCache(
       `/api/workflows/${workflowId}/status`,
       {
@@ -444,7 +453,7 @@ class UnifiedApiClient {
       }
     }
 
-    this.wsConnection.onerror = (error) => {
+    this.wsConnection.onerror = (_error) => {
       // TODO: Replace with proper logging service
     }
 
@@ -471,7 +480,7 @@ class UnifiedApiClient {
     this.stopHeartbeat()
   }
 
-  onWebSocketMessage(callback: (data: any) => void): () => void {
+  onWebSocketMessage(callback: EventHandler<WebSocketPayload>): () => void {
     const id = Math.random().toString(36).substr(2, 9)
     this.wsCallbacks.set(id, callback)
 
@@ -481,7 +490,7 @@ class UnifiedApiClient {
     }
   }
 
-  sendWebSocketMessage(message: any): void {
+  sendWebSocketMessage(message: WebSocketPayload): void {
     if (this.wsConnection?.readyState === WebSocket.OPEN) {
       this.wsConnection.send(JSON.stringify(message))
     } else {
@@ -528,7 +537,7 @@ class UnifiedApiClient {
     return this.fetchWithCache<Equipment>(`/api/laboratory/equipment/${equipmentId}`)
   }
 
-  async controlEquipment(equipmentId: string, action: string, parameters?: any): Promise<any> {
+  async controlEquipment(equipmentId: string, action: string, parameters?: EquipmentParams): Promise<JSONValue> {
     return this.fetchWithCache(
       `/api/laboratory/equipment/${equipmentId}/control`,
       {
@@ -548,7 +557,7 @@ class UnifiedApiClient {
     type: string
     researcher: string
     equipment: string[]
-    parameters?: Record<string, any>
+    parameters?: ExperimentParams
     notes?: string
   }): Promise<Experiment> {
     return this.fetchWithCache(
@@ -561,7 +570,7 @@ class UnifiedApiClient {
     )
   }
 
-  async updateExperimentStatus(experimentId: string, status: string): Promise<any> {
+  async updateExperimentStatus(experimentId: string, status: string): Promise<JSONValue> {
     return this.fetchWithCache(
       `/api/laboratory/experiments/${experimentId}/status`,
       {
@@ -572,7 +581,7 @@ class UnifiedApiClient {
     )
   }
 
-  async getExperimentLogs(experimentId: string, limit: number = 50): Promise<any> {
+  async getExperimentLogs(experimentId: string, limit: number = 50): Promise<StringRecord<unknown>[]> {
     return this.fetchWithCache(`/api/laboratory/experiments/${experimentId}/logs?limit=${limit}`)
   }
 
@@ -581,7 +590,13 @@ class UnifiedApiClient {
   }
 
   // Analytics APIs
-  async getAnalyticsMetrics(dateRange: string): Promise<any> {
+  async getAnalyticsMetrics(dateRange: string): Promise<{
+    kpis: StringRecord<number>;
+    trends: StringRecord<{ value: number; direction: string }>;
+    performanceData: StringRecord<unknown>;
+    costBreakdown: Array<{ value: number; name: string }>;
+    productivityData: StringRecord<unknown>;
+  }> {
     // For now, return mock data. In production, this would fetch from the backend
     const baseMetrics = {
       kpis: {

@@ -128,7 +128,7 @@ export default function RealtimeAlerts() {
   }, [initialAlerts])
 
   // Handle WebSocket alerts with dedicated hook
-  const { isConnected, connectionState } = useAlertsWebSocket((alertData) => {
+  const { isConnected: _isConnected, connectionState } = useAlertsWebSocket((alertData) => {
     const newAlert: Alert = {
       id: alertData.id || `alert-${Date.now()}`,
       severity: alertData.severity || 'info',

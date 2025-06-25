@@ -4,7 +4,9 @@
  * Optimized for M1 MacBook performance
  */
 
-export type MessageHandler = (data: any) => void
+import { WebSocketPayload } from '../types/common.types'
+
+export type MessageHandler = (data: WebSocketPayload) => void
 export type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'error'
 
 interface WebSocketConfig {
@@ -81,7 +83,10 @@ export class WebSocketConnectionManager {
     if (!this.subscriptions.has(topic)) {
       this.subscriptions.set(topic, new Set())
     }
-    this.subscriptions.get(topic)!.add(subscription)
+    const topicSubs = this.subscriptions.get(topic)
+    if (topicSubs) {
+      topicSubs.add(subscription)
+    }
 
     // Add topic to connection
     const connection = this.connections.get(connectionKey)
@@ -110,7 +115,7 @@ export class WebSocketConnectionManager {
   /**
    * Send a message to a specific topic
    */
-  send(topic: string, data: any): void {
+  send(topic: string, data: WebSocketPayload): void {
     const connectionKey = this.getConnectionKey(topic)
     const connection = this.connections.get(connectionKey)
 
@@ -167,7 +172,7 @@ export class WebSocketConnectionManager {
   }
 
   private createConnection(key: string, config: WebSocketConfig): void {
-    const url = config.url || this.config.url!
+    const url = config.url || this.config.url || 'ws://localhost:8080'
     const ws = new WebSocket(url, config.protocols)
 
     const connection: ConnectionPool = {
@@ -274,7 +279,7 @@ export class WebSocketConnectionManager {
     }
   }
 
-  private handleConnectionError(key: string, _error: any): void {
+  private handleConnectionError(key: string, _error: unknown): void {
     const connection = this.connections.get(key)
     if (connection) {
       connection.state = 'error'

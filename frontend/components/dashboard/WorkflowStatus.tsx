@@ -132,7 +132,7 @@ export default function WorkflowStatus() {
   })
 
   // WebSocket for real-time workflow updates with dedicated hook
-  const { isConnected, connectionState } = useWorkflowWebSocket((update) => {
+  const { isConnected: _isConnected, connectionState } = useWorkflowWebSocket((update) => {
     if (update.type === 'workflow_update' && update.workflow_id) {
       // Update specific workflow
       queryClient.setQueryData(['workflows'], (oldData: Workflow[] | undefined) => {

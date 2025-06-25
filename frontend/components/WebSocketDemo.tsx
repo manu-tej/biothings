@@ -33,36 +33,35 @@ export default function WebSocketDemo() {
   } = useWebSocket({
     channels: ['demo', 'system'],
     onMessage: (msg) => {
-      console.log('Received message:', msg)
       setMessages((prev) => [...prev.slice(-9), msg])
     },
-    onConnect: () => console.log('Demo connected'),
-    onDisconnect: () => console.log('Demo disconnected'),
+    onConnect: () => {/* Demo connected */},
+    onDisconnect: () => {/* Demo disconnected */},
     onError: (error) => console.error('Demo error:', error),
   })
 
   // Example of using specialized hooks
-  useMetricsWebSocket((metrics) => {
-    console.log('Metrics update:', metrics)
+  useMetricsWebSocket((_metrics) => {
+    // Handle metrics update
   })
 
-  useAlertsWebSocket((alert) => {
-    console.log('New alert:', alert)
+  useAlertsWebSocket((_alert) => {
+    // Handle new alert
   })
 
-  useAgentStatusWebSocket((status) => {
-    console.log('Agent status update:', status)
+  useAgentStatusWebSocket((_status) => {
+    // Handle agent status update
   })
 
-  useWorkflowWebSocket((update) => {
-    console.log('Workflow update:', update)
+  useWorkflowWebSocket((_update) => {
+    // Handle workflow update
   })
 
   // Register a custom handler for a specific message type
   useEffect(() => {
     const unregister = registerHandler(
-      (msg) => {
-        console.log('Custom handler received:', msg)
+      (_msg) => {
+        // Handle custom message
       },
       'system',
       'demo'

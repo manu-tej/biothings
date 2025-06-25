@@ -272,6 +272,7 @@ export default function OptimizedDashboard({ initialAgents = [] }: OptimizedDash
 }
 
 // Performance measurement hook
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
 function usePerformanceTracking(componentName: string) {
   React.useEffect(() => {
     perfMonitor.mark(`${componentName}-mount`)

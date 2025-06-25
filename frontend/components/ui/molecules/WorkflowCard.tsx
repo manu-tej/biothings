@@ -109,16 +109,16 @@ const priorityConfig = {
 export const WorkflowCard = forwardRef<HTMLDivElement, WorkflowCardProps>(
   (
     {
-      id,
+      _id,
       name,
       description,
       status,
-      steps = [],
+      _steps = [],
       assignedAgents = [],
       priority = 'medium',
       tags = [],
       actions,
-      size = 'md',
+      _size = 'md',
       variant = 'default',
       selectable = false,
       selected = false,

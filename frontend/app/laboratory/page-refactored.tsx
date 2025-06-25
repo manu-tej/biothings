@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic'
 import { useState } from 'react'
 
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
-
 // Hooks
 import { EquipmentFilters } from '@/components/laboratory/equipment/EquipmentFilters'
 import { EquipmentGrid } from '@/components/laboratory/equipment/EquipmentGrid'
@@ -17,6 +16,7 @@ import {
   useAnalysisResults,
   useSimulations,
 } from '@/lib/laboratory/hooks'
+import { StringRecord, JSONValue } from '@/lib/types/common.types'
 
 // Components
 
@@ -66,7 +66,7 @@ export default function LaboratoryPageRefactored() {
 
   const { simulations, activeSimulations, runSimulation } = useSimulations()
 
-  const handleCreateExperiment = async (data: any) => {
+  const handleCreateExperiment = async (data: StringRecord<JSONValue>) => {
     await createExperiment.mutateAsync(data)
     setShowNewExperiment(false)
   }
@@ -164,7 +164,7 @@ export default function LaboratoryPageRefactored() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as 'experiments' | 'equipment' | 'analysis' | 'simulation')}
                 className={`
                   flex items-center py-2 px-1 border-b-2 font-medium text-sm
                   ${

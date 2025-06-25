@@ -55,7 +55,7 @@ export const SankeyChart: React.FC<SankeyChartProps> = ({
     tooltip: {
       trigger: 'item',
       triggerOn: 'mousemove',
-      formatter: function (params: any) {
+      formatter: function (params: { dataType: string; data: SankeyNode | SankeyLink }) {
         if (params.dataType === 'node') {
           return `${params.data.name}<br/>Value: ${params.data.value || 0}`
         } else if (params.dataType === 'edge') {
@@ -112,7 +112,7 @@ export const SankeyChart: React.FC<SankeyChartProps> = ({
   }
 
   const handleEvents = {
-    click: (params: any) => {
+    click: (params: { dataType: string; data: SankeyNode | SankeyLink }) => {
       if (params.dataType === 'node' && onNodeClick) {
         const originalNode = data.nodes.find((node) => node.name === params.data.name)
         if (originalNode) {

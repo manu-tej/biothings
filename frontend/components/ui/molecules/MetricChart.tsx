@@ -10,7 +10,7 @@ import { Card, CardHeader, CardBody } from '../atoms/Card'
 import { Spinner } from '../atoms/Spinner'
 
 export interface ChartDataPoint {
-  x: any
+  x: string | number | Date
   y: number
   label?: string
   color?: string
@@ -74,17 +74,17 @@ export const MetricChart = forwardRef<HTMLDivElement, MetricChartProps>(
       title,
       subtitle,
       series,
-      type = 'line',
+      type: _type = 'line',
       loading = false,
       error,
       noData = false,
       height,
       showLegend = true,
-      showGrid = true,
-      showTooltip = true,
+      showGrid: _showGrid = true,
+      showTooltip: _showTooltip = true,
       timeRange,
       lastUpdated,
-      refreshInterval,
+      refreshInterval: _refreshInterval,
       onRefresh,
       onExport,
       onFullscreen,

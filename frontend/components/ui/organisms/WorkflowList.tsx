@@ -75,7 +75,7 @@ export const WorkflowList = forwardRef<HTMLDivElement, WorkflowListProps>(
       sortable = true,
       selectable = true,
       virtualScrolling = false,
-      itemHeight = 120,
+      _itemHeight = 120,
       maxHeight = 600,
       pageSize = 50,
       selectedWorkflows = new Set(),
@@ -106,7 +106,7 @@ export const WorkflowList = forwardRef<HTMLDivElement, WorkflowListProps>(
     // Memoized sort comparator
     const sortComparator = useCallback(
       (a: WorkflowListItem, b: WorkflowListItem) => {
-        let aValue: any, bValue: any
+        let aValue: string | number | Date, bValue: string | number | Date
 
         switch (sortField) {
           case 'name':
@@ -179,7 +179,7 @@ export const WorkflowList = forwardRef<HTMLDivElement, WorkflowListProps>(
     )
 
     // Memoized sort handler
-    const handleSort = useCallback(
+    const _handleSort = useCallback(
       (field: SortField) => {
         if (sortField === field) {
           setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
@@ -376,7 +376,7 @@ export const WorkflowList = forwardRef<HTMLDivElement, WorkflowListProps>(
       ),
       [
         processedWorkflows.length,
-        selectedWorkflows.size,
+        selectedWorkflows,
         loading,
         searchQuery,
         statusFilter,
@@ -392,8 +392,6 @@ export const WorkflowList = forwardRef<HTMLDivElement, WorkflowListProps>(
         filterable,
         sortable,
         selectable,
-        statusOptions,
-        sortOptions,
       ]
     )
 

@@ -14,6 +14,8 @@ import {
 } from 'lucide-react'
 import React, { forwardRef, useState, useMemo, useCallback } from 'react'
 
+import { JSONValue } from '@/lib/types/common.types'
+
 import { Badge } from '../atoms/Badge'
 import { Button } from '../atoms/Button'
 import { Card } from '../atoms/Card'
@@ -22,8 +24,8 @@ import { Tooltip } from '../atoms/Tooltip'
 export interface DashboardGridItem {
   id: string
   title: string
-  component: React.ComponentType<any>
-  props?: Record<string, any>
+  component: React.ComponentType<Record<string, unknown>>
+  props?: Record<string, JSONValue>
   size: {
     width: number // Grid columns (1-12)
     height: number // Grid rows
@@ -81,7 +83,7 @@ export const DashboardGrid = forwardRef<HTMLDivElement, DashboardGridProps>(
       rowHeight = 200,
       gap = 16,
       editable = false,
-      responsive = true,
+      _responsive = true,
       autoLayout = false,
       showGrid = false,
       allowAdd = true,
@@ -454,7 +456,7 @@ export const DashboardGrid = forwardRef<HTMLDivElement, DashboardGridProps>(
         {isFullscreen && (
           <div
             className="fixed inset-0 bg-black/50 z-999"
-            onClick={() => handleFullscreen(fullscreenItem!)}
+            onClick={() => fullscreenItem && handleFullscreen(fullscreenItem)}
           />
         )}
       </div>

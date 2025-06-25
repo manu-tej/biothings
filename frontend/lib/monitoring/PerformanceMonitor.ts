@@ -100,6 +100,7 @@ export class PerformanceMonitor {
     this.startUserInteractionMonitoring()
     this.startWebSocketMonitoring()
 
+    // eslint-disable-next-line no-console
     console.log('Performance monitoring started')
   }
 
@@ -109,6 +110,7 @@ export class PerformanceMonitor {
     this.isMonitoring = false
     this.stopObservers()
 
+    // eslint-disable-next-line no-console
     console.log('Performance monitoring stopped')
   }
 
@@ -312,7 +314,7 @@ export class PerformanceMonitor {
     })
 
     return Array.from(componentAverages.entries())
-      .map(([name, data]) => ({
+      .map(([_name, data]) => ({
         ...data.latest,
         renderTime: data.total / data.count,
       }))
@@ -384,6 +386,7 @@ export class PerformanceMonitor {
         paintObserver.observe({ entryTypes: ['paint'] })
         this.observers.push(paintObserver)
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.warn('Paint observer not supported:', error)
       }
 
@@ -413,6 +416,7 @@ export class PerformanceMonitor {
         longTaskObserver.observe({ entryTypes: ['longtask'] })
         this.observers.push(longTaskObserver)
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.warn('Long task observer not supported:', error)
       }
     }
@@ -427,6 +431,7 @@ export class PerformanceMonitor {
       try {
         observer.disconnect()
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.warn('Error disconnecting observer:', error)
       }
     })
@@ -440,7 +445,7 @@ export class PerformanceMonitor {
     const monitorMemory = () => {
       if (!this.isMonitoring) return
 
-      const memory = (performance as any).memory
+      const memory = (performance as unknown as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory
       if (memory) {
         const metric: MemoryMetric = {
           used: memory.usedJSHeapSize,

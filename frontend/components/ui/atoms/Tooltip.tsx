@@ -28,7 +28,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       contentClassName,
       testId,
     },
-    ref
+    _ref
   ) => {
     const [isVisible, setIsVisible] = useState(false)
     const [coords, setCoords] = useState({ top: 0, left: 0 })

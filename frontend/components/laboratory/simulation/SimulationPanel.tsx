@@ -7,7 +7,7 @@ import type { SimulationRun, Experiment } from '@/lib/laboratory/types'
 
 interface SimulationPanelProps {
   simulations: SimulationRun[]
-  onRunSimulation: (params: any) => void
+  onRunSimulation: (params: Record<string, unknown>) => void
   experiments: Experiment[]
 }
 

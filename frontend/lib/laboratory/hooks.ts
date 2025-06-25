@@ -8,6 +8,8 @@ import { useState, useCallback, useMemo } from 'react'
 import { apiClient } from '@/lib/api/client'
 import { useWebSocket } from '@/lib/websocket/hooks'
 
+import { StringRecord, JSONValue } from '../types/common.types'
+
 import type { Experiment, Equipment, SimulationRun, EquipmentFilters } from './types'
 
 /**
@@ -24,12 +26,12 @@ export function useExperiments() {
   })
 
   // WebSocket for real-time updates
-  useWebSocket('experiment-updates', (update) => {
+  useWebSocket('experiment-updates', (_update) => {
     queryClient.invalidateQueries({ queryKey: ['experiments'] })
   })
 
   const createExperiment = useMutation({
-    mutationFn: (data: any) => apiClient.createExperiment(data),
+    mutationFn: (data: StringRecord<JSONValue>) => apiClient.createExperiment(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['experiments'] })
     },
@@ -170,7 +172,7 @@ export function useSimulations() {
   })
 
   const runSimulation = useMutation({
-    mutationFn: (params: any) => apiClient.runSimulation(params),
+    mutationFn: (params: StringRecord<JSONValue>) => apiClient.runSimulation(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['simulations'] })
     },

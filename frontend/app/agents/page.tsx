@@ -17,6 +17,7 @@ import { useState } from 'react'
 
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { apiClient } from '@/lib/api/client'
+import { StringRecord, JSONValue } from '@/lib/types/common.types'
 
 // Lazy load heavy components
 const AgentChat = dynamic(() => import('@/components/agents/AgentChat'), {
@@ -44,7 +45,7 @@ const statusColors: Record<string, string> = {
 }
 
 export default function AgentsPage() {
-  const [selectedAgent, setSelectedAgent] = useState<any>(null)
+  const [selectedAgent, setSelectedAgent] = useState<StringRecord<JSONValue> | null>(null)
   const [showChat, setShowChat] = useState(false)
 
   const { data: agents, isLoading } = useQuery({
@@ -100,7 +101,7 @@ export default function AgentsPage() {
 
         {/* Agent Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {agents?.map((agent: any) => (
+          {agents?.map((agent: StringRecord<JSONValue>) => (
             <div
               key={agent.id}
               className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"

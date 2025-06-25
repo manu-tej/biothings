@@ -36,7 +36,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   const listRef = useRef<HTMLDivElement>(null)
 
   // Default commands
-  const defaultCommands: Command[] = [
+  const defaultCommands: Command[] = React.useMemo(() => [
     {
       id: 'dashboard',
       name: 'Go to Dashboard',
@@ -110,7 +110,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'Actions',
       keywords: ['export', 'download', 'save'],
       icon: '📥',
-      action: () => console.log('Export data'),
+      action: () => {/* TODO: Implement export data */},
       priority: 5,
     },
     {
@@ -120,7 +120,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'Create',
       keywords: ['create', 'new', 'agent'],
       icon: '➕',
-      action: () => console.log('Create agent'),
+      action: () => {/* TODO: Implement create agent */},
       priority: 4,
     },
     {
@@ -130,12 +130,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'Create',
       keywords: ['create', 'new', 'workflow'],
       icon: '➕',
-      action: () => console.log('Create workflow'),
+      action: () => {/* TODO: Implement create workflow */},
       priority: 4,
     },
-  ]
+  ], [])
 
-  const allCommands = [...defaultCommands, ...commands]
+  const allCommands = React.useMemo(() => [...defaultCommands, ...commands], [commands, defaultCommands])
 
   // Filter commands based on query
   useEffect(() => {
@@ -279,7 +279,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                 <div className="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide bg-gray-50 dark:bg-gray-900">
                   {category}
                 </div>
-                {categoryCommands.map((command, index) => {
+                {categoryCommands.map((command, _index) => {
                   const globalIndex = filteredCommands.indexOf(command)
                   return (
                     <div

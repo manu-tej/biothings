@@ -30,8 +30,20 @@ const statusColors: Record<string, string> = {
   failed: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
 }
 
+interface WorkflowData {
+  id: string
+  name: string
+  workflow_type: string
+  status: string
+  progress: number
+  created_at: string
+  updated_at: string
+  assigned_agents?: string[]
+  priority?: string
+}
+
 // Memoized workflow item component
-const WorkflowItem = memo(({ workflow }: { workflow: any }) => {
+const WorkflowItem = memo(({ workflow }: { workflow: WorkflowData }) => {
   const formatDate = useCallback((dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -128,11 +140,16 @@ export default function OptimizedWorkflowsPage() {
     if (!workflows) return { total: 0, running: 0, completed: 0, failed: 0 }
     return {
       total: workflows.length,
-      running: workflows.filter((w: any) => w.status === 'running').length,
-      completed: workflows.filter((w: any) => w.status === 'completed').length,
-      failed: workflows.filter((w: any) => w.status === 'failed').length,
+      running: workflows.filter((w: WorkflowData) => w.status === 'running').length,
+      completed: workflows.filter((w: WorkflowData) => w.status === 'completed').length,
+      failed: workflows.filter((w: WorkflowData) => w.status === 'failed').length,
     }
   }, [workflows])
+
+  const renderWorkflow = useCallback(
+    (workflow: WorkflowData) => <WorkflowItem key={workflow.id} workflow={workflow} />,
+    []
+  )
 
   if (isLoading) {
     return (
@@ -150,11 +167,6 @@ export default function OptimizedWorkflowsPage() {
       </DashboardLayout>
     )
   }
-
-  const renderWorkflow = useCallback(
-    (workflow: any) => <WorkflowItem key={workflow.id} workflow={workflow} />,
-    []
-  )
 
   return (
     <DashboardLayout>
@@ -203,7 +215,7 @@ export default function OptimizedWorkflowsPage() {
             />
           ) : (
             <div className="grid grid-cols-1 gap-6">
-              {workflows?.map((workflow: any) => (
+              {workflows?.map((workflow: WorkflowData) => (
                 <WorkflowItem key={workflow.id} workflow={workflow} />
               ))}
             </div>

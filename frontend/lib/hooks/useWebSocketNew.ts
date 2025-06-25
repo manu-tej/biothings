@@ -1,9 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 
-import { useWebSocketStore } from '../stores/websocketStore'
-import type { WebSocketMessage } from '../stores/websocketStore'
+import { useWebSocketStore, type WebSocketMessage } from '../stores/websocketStore'
 import type { WebSocketConfig } from '../websocket/WebSocketManager'
 import {
   useWebSocket as useWebSocketContext,
@@ -30,9 +29,9 @@ export type MessageType =
 export interface LegacyWebSocketMessage {
   type: MessageType
   channel?: string
-  data?: any
+  data?: unknown
   timestamp?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface UseWebSocketOptions {
@@ -60,14 +59,14 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     onMessage,
     onConnect,
     onDisconnect,
-    onError,
+    onError: _onError,
     reconnectAttempts = 5,
     reconnectInterval = 1000,
     maxReconnectDelay = 30000,
     heartbeatInterval = 30000,
   } = options
 
-  const { status, connect, disconnect, send, subscribe, getConnectionStatus } =
+  const { status, connect, disconnect, send, subscribe, getConnectionStatus: _getConnectionStatus } =
     useWebSocketContext()
   const store = useWebSocketStore()
   const messageHandlersRef = useRef<MessageHandlerWrapper[]>([])
@@ -90,7 +89,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   )
 
   // Create WebSocket config from options
-  const config: WebSocketConfig = {
+  const config: WebSocketConfig = React.useMemo(() => ({
     url:
       process.env.NODE_ENV === 'production'
         ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/${clientId.current}`
@@ -100,18 +99,19 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     maxReconnectAttempts: reconnectAttempts,
     enableHeartbeat: true,
     heartbeatInterval: heartbeatInterval,
-  }
+  }), [reconnectInterval, maxReconnectDelay, reconnectAttempts, heartbeatInterval])
 
   // Initialize connection on mount
   useEffect(() => {
-    connect(connectionRef.current, config).catch((error) => {
+    const connectionId = connectionRef.current
+    connect(connectionId, config).catch((_error) => {
       // TODO: Replace with proper logging service
     })
 
     return () => {
-      disconnect(connectionRef.current)
+      disconnect(connectionId)
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [connect, disconnect, config])
 
   // Handle connection status changes
   useEffect(() => {
@@ -236,7 +236,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 }
 
 // Convenience hooks for specific message types
-export function useMetricsWebSocket(onMetrics: (metrics: any) => void) {
+export function useMetricsWebSocket(onMetrics: (metrics: unknown) => void) {
   const { registerHandler, ...rest } = useWebSocket({
     channels: ['metrics'],
   })
@@ -252,7 +252,7 @@ export function useMetricsWebSocket(onMetrics: (metrics: any) => void) {
   return rest
 }
 
-export function useAlertsWebSocket(onAlert: (alert: any) => void) {
+export function useAlertsWebSocket(onAlert: (alert: unknown) => void) {
   const { registerHandler, ...rest } = useWebSocket({
     channels: ['alerts'],
   })
@@ -268,7 +268,7 @@ export function useAlertsWebSocket(onAlert: (alert: any) => void) {
   return rest
 }
 
-export function useAgentStatusWebSocket(onAgentUpdate: (update: any) => void) {
+export function useAgentStatusWebSocket(onAgentUpdate: (update: unknown) => void) {
   const { registerHandler, ...rest } = useWebSocket({
     channels: ['agents'],
   })
@@ -284,7 +284,7 @@ export function useAgentStatusWebSocket(onAgentUpdate: (update: any) => void) {
   return rest
 }
 
-export function useWorkflowWebSocket(onWorkflowUpdate: (update: any) => void) {
+export function useWorkflowWebSocket(onWorkflowUpdate: (update: unknown) => void) {
   const { registerHandler, ...rest } = useWebSocket({
     channels: ['workflows'],
   })
@@ -314,7 +314,7 @@ export function useModernWebSocket() {
   return useWebSocketContext()
 }
 
-export function useWebSocketTopic<T = any>(
+export function useWebSocketTopic<T = unknown>(
   topic: string,
   handler: (data: T) => void,
   deps: React.DependencyList = []

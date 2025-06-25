@@ -1,10 +1,12 @@
+import { JSONValue, StringRecord } from '../types/common.types'
+
 export interface WidgetConfig {
   id: string
   type: string
   title: string
   position: WidgetPosition
   size: WidgetSize
-  settings: Record<string, any>
+  settings: StringRecord<JSONValue>
   visible: boolean
   resizable: boolean
   movable: boolean
@@ -345,7 +347,10 @@ export class LayoutManager {
     return true
   }
 
-  private boundsOverlap(bounds1: any, bounds2: any): boolean {
+  private boundsOverlap(
+    bounds1: { left: number; top: number; right: number; bottom: number },
+    bounds2: { left: number; top: number; right: number; bottom: number }
+  ): boolean {
     return !(
       bounds1.right <= bounds2.left ||
       bounds1.left >= bounds2.right ||
@@ -597,14 +602,14 @@ export class LayoutManager {
     }
   }
 
-  private dateReplacer(key: string, value: any): any {
+  private dateReplacer(key: string, value: unknown): unknown {
     if (value instanceof Date) {
       return { __type: 'Date', value: value.toISOString() }
     }
     return value
   }
 
-  private dateReviver(key: string, value: any): any {
+  private dateReviver(key: string, value: unknown): unknown {
     if (value && typeof value === 'object' && value.__type === 'Date') {
       return new Date(value.value)
     }

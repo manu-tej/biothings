@@ -44,3 +44,4 @@ htmlcov/
 scratch_notes/
 *.log
 .claude
+frontend/lint_output.txt

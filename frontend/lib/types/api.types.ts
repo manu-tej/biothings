@@ -1,7 +1,10 @@
 // Strict API response types
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { JSONValue, StringRecord } from './common.types'
 
 // Base API types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = JSONValue> {
   success: boolean
   data?: T
   error?: ApiError
@@ -11,7 +14,7 @@ export interface ApiResponse<T = any> {
 export interface ApiError {
   code: string
   message: string
-  details?: any
+  details?: JSONValue
   field?: string
   timestamp: string
   traceId?: string
@@ -42,11 +45,11 @@ export interface RateLimitInfo {
 }
 
 // Request types
-export interface ApiRequest<T = any> {
+export interface ApiRequest<T = JSONValue> {
   endpoint: string
   method: HttpMethod
-  params?: Record<string, any>
-  query?: Record<string, any>
+  params?: StringRecord<JSONValue>
+  query?: StringRecord<JSONValue>
   body?: T
   headers?: Record<string, string>
   timeout?: number
@@ -70,6 +73,7 @@ export interface SortOptions {
 export interface FilterOptions {
   field: string
   operator: FilterOperator
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any
 }
 
@@ -220,7 +224,7 @@ export type StepStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipp
 export interface StepError {
   code: string
   message: string
-  details?: any
+  details?: JSONValue
   recoverable: boolean
   retryAfter?: number
 }
@@ -521,7 +525,7 @@ export interface BatchOperation {
   id: string
   method: HttpMethod
   endpoint: string
-  params?: Record<string, any>
+  params?: StringRecord<JSONValue>
   body?: any
   dependsOn?: string[]
 }

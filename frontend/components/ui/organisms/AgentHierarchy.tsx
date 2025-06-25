@@ -58,7 +58,7 @@ export interface AgentHierarchyProps {
   testId?: string
 }
 
-const virtualizedItemHeight = {
+const _virtualizedItemHeight = {
   agent: { compact: 80, normal: 120, detailed: 160 },
   group: { compact: 50, normal: 60, detailed: 70 },
 }
@@ -75,10 +75,10 @@ export const AgentHierarchy = forwardRef<HTMLDivElement, AgentHierarchyProps>(
       searchable = true,
       filterable = true,
       selectable = true,
-      virtualScrolling = true,
+      _virtualScrolling = true,
       maxHeight = 600,
       compactMode = false,
-      showMetrics = true,
+      _showMetrics = true,
       groupActions,
       className,
       testId,
@@ -86,8 +86,8 @@ export const AgentHierarchy = forwardRef<HTMLDivElement, AgentHierarchyProps>(
     ref
   ) => {
     const [searchQuery, setSearchQuery] = useState('')
-    const [filterStatus, setFilterStatus] = useState<string[]>([])
-    const [filterType, setFilterType] = useState<string[]>([])
+    const [filterStatus, _setFilterStatus] = useState<string[]>([])
+    const [filterType, _setFilterType] = useState<string[]>([])
     const [isFullscreen, setIsFullscreen] = useState(false)
 
     // Flatten hierarchy for virtual scrolling and filtering

@@ -5,19 +5,21 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 
+import { WebSocketPayload } from '../types/common.types'
+
 import { wsManager, type ConnectionState } from './connection-manager'
 
 interface UseWebSocketOptions {
   onConnect?: () => void
   onDisconnect?: () => void
-  onError?: (error: any) => void
+  onError?: (error: Error) => void
   autoReconnect?: boolean
 }
 
 /**
  * Hook for subscribing to WebSocket topics
  */
-export function useWebSocket<T = any>(
+export function useWebSocket<T = WebSocketPayload>(
   topic: string,
   handler: (data: T) => void,
   options: UseWebSocketOptions = {}
@@ -65,10 +67,10 @@ export function useWebSocket<T = any>(
       unsubscribe()
       clearInterval(interval)
     }
-  }, [topic, options.onConnect, options.onDisconnect, options.onError])
+  }, [topic, options])
 
   const sendMessage = useCallback(
-    (data: any) => {
+    (data: WebSocketPayload) => {
       wsManager.send(topic, data)
     },
     [topic]
@@ -86,7 +88,7 @@ export function useWebSocket<T = any>(
  * Hook for agent status updates
  */
 export function useAgentStatusWebSocket(
-  onUpdate: (data: any) => void,
+  onUpdate: (data: WebSocketPayload) => void,
   _options?: UseWebSocketOptions
 ) {
   return useWebSocket('agent-status', onUpdate, _options)
@@ -96,7 +98,7 @@ export function useAgentStatusWebSocket(
  * Hook for workflow updates
  */
 export function useWorkflowWebSocket(
-  onUpdate: (data: any) => void,
+  onUpdate: (data: WebSocketPayload) => void,
   _options?: UseWebSocketOptions
 ) {
   return useWebSocket('workflow-updates', onUpdate, _options)
@@ -105,28 +107,28 @@ export function useWorkflowWebSocket(
 /**
  * Hook for alerts
  */
-export function useAlertsWebSocket(onAlert: (data: any) => void, _options?: UseWebSocketOptions) {
+export function useAlertsWebSocket(onAlert: (data: WebSocketPayload) => void, _options?: UseWebSocketOptions) {
   return useWebSocket('alerts', onAlert, _options)
 }
 
 /**
  * Hook for metrics updates
  */
-export function useMetricsWebSocket(onUpdate: (data: any) => void, _options?: UseWebSocketOptions) {
+export function useMetricsWebSocket(onUpdate: (data: WebSocketPayload) => void, _options?: UseWebSocketOptions) {
   return useWebSocket('metrics', onUpdate, _options)
 }
 
 /**
  * Hook for multiple topic subscriptions
  */
-export function useMultipleWebSockets<T extends Record<string, any>>(
+export function useMultipleWebSockets<T extends Record<string, WebSocketPayload>>(
   topics: {
     [K in keyof T]: {
       topic: string
       handler: (data: T[K]) => void
     }
   },
-  options?: UseWebSocketOptions
+  _options?: UseWebSocketOptions
 ) {
   const [connectionStates, setConnectionStates] = useState<Record<string, ConnectionState>>({})
   const [lastMessages, setLastMessages] = useState<Partial<T>>({})
@@ -136,10 +138,10 @@ export function useMultipleWebSockets<T extends Record<string, any>>(
     const stateCheckIntervals: NodeJS.Timeout[] = []
 
     Object.entries(topics).forEach(([key, config]) => {
-      const { topic, handler } = config as any
+      const { topic, handler } = config as { topic: string; handler: (data: WebSocketPayload) => void }
 
       // Create wrapped handler
-      const wrappedHandler = (data: any) => {
+      const wrappedHandler = (data: WebSocketPayload) => {
         setLastMessages((prev) => ({ ...prev, [key]: data }))
         handler(data)
       }
@@ -165,7 +167,7 @@ export function useMultipleWebSockets<T extends Record<string, any>>(
     }
   }, [topics])
 
-  const sendMessage = useCallback((topic: string, data: any) => {
+  const sendMessage = useCallback((topic: string, data: WebSocketPayload) => {
     wsManager.send(topic, data)
   }, [])
 

@@ -101,12 +101,12 @@ const initialState = {
 export const useDashboardStore = create<DashboardState>()(
   devtools(
     persist(
-      (set, get) => ({
+      (set, _get) => ({
         ...initialState,
 
         // Agent actions
         setAgents: (agents) =>
-          set((state) => ({
+          set((_state) => ({
             agents: new Map(agents.map((agent) => [agent.id, agent])),
           })),
 
@@ -131,7 +131,7 @@ export const useDashboardStore = create<DashboardState>()(
 
         // Workflow actions
         setWorkflows: (workflows) =>
-          set((state) => ({
+          set((_state) => ({
             workflows: new Map(workflows.map((workflow) => [workflow.id, workflow])),
           })),
 

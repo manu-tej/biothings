@@ -18,6 +18,7 @@ import { useState, useEffect } from 'react'
 
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { apiClient } from '@/lib/api/client'
+import { StringRecord, JSONValue } from '@/lib/types/common.types'
 
 // Remove static data - we'll fetch from API
 
@@ -43,8 +44,8 @@ const statusIcons: Record<string, React.ReactNode> = {
 
 export default function LaboratoryPage() {
   const [showNewExperiment, setShowNewExperiment] = useState(false)
-  const [selectedExperiment, setSelectedExperiment] = useState<any>(null)
-  const [selectedEquipment, setSelectedEquipment] = useState<any>(null)
+  const [selectedExperiment, setSelectedExperiment] = useState<StringRecord<JSONValue> | null>(null)
+  const [selectedEquipment, setSelectedEquipment] = useState<StringRecord<JSONValue> | null>(null)
   const [newExperimentData, setNewExperimentData] = useState<{
     name: string
     type: string
@@ -98,7 +99,7 @@ export default function LaboratoryPage() {
       unsubscribe()
       apiClient.disconnectWebSocket()
     }
-  }, [])
+  }, [queryClient])
 
   // Mutations
   const createExperimentMutation = useMutation({
@@ -132,7 +133,7 @@ export default function LaboratoryPage() {
     }: {
       equipmentId: string
       action: string
-      parameters?: any
+      parameters?: StringRecord<JSONValue>
     }) => apiClient.controlEquipment(equipmentId, action, parameters),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['equipment'] })

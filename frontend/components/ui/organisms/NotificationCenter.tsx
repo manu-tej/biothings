@@ -40,7 +40,7 @@ export interface Notification {
   source?: string
   category?: string
   priority?: 'low' | 'medium' | 'high' | 'urgent'
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface NotificationCenterProps {
@@ -76,7 +76,7 @@ const typeVariants = {
   error: 'danger' as const,
 }
 
-const priorityColors = {
+const _priorityColors = {
   low: 'text-gray-500',
   medium: 'text-blue-500',
   high: 'text-orange-500',
@@ -112,7 +112,7 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
       groupByCategory = false,
       autoMarkReadOnView = true,
       dismissTimeout = 5000,
-      position = 'top-right',
+      _position = 'top-right',
       variant = 'popover',
       className,
       testId,
@@ -123,7 +123,7 @@ export const NotificationCenter = forwardRef<HTMLDivElement, NotificationCenterP
     const [statusFilter, setStatusFilter] = useState('all')
     const [typeFilter, setTypeFilter] = useState('')
     const [selectedNotifications, setSelectedNotifications] = useState<Set<string>>(new Set())
-    const [isExpanded, setIsExpanded] = useState(variant === 'inline')
+    const [_isExpanded, _setIsExpanded] = useState(variant === 'inline')
 
     // Auto-dismiss notifications
     useEffect(() => {

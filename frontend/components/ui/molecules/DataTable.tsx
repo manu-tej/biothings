@@ -8,12 +8,12 @@ import { Checkbox } from '../atoms/Checkbox'
 import { Input } from '../atoms/Input'
 import { Spinner } from '../atoms/Spinner'
 
-export interface DataTableColumn<T = any> {
+export interface DataTableColumn<T = Record<string, unknown>> {
   id: string
   header: string
   accessorKey?: keyof T
-  accessorFn?: (row: T) => any
-  cell?: (value: any, row: T) => React.ReactNode
+  accessorFn?: (row: T) => unknown
+  cell?: (value: unknown, row: T) => React.ReactNode
   sortable?: boolean
   filterable?: boolean
   width?: string | number
@@ -22,7 +22,7 @@ export interface DataTableColumn<T = any> {
   align?: 'left' | 'center' | 'right'
 }
 
-export interface DataTableProps<T = any> {
+export interface DataTableProps<T = Record<string, unknown>> {
   data: T[]
   columns: DataTableColumn<T>[]
   loading?: boolean
@@ -68,9 +68,9 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps>(
       emptyMessage = 'No data available',
       className,
       testId,
-      virtualized = false,
-      rowHeight = 52,
-      maxHeight = '400px',
+      virtualized: _virtualized = false,
+      rowHeight: _rowHeight = 52,
+      maxHeight: _maxHeight = '400px',
     },
     ref
   ) => {
@@ -178,7 +178,7 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps>(
       [onRowSelect]
     )
 
-    const getCellValue = useCallback((row: any, column: DataTableColumn) => {
+    const getCellValue = useCallback((row: T, column: DataTableColumn<T>) => {
       if (column.accessorFn) {
         return column.accessorFn(row)
       } else if (column.accessorKey) {
@@ -187,7 +187,7 @@ export const DataTable = forwardRef<HTMLDivElement, DataTableProps>(
       return ''
     }, [])
 
-    const renderCell = useCallback((value: any, row: any, column: DataTableColumn) => {
+    const renderCell = useCallback((value: unknown, row: T, column: DataTableColumn<T>) => {
       if (column.cell) {
         return column.cell(value, row)
       }

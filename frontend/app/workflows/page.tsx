@@ -40,7 +40,24 @@ export default function WorkflowsPage() {
   const [quickAction, setQuickAction] = useState<
     'drug_discovery' | 'production_scaleup' | 'quality_control' | null
   >(null)
-  const [selectedWorkflow, setSelectedWorkflow] = useState<any>(null)
+interface WorkflowStage {
+  name: string
+  status: string
+}
+
+interface WorkflowData {
+  id: string
+  name: string
+  workflow_type: string
+  status: string
+  progress: number
+  created_at: string
+  updated_at: string
+  assigned_agents?: string[]
+  stages?: WorkflowStage[]
+}
+
+  const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowData | null>(null)
   const queryClient = useQueryClient()
 
   const { data: workflows, isLoading } = useQuery({
@@ -64,7 +81,7 @@ export default function WorkflowsPage() {
       unsubscribe()
       apiClient.disconnectWebSocket()
     }
-  }, [])
+  }, [queryClient])
 
   const updateWorkflowStatus = useMutation({
     mutationFn: async ({ workflowId, status }: { workflowId: string; status: string }) => {
@@ -112,7 +129,7 @@ export default function WorkflowsPage() {
 
         {/* Workflow Cards */}
         <div className="space-y-4">
-          {workflows?.map((workflow: any) => (
+          {workflows?.map((workflow: WorkflowData) => (
             <div
               key={workflow.id}
               className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700"
@@ -162,7 +179,7 @@ export default function WorkflowsPage() {
                     Stages
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-                    {workflow.stages.map((stage: any, index: number) => (
+                    {workflow.stages.map((stage: WorkflowStage, index: number) => (
                       <div
                         key={index}
                         className="flex items-center space-x-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-700"
@@ -360,7 +377,7 @@ export default function WorkflowsPage() {
                     Workflow Stages
                   </h3>
                   <div className="space-y-2">
-                    {selectedWorkflow.stages.map((stage: any, index: number) => (
+                    {selectedWorkflow.stages.map((stage: WorkflowStage, index: number) => (
                       <div
                         key={index}
                         className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"

@@ -93,8 +93,11 @@ export class ErrorBoundary extends Component<Props, State> {
 
     // For now, just log to console in development
     if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
       console.group('🚨 Error Boundary Log')
+      // eslint-disable-next-line no-console
       console.error('Error Data:', errorData)
+      // eslint-disable-next-line no-console
       console.groupEnd()
     }
 
@@ -114,6 +117,7 @@ export class ErrorBoundary extends Component<Props, State> {
   handleReset = () => {
     // Prevent infinite error loops
     if (this.state.errorCount > 3) {
+      // eslint-disable-next-line no-console
       console.error('Too many consecutive errors. Preventing reset to avoid infinite loop.')
       return
     }

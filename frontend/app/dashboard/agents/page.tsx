@@ -231,7 +231,7 @@ export default function AgentsPage() {
               },
             ]}
             values={{}}
-            onFilterChange={(_filterId: string, _value: any) => {
+            onFilterChange={(_filterId: string, _value: unknown) => {
               // Filter changed
             }}
             onClearAll={() => {

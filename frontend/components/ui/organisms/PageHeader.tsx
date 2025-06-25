@@ -2,8 +2,7 @@
 
 import { clsx } from 'clsx'
 import { Bell, Search, User, Moon, Sun, Monitor, Settings, LogOut, ChevronDown } from 'lucide-react'
-import React from 'react'
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 
 import { useDashboardStore } from '@/lib/stores/dashboardStore'
 import { useUIStore } from '@/lib/stores/uiStore'

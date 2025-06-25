@@ -5,6 +5,7 @@ import { X, Activity } from 'lucide-react'
 import { useState } from 'react'
 
 import { apiClient } from '@/lib/api/client'
+import { StringRecord, JSONValue } from '@/lib/types/common.types'
 
 interface QuickActionModalProps {
   isOpen: boolean
@@ -59,7 +60,7 @@ export default function QuickActionModal({ isOpen, onClose, actionType }: QuickA
   const [workflowName, setWorkflowName] = useState('')
 
   const createWorkflowMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: StringRecord<JSONValue>) => {
       const response = await fetch(`${apiClient['apiBaseUrl']}/api/workflows`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -95,7 +96,7 @@ export default function QuickActionModal({ isOpen, onClose, actionType }: QuickA
     })
   }
 
-  const updateParameter = (key: string, value: any) => {
+  const updateParameter = (key: string, value: JSONValue) => {
     setParameters((prev) => ({ ...prev, [key]: value }))
   }
 

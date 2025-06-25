@@ -5,15 +5,17 @@
 
 import { useQuery, useMutation, useQueries, UseQueryOptions } from '@tanstack/react-query'
 
+import { JSONValue, StringRecord } from '../types/common.types'
+
 import { batchClient } from './batch-client'
 
 /**
  * Batched query hook
  */
-export function useBatchQuery<T = any>(
+export function useBatchQuery<T = JSONValue>(
   key: string | string[],
   endpoint: string,
-  params?: any,
+  params?: StringRecord<JSONValue>,
   options?: Omit<UseQueryOptions<T>, 'queryKey' | 'queryFn'>
 ) {
   return useQuery<T>({
@@ -28,11 +30,11 @@ export function useBatchQuery<T = any>(
 /**
  * Multiple batched queries
  */
-export function useBatchQueries<T extends any[]>(
+export function useBatchQueries<_T extends JSONValue[]>(
   queries: Array<{
     key: string | string[]
     endpoint: string
-    params?: any
+    params?: StringRecord<JSONValue>
     options?: Omit<UseQueryOptions, 'queryKey' | 'queryFn'>
   }>
 ) {
@@ -50,7 +52,7 @@ export function useBatchQueries<T extends any[]>(
 /**
  * Batched mutation hook
  */
-export function useBatchMutation<TData = any, TVariables = any>(
+export function useBatchMutation<TData = JSONValue, TVariables = JSONValue>(
   method: 'POST' | 'PUT' | 'DELETE',
   endpoint: string | ((variables: TVariables) => string),
   options?: {
@@ -80,10 +82,10 @@ export function useBatchMutation<TData = any, TVariables = any>(
 /**
  * Parallel requests hook
  */
-export function useParallelQueries<T extends Record<string, any>>(requests: {
+export function useParallelQueries<T extends StringRecord<JSONValue>>(requests: {
   [K in keyof T]: {
     endpoint: string
-    params?: any
+    params?: StringRecord<JSONValue>
   }
 }): {
   data: Partial<T>
@@ -162,10 +164,10 @@ export function useAgentHierarchy() {
 
   // Then batch load subordinate details for executives
   const executives =
-    agents?.filter((a: any) => ['CEO', 'COO', 'CFO', 'CTO', 'CSO'].includes(a.agent_type)) || []
+    agents?.filter((a: StringRecord<JSONValue>) => ['CEO', 'COO', 'CFO', 'CTO', 'CSO'].includes(a.agent_type as string)) || []
 
   const subordinateQueries = useBatchQueries(
-    executives.map((exec: any) => ({
+    executives.map((exec: StringRecord<JSONValue>) => ({
       key: ['agent-subordinates', exec.id],
       endpoint: `/api/agents/${exec.id}/subordinates`,
       options: {

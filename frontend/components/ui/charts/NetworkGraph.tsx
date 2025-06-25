@@ -54,7 +54,7 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
     },
     tooltip: {
       trigger: 'item',
-      formatter: function (params: any) {
+      formatter: function (params: { dataType: string; data: NetworkNode | NetworkLink }) {
         if (params.dataType === 'node') {
           return `${params.data.name}<br/>Category: ${params.data.category || 'Unknown'}<br/>Value: ${params.data.value || 0}`
         } else if (params.dataType === 'edge') {
@@ -131,7 +131,7 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
   }
 
   const handleEvents = {
-    click: (params: any) => {
+    click: (params: { dataType: string; data: NetworkNode | NetworkLink }) => {
       if (params.dataType === 'node' && onNodeClick) {
         const originalNode = data.nodes.find((node) => node.id === params.data.id)
         if (originalNode) {
@@ -175,7 +175,7 @@ function getCategoryColor(category?: string): string {
 }
 
 // Helper function to generate sample agent network data
-export const generateAgentNetworkData = (agents: any[]): NetworkData => {
+export const generateAgentNetworkData = (agents: Array<{ id: string; name: string; type?: string; metrics?: { tasksCompleted?: number } }>): NetworkData => {
   const nodes: NetworkNode[] = agents.map((agent) => ({
     id: agent.id,
     name: agent.name,

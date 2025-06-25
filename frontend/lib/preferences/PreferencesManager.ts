@@ -339,7 +339,7 @@ export class PreferencesManager {
   }
 
   // Validation
-  private validatePreferences(preferences: any): boolean {
+  private validatePreferences(preferences: unknown): boolean {
     try {
       // Basic structure validation
       return (
@@ -596,14 +596,14 @@ export class PreferencesManager {
     }
   }
 
-  private dateReplacer(key: string, value: any): any {
+  private dateReplacer(key: string, value: unknown): unknown {
     if (value instanceof Date) {
       return { __type: 'Date', value: value.toISOString() }
     }
     return value
   }
 
-  private dateReviver(key: string, value: any): any {
+  private dateReviver(key: string, value: unknown): unknown {
     if (value && typeof value === 'object' && value.__type === 'Date') {
       return new Date(value.value)
     }

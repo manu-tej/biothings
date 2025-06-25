@@ -16,14 +16,14 @@ export interface FilterOption {
   label: string
   type: 'text' | 'select' | 'multiselect' | 'checkbox' | 'date' | 'range'
   options?: SelectOption[]
-  value?: any
+  value?: unknown
   placeholder?: string
 }
 
 export interface FilterPanelProps {
   filters: FilterOption[]
-  values: Record<string, any>
-  onFilterChange: (filterId: string, value: any) => void
+  values: Record<string, unknown>
+  onFilterChange: (filterId: string, value: unknown) => void
   onClearAll: () => void
   onApply?: () => void
   title?: string
@@ -88,7 +88,7 @@ export const FilterPanel = forwardRef<HTMLDivElement, FilterPanelProps>(
       return count + 1
     }, 0)
 
-    const handleFilterChange = (filterId: string, value: any) => {
+    const handleFilterChange = (filterId: string, value: unknown) => {
       onFilterChange(filterId, value)
     }
 

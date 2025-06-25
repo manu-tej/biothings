@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
+import { JSONValue } from '../types/common.types'
+
 export type Theme = 'light' | 'dark' | 'auto'
 export type ViewMode = 'grid' | 'list' | 'compact'
 export type DateFormat = 'relative' | 'absolute'
@@ -29,7 +31,7 @@ export interface WidgetConfig {
   position: GridPosition
   size: GridSize
   title?: string
-  config: Record<string, any>
+  config: Record<string, JSONValue>
   hidden?: boolean
 }
 
@@ -322,13 +324,13 @@ export const applyTheme = (theme: Theme) => {
 
 // Watch for theme changes
 if (typeof window !== 'undefined') {
-  const unsubscribe = useUIStore.subscribe((state) => applyTheme(state.preferences.theme))
+  const _unsubscribe = useUIStore.subscribe((state) => applyTheme(state.preferences.theme))
 
   // Apply initial theme
   applyTheme(useUIStore.getState().preferences.theme)
 
   // Listen for system theme changes
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (_e) => {
     const currentTheme = useUIStore.getState().preferences.theme
     if (currentTheme === 'auto') {
       applyTheme('auto')

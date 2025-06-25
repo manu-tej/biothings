@@ -52,13 +52,13 @@ export const SearchBar = forwardRef<HTMLDivElement, SearchBarProps>(
       onFilterToggle,
       showFilters = true,
       showSuggestions = true,
-      loading = false,
+      _loading = false,
       size = 'md',
       variant = 'default',
       className,
       testId,
     },
-    ref
+_ref
   ) => {
     const [focused, setFocused] = useState(false)
     const [showDropdown, setShowDropdown] = useState(false)

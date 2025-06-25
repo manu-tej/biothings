@@ -9,7 +9,7 @@ export interface SearchableItem {
   type: 'agent' | 'workflow' | 'setting'
   content: string
   tags?: string[]
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface SearchResult {
@@ -101,7 +101,7 @@ export class SearchEngine {
 
         // Tag filter
         if (filters.tags.length > 0 && item.tags) {
-          const hasTag = filters.tags.some((tag) => item.tags!.includes(tag))
+          const hasTag = filters.tags.some((tag) => item.tags?.includes(tag) ?? false)
           if (!hasTag) return false
         }
 
