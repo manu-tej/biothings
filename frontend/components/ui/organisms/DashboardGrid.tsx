@@ -1,6 +1,5 @@
 'use client';
 
-import React, { forwardRef, useState, useMemo, useCallback } from 'react';
 import { clsx } from 'clsx';
 import { 
   Grid3X3, 
@@ -10,13 +9,14 @@ import {
   EyeOff,
   Move,
   Trash2,
-  MoreHorizontal,
   Maximize2,
   Minimize2
 } from 'lucide-react';
-import { Card } from '../atoms/Card';
-import { Button } from '../atoms/Button';
+import React, { forwardRef, useState, useMemo, useCallback } from 'react';
+
 import { Badge } from '../atoms/Badge';
+import { Button } from '../atoms/Button';
+import { Card } from '../atoms/Card';
 import { Tooltip } from '../atoms/Tooltip';
 
 export interface DashboardGridItem {

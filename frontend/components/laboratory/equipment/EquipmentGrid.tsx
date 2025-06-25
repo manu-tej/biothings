@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
 import { Wrench, Calendar } from 'lucide-react'
+import React from 'react'
+
 import { equipmentTypeIcons, statusColors } from '@/lib/laboratory/constants'
 import type { Equipment } from '@/lib/laboratory/types'
 

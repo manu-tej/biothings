@@ -1,8 +1,9 @@
 'use client';
 
-import React, { forwardRef, useEffect, useRef } from 'react';
 import { clsx } from 'clsx';
 import { X } from 'lucide-react';
+import React, { forwardRef, useEffect, useRef } from 'react';
+
 import { Button } from '../atoms/Button';
 import { Card, CardHeader, CardBody, CardFooter } from '../atoms/Card';
 

@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
 import { Brain, Play, Pause, RotateCcw } from 'lucide-react'
+import React, { useState } from 'react'
+
 import type { SimulationRun, Experiment } from '@/lib/laboratory/types'
 
 interface SimulationPanelProps {

@@ -1,23 +1,21 @@
 'use client';
 
-import React, { forwardRef } from 'react';
 import { clsx } from 'clsx';
 import { 
-  Activity, 
   Clock, 
-  Cpu, 
   MoreHorizontal, 
   Play, 
   Pause, 
   Square,
   AlertCircle,
-  CheckCircle,
-  Zap
+  CheckCircle
 } from 'lucide-react';
-import { Card, CardHeader, CardBody, CardFooter } from '../atoms/Card';
+import React, { forwardRef } from 'react';
+
+import { Avatar } from '../atoms/Avatar';
 import { Badge } from '../atoms/Badge';
 import { Button } from '../atoms/Button';
-import { Avatar } from '../atoms/Avatar';
+import { Card, CardHeader, CardBody, CardFooter } from '../atoms/Card';
 import { Tooltip } from '../atoms/Tooltip';
 
 export interface AgentStatus {

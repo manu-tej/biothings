@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo, memo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { Activity, Play, Pause, CheckCircle, AlertCircle, Clock, Users, StopCircle, X } from 'lucide-react'
-import { apiClient } from '@/lib/api/client'
+import { useState, useEffect, useCallback, useMemo, memo } from 'react'
+
+import DashboardLayout from '@/components/dashboard/DashboardLayout'
+import { VirtualList } from '@/components/VirtualList'
 import NewWorkflowModal from '@/components/workflows/NewWorkflowModal'
 import QuickActionModal from '@/components/workflows/QuickActionModal'
-import { VirtualList } from '@/components/VirtualList'
+import { apiClient } from '@/lib/api/client'
 
 const statusIcons: Record<string, React.ReactNode> = {
   running: <Play className="w-4 h-4 text-green-600" />,

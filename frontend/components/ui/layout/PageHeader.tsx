@@ -1,20 +1,17 @@
 'use client';
 
-import React, { forwardRef } from 'react';
 import { clsx } from 'clsx';
 import { 
   ChevronRight, 
-  Home, 
-  Settings, 
   Bell, 
   Search,
-  User,
-  Menu,
-  MoreHorizontal
+  Menu
 } from 'lucide-react';
-import { Button } from '../atoms/Button';
-import { Badge } from '../atoms/Badge';
+import React, { forwardRef } from 'react';
+
 import { Avatar } from '../atoms/Avatar';
+import { Badge } from '../atoms/Badge';
+import { Button } from '../atoms/Button';
 import { Input } from '../atoms/Input';
 import { Tooltip } from '../atoms/Tooltip';
 

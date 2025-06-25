@@ -6,6 +6,7 @@
 'use client';
 
 import React, { useState, useCallback, useMemo } from 'react';
+
 import { 
   withMemo, 
   VirtualList, 
@@ -15,8 +16,9 @@ import {
   usePreloadOnInteraction,
   perfMonitor
 } from '@/lib/performance/optimization-toolkit';
-import { Card } from '@/components/ui/card';
+
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 
 // Lazy load heavy chart component
 const AnalyticsChart = lazyWithPreload(

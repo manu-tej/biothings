@@ -1,7 +1,7 @@
 'use client';
 
-import React, { forwardRef } from 'react';
 import { clsx } from 'clsx';
+import React, { forwardRef } from 'react';
 
 export interface ContentLayoutProps {
   children: React.ReactNode;

@@ -1,8 +1,10 @@
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+
 import './globals.css'
-import Providers from './providers'
 import { optimizedApiClient } from '@/lib/api/client'
+
+import Providers from './providers'
 
 // Optimize font loading
 const inter = Inter({ 

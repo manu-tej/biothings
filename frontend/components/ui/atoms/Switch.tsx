@@ -1,7 +1,7 @@
 'use client';
 
-import React, { forwardRef, InputHTMLAttributes } from 'react';
 import { clsx } from 'clsx';
+import React, { forwardRef, InputHTMLAttributes } from 'react';
 
 export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
   label?: string;

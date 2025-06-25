@@ -1,8 +1,8 @@
 'use client';
 
-import React, { forwardRef, HTMLAttributes, useState } from 'react';
 import { clsx } from 'clsx';
 import { User } from 'lucide-react';
+import React, { forwardRef, HTMLAttributes, useState } from 'react';
 
 export interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
   src?: string;

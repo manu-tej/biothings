@@ -1,8 +1,9 @@
 'use client'
 
+import { User, Bell, Shield, Database, Palette, Globe, Save } from 'lucide-react'
 import { useState } from 'react'
+
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
-import { Settings, User, Bell, Shield, Database, Palette, Globe, Save } from 'lucide-react'
 
 const settingsCategories = [
   { id: 'profile', name: 'Profile', icon: User },

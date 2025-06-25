@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
-import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
+import ReactECharts from 'echarts-for-react';
+import React from 'react';
 
 export interface SankeyNode {
   id: string;

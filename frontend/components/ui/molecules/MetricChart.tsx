@@ -1,12 +1,13 @@
 'use client';
 
-import React, { forwardRef, useState } from 'react';
 import { clsx } from 'clsx';
-import { MoreHorizontal, Download, Maximize2, RefreshCw } from 'lucide-react';
-import { Card, CardHeader, CardBody } from '../atoms/Card';
-import { Button } from '../atoms/Button';
-import { Spinner } from '../atoms/Spinner';
+import { Download, Maximize2, RefreshCw } from 'lucide-react';
+import React, { forwardRef, useState } from 'react';
+
 import { Badge } from '../atoms/Badge';
+import { Button } from '../atoms/Button';
+import { Card, CardHeader, CardBody } from '../atoms/Card';
+import { Spinner } from '../atoms/Spinner';
 
 export interface ChartDataPoint {
   x: any;

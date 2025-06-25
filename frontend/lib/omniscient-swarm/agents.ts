@@ -3,8 +3,8 @@
  * Using LangGraph architecture with specialized agents
  */
 
-import { StateGraph, MessagesState, START, END } from '@langchain/langgraph';
 import { BaseMessage, HumanMessage, AIMessage } from '@langchain/core/messages';
+import { StateGraph, MessagesState, START, END } from '@langchain/langgraph';
 
 // Agent State Interface
 interface PerformanceAnalysisState extends MessagesState {

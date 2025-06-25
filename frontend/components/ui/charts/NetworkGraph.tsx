@@ -1,7 +1,9 @@
 'use client';
 
-import React from 'react';
 import ReactECharts from 'echarts-for-react';
+import React from 'react';
+
+import { withErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 export interface NetworkNode {
   id: string;
@@ -220,4 +222,19 @@ function getConnectionProbability(category1?: string, category2?: string): numbe
   return connections[cat1]?.[cat2] || connections[cat2]?.[cat1] || 0.2;
 }
 
-export default NetworkGraph;
+// Wrap with error boundary for resilience
+export default withErrorBoundary(NetworkGraph, {
+  isolate: true,
+  fallback: (
+    <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-800 rounded-lg p-8">
+      <div className="text-center">
+        <p className="text-gray-600 dark:text-gray-400 mb-2">Unable to render network graph</p>
+        <p className="text-sm text-gray-500 dark:text-gray-500">Please try refreshing the component</p>
+      </div>
+    </div>
+  ),
+  onError: (error) => {
+    console.error('NetworkGraph component error:', error);
+    // TODO: Send to monitoring service
+  },
+});

@@ -1,6 +1,5 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { 
   AlertCircle, 
@@ -11,8 +10,10 @@ import {
   Bell,
   BellOff
 } from 'lucide-react'
-import { useAlertsWebSocket } from '@/lib/hooks/useWebSocket'
+import React, { useEffect, useState } from 'react'
+
 import { apiClient, type Alert as APIAlert } from '@/lib/api/client'
+import { useAlertsWebSocket } from '@/lib/hooks/useWebSocketNew'
 
 interface Alert extends APIAlert {
   agent_id?: string

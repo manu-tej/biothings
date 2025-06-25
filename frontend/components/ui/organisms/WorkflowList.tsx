@@ -1,28 +1,22 @@
 'use client';
 
-import React, { forwardRef, useState, useMemo, useCallback } from 'react';
-import { clsx } from 'clsx';
 import { 
   Workflow, 
   Search, 
-  Filter, 
   SortAsc, 
   SortDesc,
   RefreshCw,
-  Download,
-  MoreHorizontal,
-  Eye,
-  Play,
-  Pause,
-  Square
+  Download
 } from 'lucide-react';
-import { Card } from '../atoms/Card';
+import React, { forwardRef, useState, useMemo, useCallback } from 'react';
+
+import { Badge } from '../atoms/Badge';
 import { Button } from '../atoms/Button';
+import { Card } from '../atoms/Card';
+import { Checkbox } from '../atoms/Checkbox';
 import { Input } from '../atoms/Input';
 import { Select, SelectOption } from '../atoms/Select';
-import { Badge } from '../atoms/Badge';
 import { Spinner } from '../atoms/Spinner';
-import { Checkbox } from '../atoms/Checkbox';
 import { WorkflowCard, WorkflowCardProps } from '../molecules/WorkflowCard';
 
 export interface WorkflowListItem extends Omit<WorkflowCardProps, 'onAction'> {
@@ -105,18 +99,58 @@ export const WorkflowList = forwardRef<HTMLDivElement, WorkflowListProps>(
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [currentPage, setCurrentPage] = useState(0);
 
-    // Filter and sort workflows
+    // Memoized search filter function
+    const filterBySearch = useCallback((workflow: WorkflowListItem, query: string) => {
+      const lowerQuery = query.toLowerCase();
+      return (
+        workflow.name.toLowerCase().includes(lowerQuery) ||
+        workflow.description?.toLowerCase().includes(lowerQuery) ||
+        workflow.createdBy?.toLowerCase().includes(lowerQuery) ||
+        workflow.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+      );
+    }, []);
+
+    // Memoized sort comparator
+    const sortComparator = useCallback((a: WorkflowListItem, b: WorkflowListItem) => {
+      let aValue: any, bValue: any;
+      
+      switch (sortField) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'status':
+          aValue = a.status.status;
+          bValue = b.status.status;
+          break;
+        case 'lastModified':
+          aValue = a.lastModified?.getTime() || 0;
+          bValue = b.lastModified?.getTime() || 0;
+          break;
+        case 'createdBy':
+          aValue = a.createdBy?.toLowerCase() || '';
+          bValue = b.createdBy?.toLowerCase() || '';
+          break;
+        case 'progress':
+          aValue = a.status.progress || 0;
+          bValue = b.status.progress || 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    }, [sortField, sortDirection]);
+
+    // Filter and sort workflows with memoized operations
     const processedWorkflows = useMemo(() => {
       let filtered = workflows;
 
       // Search filter
       if (searchQuery) {
-        filtered = filtered.filter(workflow => 
-          workflow.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          workflow.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          workflow.createdBy?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          workflow.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-        );
+        filtered = filtered.filter(workflow => filterBySearch(workflow, searchQuery));
       }
 
       // Status filter
@@ -126,42 +160,12 @@ export const WorkflowList = forwardRef<HTMLDivElement, WorkflowListProps>(
 
       // Sort
       if (sortable) {
-        filtered.sort((a, b) => {
-          let aValue: any, bValue: any;
-          
-          switch (sortField) {
-            case 'name':
-              aValue = a.name.toLowerCase();
-              bValue = b.name.toLowerCase();
-              break;
-            case 'status':
-              aValue = a.status;
-              bValue = b.status;
-              break;
-            case 'lastModified':
-              aValue = a.lastModified?.getTime() || 0;
-              bValue = b.lastModified?.getTime() || 0;
-              break;
-            case 'createdBy':
-              aValue = a.createdBy?.toLowerCase() || '';
-              bValue = b.createdBy?.toLowerCase() || '';
-              break;
-            case 'progress':
-              aValue = a.status.progress || 0;
-              bValue = b.status.progress || 0;
-              break;
-            default:
-              return 0;
-          }
-
-          if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-          if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-          return 0;
-        });
+        // Create a copy to avoid mutating the original array
+        filtered = [...filtered].sort(sortComparator);
       }
 
       return filtered;
-    }, [workflows, searchQuery, statusFilter, sortField, sortDirection]);
+    }, [workflows, searchQuery, statusFilter, sortable, filterBySearch, sortComparator]);
 
     // Pagination
     const paginatedWorkflows = useMemo(() => {
@@ -172,16 +176,21 @@ export const WorkflowList = forwardRef<HTMLDivElement, WorkflowListProps>(
       return processedWorkflows.slice(start, end);
     }, [processedWorkflows, currentPage, pageSize, virtualScrolling]);
 
-    const totalPages = Math.ceil(processedWorkflows.length / pageSize);
+    // Memoized total pages calculation
+    const totalPages = useMemo(() => 
+      Math.ceil(processedWorkflows.length / pageSize),
+      [processedWorkflows.length, pageSize]
+    );
 
-    const handleSort = (field: SortField) => {
+    // Memoized sort handler
+    const handleSort = useCallback((field: SortField) => {
       if (sortField === field) {
-        setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
       } else {
         setSortField(field);
         setSortDirection('asc');
       }
-    };
+    }, [sortField]);
 
     const handleSelectAll = useCallback((checked: boolean) => {
       if (checked) {
@@ -205,9 +214,13 @@ export const WorkflowList = forwardRef<HTMLDivElement, WorkflowListProps>(
       onSelectionChange?.(newSelection);
     }, [selectedWorkflows, onSelectionChange]);
 
-    const allCurrentPageSelected = paginatedWorkflows.length > 0 && 
-      paginatedWorkflows.every(w => selectedWorkflows.has(w.id));
-    const someCurrentPageSelected = paginatedWorkflows.some(w => selectedWorkflows.has(w.id));
+    // Memoized selection state calculations
+    const { allCurrentPageSelected, someCurrentPageSelected } = useMemo(() => {
+      const allSelected = paginatedWorkflows.length > 0 && 
+        paginatedWorkflows.every(w => selectedWorkflows.has(w.id));
+      const someSelected = paginatedWorkflows.some(w => selectedWorkflows.has(w.id));
+      return { allCurrentPageSelected: allSelected, someCurrentPageSelected: someSelected };
+    }, [paginatedWorkflows, selectedWorkflows]);
 
     const renderWorkflowItem = useCallback((workflow: WorkflowListItem) => {
       const isSelected = selectedWorkflows.has(workflow.id);
@@ -242,7 +255,8 @@ export const WorkflowList = forwardRef<HTMLDivElement, WorkflowListProps>(
       );
     }, [selectable, selectedWorkflows, handleSelectWorkflow, onWorkflowAction]);
 
-    const renderHeader = () => (
+    // Memoized header renderer
+    const renderHeader = useCallback(() => (
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -345,9 +359,13 @@ export const WorkflowList = forwardRef<HTMLDivElement, WorkflowListProps>(
           </div>
         )}
       </div>
-    );
+    ), [processedWorkflows.length, selectedWorkflows.size, loading, searchQuery, statusFilter, 
+        sortField, sortDirection, allCurrentPageSelected, someCurrentPageSelected, 
+        handleSelectAll, onExport, onRefresh, paginatedWorkflows.length, searchable, 
+        filterable, sortable, selectable, statusOptions, sortOptions]);
 
-    const renderContent = () => {
+    // Memoized content renderer
+    const renderContent = useCallback(() => {
       if (error) {
         return (
           <div className="flex items-center justify-center h-32">
@@ -398,9 +416,12 @@ export const WorkflowList = forwardRef<HTMLDivElement, WorkflowListProps>(
           {paginatedWorkflows.map(renderWorkflowItem)}
         </div>
       );
-    };
+    }, [error, loading, workflows.length, processedWorkflows.length, searchQuery, 
+        statusFilter, emptyState, virtualScrolling, maxHeight, paginatedWorkflows, 
+        renderWorkflowItem, onRefresh]);
 
-    const renderPagination = () => {
+    // Memoized pagination renderer
+    const renderPagination = useCallback(() => {
       if (virtualScrolling || totalPages <= 1) return null;
 
       return (
@@ -433,7 +454,7 @@ export const WorkflowList = forwardRef<HTMLDivElement, WorkflowListProps>(
           </div>
         </div>
       );
-    };
+    }, [virtualScrolling, totalPages, currentPage, pageSize, processedWorkflows.length]);
 
     return (
       <Card

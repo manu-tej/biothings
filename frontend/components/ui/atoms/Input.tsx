@@ -1,8 +1,8 @@
 'use client';
 
-import React, { forwardRef, InputHTMLAttributes, useState } from 'react';
 import { clsx } from 'clsx';
 import { Search, X, AlertCircle, Check } from 'lucide-react';
+import React, { forwardRef, InputHTMLAttributes, useState } from 'react';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   variant?: 'default' | 'search' | 'number';

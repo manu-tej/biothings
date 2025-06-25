@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { Send, X, Bot, User, Loader2, Wifi, WifiOff } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
+import { Send, X, Bot, User, Loader2, Wifi, WifiOff } from 'lucide-react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+
 import { apiClient } from '@/lib/api/client'
-import { useWebSocket, type WebSocketMessage } from '@/lib/hooks/useWebSocket'
+import { useWebSocket, type LegacyWebSocketMessage as WebSocketMessage } from '@/lib/hooks/useWebSocketNew'
 
 interface Message {
   id: string
@@ -91,7 +92,7 @@ export default function AgentChat({ agent, isOpen, onClose }: AgentChatProps) {
   } = useWebSocket({
     channels: [`chat-${agent.id}`, `agent-${agent.id}`],
     onConnect: () => {
-      console.log(`Connected to chat for ${agent.name}`)
+      // Connected to chat for agent
     }
   })
 

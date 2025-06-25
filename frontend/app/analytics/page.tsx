@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, Suspense, lazy } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { TrendingUp, TrendingDown, BarChart3, Activity, DollarSign, Download, RefreshCw } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { useState } from 'react'
+
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
-import { TrendingUp, TrendingDown, BarChart3, PieChart, Activity, DollarSign, Download, Calendar, RefreshCw } from 'lucide-react'
 import { apiClient } from '@/lib/api/client'
 
 // Lazy load chart components

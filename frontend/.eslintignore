@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Test coverage
+coverage/
+
+# Environment
+.env*
+
+# Generated files
+*.min.js
+*.min.css
+next-env.d.ts
+
+# Config files
+jest.config.js
+next.config.js
+postcss.config.js
+tailwind.config.js
+
+# Public folder
+public/

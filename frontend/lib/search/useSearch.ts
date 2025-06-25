@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { SearchEngine, searchEngine, SearchResult, SearchFilters, SearchHistory, SavedQuery } from './SearchEngine';
+
 import { useDashboardStore } from '../stores/dashboardStore';
+
+import { SearchEngine, searchEngine, SearchResult, SearchFilters, SearchHistory, SavedQuery } from './SearchEngine';
 
 interface UseSearchOptions {
   enableHotkeys?: boolean;

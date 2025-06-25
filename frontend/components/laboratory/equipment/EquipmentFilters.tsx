@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
 import { Search, Filter } from 'lucide-react'
+import React from 'react'
+
 import { equipmentTypes, equipmentStatuses } from '@/lib/laboratory/constants'
 import type { EquipmentFilters as Filters } from '@/lib/laboratory/types'
 

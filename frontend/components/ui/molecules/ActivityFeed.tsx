@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
-import { Card } from '@/components/ui/atoms/Card';
-import { Badge } from '@/components/ui/atoms/Badge';
 import { clsx } from 'clsx';
+import React from 'react';
+
+import { Badge } from '@/components/ui/atoms/Badge';
 
 export interface ActivityItem {
   id: string;

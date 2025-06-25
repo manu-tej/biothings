@@ -1,22 +1,18 @@
 'use client';
 
-import React, { forwardRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { 
   ChevronLeft, 
   ChevronRight, 
   ChevronDown, 
   ChevronUp,
-  Home,
-  Settings,
-  User,
-  LogOut,
-  Menu,
-  X
+  LogOut
 } from 'lucide-react';
-import { Button } from '../atoms/Button';
-import { Badge } from '../atoms/Badge';
+import React, { forwardRef, useState } from 'react';
+
 import { Avatar } from '../atoms/Avatar';
+import { Badge } from '../atoms/Badge';
+import { Button } from '../atoms/Button';
 import { Tooltip } from '../atoms/Tooltip';
 
 export interface SidebarItem {

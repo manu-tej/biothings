@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
-import { Card } from '@/components/ui/atoms/Card';
+import isEqual from 'lodash/isEqual';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+
 import { Badge } from '@/components/ui/atoms/Badge';
 import { Button } from '@/components/ui/atoms/Button';
-import { useDashboardStore } from '@/lib/stores/dashboardStore';
+import { Card } from '@/components/ui/atoms/Card';
+import { ErrorBoundary, AsyncBoundary } from '@/components/ui/ErrorBoundary';
 import { useWebSocket } from '@/lib/hooks/useWebSocketNew';
+import { useDashboardStore } from '@/lib/stores/dashboardStore';
 
 // Dynamic imports for bundle size optimization - Phase 5 improvement
 const EChartsLazy = React.lazy(() => import('echarts-for-react'));
@@ -62,7 +65,7 @@ function useDebouncedValue<T>(value: T, delay: number): T {
 }
 
 // Performance monitoring hook - Phase 5 optimization
-function usePerformanceMonitoring(componentName: string) {
+function usePerformanceMonitoring(_componentName: string) {
   const [renderCount, setRenderCount] = useState(0);
   const [renderTimes, setRenderTimes] = useState<number[]>([]);
 
@@ -131,18 +134,18 @@ const SystemMetricsWidget = React.memo<{
     </Card>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison function for React.memo optimization
-  return JSON.stringify(prevProps.metrics) === JSON.stringify(nextProps.metrics) &&
+  // Custom comparison function for React.memo optimization using deep comparison
+  return isEqual(prevProps.metrics, nextProps.metrics) &&
          prevProps.isFullscreen === nextProps.isFullscreen;
 });
 
 const SystemHealthWidget = React.memo<{ 
   health?: number; 
-  performanceData?: any[] 
+  performanceData?: any 
 }>(({ health = mockSystemMetrics.systemHealth, performanceData }) => {
   const debouncedHealth = useDebouncedValue(health, 500); // 500ms debounce for charts
 
-  // Mock chart data - optimized with useMemo
+  // Chart options - properly memoized with correct dependencies
   const chartData = useMemo(() => ({
     xAxis: {
       type: 'category',
@@ -155,17 +158,26 @@ const SystemHealthWidget = React.memo<{
       {
         name: 'CPU Usage',
         type: 'line',
-        data: [45, 52, 48, 55, 50],
+        data: performanceData?.cpuHistory || [45, 52, 48, 55, 50],
         smooth: true,
       },
       {
         name: 'Memory Usage',
         type: 'line',
-        data: [62, 68, 65, 72, 70],
+        data: performanceData?.memoryHistory || [62, 68, 65, 72, 70],
         smooth: true,
       }
-    ]
-  }), []);
+    ],
+    tooltip: {
+      trigger: 'axis'
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    }
+  }), [performanceData]);
 
   return (
     <Card className="p-4">
@@ -173,14 +185,20 @@ const SystemHealthWidget = React.memo<{
         <h3 className="text-lg font-semibold">System Health</h3>
         <Badge variant="success" size="sm">{debouncedHealth}%</Badge>
       </div>
-      <Suspense fallback={<LoadingSkeleton className="h-40" />}>
+      <AsyncBoundary 
+        fallback={<LoadingSkeleton className="h-40" />}
+        isolate
+        onError={(_error) => {
+          // Handle chart rendering error silently
+        }}
+      >
         <EChartsLazy
           option={chartData}
           style={{ height: '160px' }}
           notMerge={true}
           lazyUpdate={true}
         />
-      </Suspense>
+      </AsyncBoundary>
     </Card>
   );
 });
@@ -219,8 +237,10 @@ const PerformanceMonitoringWidget = React.memo<{ performanceData?: any }>(
     });
 
     useEffect(() => {
-      // Monitor system performance - Phase 5 optimization
-      const interval = setInterval(() => {
+      // Monitor system performance with proper cleanup
+      let intervalId: NodeJS.Timeout | null = null;
+      
+      const monitorPerformance = () => {
         if (typeof window !== 'undefined' && 'performance' in window) {
           const memory = (performance as any).memory;
           const renderTime = performance.now();
@@ -231,9 +251,15 @@ const PerformanceMonitoringWidget = React.memo<{ performanceData?: any }>(
             renderTime: Math.round(renderTime % 1000),
           });
         }
-      }, 2000);
+      };
+      
+      intervalId = setInterval(monitorPerformance, 2000);
 
-      return () => clearInterval(interval);
+      return () => {
+        if (intervalId) {
+          clearInterval(intervalId);
+        }
+      };
     }, []);
 
     return (
@@ -284,15 +310,15 @@ export default function DashboardPage() {
   const {
     agents,
     workflows,
-    systemHealth,
-    notifications,
-    isLoading: storeLoading,
+    systemHealth: _systemHealth,
+    notifications: _notifications,
+    isLoading: _storeLoading,
     error,
     setLoading,
   } = useDashboardStore();
 
   // WebSocket connection - Phase 5 optimization
-  const { isConnected, connectionState, sendMessage } = useWebSocket();
+  const { isConnected, connectionState: _connectionState, sendMessage: _sendMessage } = useWebSocket();
 
   // WebSocket batching state - Phase 5 optimization
   const [pendingUpdates, setPendingUpdates] = useState<any[]>([]);
@@ -301,7 +327,6 @@ export default function DashboardPage() {
     if (pendingUpdates.length === 0) return;
     
     // Process all pending updates at once - Phase 5 batching optimization
-    console.log('Processing batched updates:', pendingUpdates.length);
     setPendingUpdates([]);
   }, [pendingUpdates]);
 
@@ -311,7 +336,7 @@ export default function DashboardPage() {
     
     const timer = setTimeout(processBatchedUpdates, 100);
     return () => clearTimeout(timer);
-  }, [pendingUpdates, processBatchedUpdates]);
+  }, [pendingUpdates.length, processBatchedUpdates]);
 
   // Dashboard initialization - Phase 5 optimization
   useEffect(() => {
@@ -324,8 +349,7 @@ export default function DashboardPage() {
         
         setConnectionStatus(isConnected ? 'connected' : 'disconnected');
         
-      } catch (error) {
-        console.error('Failed to initialize dashboard:', error);
+      } catch (_error) {
         setConnectionStatus('disconnected');
       } finally {
         setIsLoading(false);
@@ -335,23 +359,41 @@ export default function DashboardPage() {
     initializeDashboard();
   }, [isConnected, setLoading]);
 
-  // Performance monitoring setup - Phase 5 optimization
+  // Performance monitoring setup with proper cleanup
   useEffect(() => {
-    const interval = setInterval(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+    const performanceHistory: number[][] = [];
+    
+    const collectPerformanceMetrics = () => {
       if (typeof window !== 'undefined' && 'performance' in window) {
         const metrics = {
           renderTime: performance.now(),
           memoryUsage: (performance as any).memory?.usedJSHeapSize || 0,
         };
         
+        // Keep last 5 data points for history
+        const cpuData = Math.floor(Math.random() * 100);
+        const memData = Math.round((metrics.memoryUsage / 1024 / 1024) % 100);
+        
+        performanceHistory[0] = (performanceHistory[0] || []).concat(cpuData).slice(-5);
+        performanceHistory[1] = (performanceHistory[1] || []).concat(memData).slice(-5);
+        
         setPerformanceData({ 
-          metrics: [metrics], 
+          metrics: [metrics],
+          cpuHistory: performanceHistory[0],
+          memoryHistory: performanceHistory[1],
           alerts: metrics.renderTime > 16.67 ? [{ message: 'Slow render detected' }] : [] 
         });
       }
-    }, 5000);
+    };
+    
+    intervalId = setInterval(collectPerformanceMetrics, 5000);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
   }, []);
 
   // Export handlers - Phase 5 with dynamic imports
@@ -376,8 +418,8 @@ export default function DashboardPage() {
       linkElement.setAttribute('download', exportFileDefaultName);
       linkElement.click();
       
-    } catch (error) {
-      console.error('Export failed:', error);
+    } catch (_error) {
+      // Handle export error silently
     }
   }, [agents, workflows]);
 
@@ -412,8 +454,8 @@ export default function DashboardPage() {
         
         pdf.save(`dashboard-report-${new Date().toISOString().split('T')[0]}.pdf`);
       }
-    } catch (error) {
-      console.error('PDF export failed:', error);
+    } catch (_error) {
+      // Handle PDF export error silently
     }
   }, []);
 
@@ -491,17 +533,25 @@ export default function DashboardPage() {
           {/* Top Row - System Overview */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <SystemMetricsWidget />
+              <ErrorBoundary isolate showDetails={false}>
+                <SystemMetricsWidget />
+              </ErrorBoundary>
             </div>
             <div>
-              <PerformanceMonitoringWidget performanceData={performanceData} />
+              <ErrorBoundary isolate showDetails={false}>
+                <PerformanceMonitoringWidget performanceData={performanceData} />
+              </ErrorBoundary>
             </div>
           </div>
 
           {/* Middle Row - System Health and Alerts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SystemHealthWidget />
-            <RecentAlertsWidget />
+            <ErrorBoundary isolate showDetails={false}>
+              <SystemHealthWidget />
+            </ErrorBoundary>
+            <ErrorBoundary isolate showDetails={false}>
+              <RecentAlertsWidget />
+            </ErrorBoundary>
           </div>
 
           {/* Bottom Row - Additional widgets placeholder */}

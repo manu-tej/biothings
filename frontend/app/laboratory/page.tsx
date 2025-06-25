@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import DashboardLayout from '@/components/dashboard/DashboardLayout'
-import { FlaskConical, Thermometer, Zap, CheckCircle, AlertTriangle, Clock, Plus, Play, Pause, X, StopCircle, Settings } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { FlaskConical, Thermometer, Zap, CheckCircle, AlertTriangle, Clock, Plus, Play, X, StopCircle, Settings } from 'lucide-react'
+import { useState, useEffect } from 'react'
+
+import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { apiClient } from '@/lib/api/client'
 
 // Remove static data - we'll fetch from API

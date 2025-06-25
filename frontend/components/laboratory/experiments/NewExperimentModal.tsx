@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
 import { X } from 'lucide-react'
+import React, { useState } from 'react'
+
 import { experimentTypes } from '@/lib/laboratory/constants'
 import type { ExperimentFormData } from '@/lib/laboratory/types'
 

@@ -2,7 +2,7 @@ import { render, screen, waitFor, act } from '@/shared/test-utils';
 import { axe, toHaveNoViolations } from 'jest-axe';
 import SystemMetrics from '@/components/dashboard/SystemMetrics';
 import { apiClient } from '@/lib/api/client';
-import { useMetricsWebSocket } from '@/lib/hooks/useWebSocket';
+import { useMetricsWebSocket } from '@/lib/hooks/useWebSocketNew';
 import { 
   createMetrics, 
   createCriticalMetrics, 
@@ -15,7 +15,7 @@ expect.extend(toHaveNoViolations);
 
 // Mock the dependencies
 jest.mock('@/lib/api/client');
-jest.mock('@/lib/hooks/useWebSocket');
+jest.mock('@/lib/hooks/useWebSocketNew');
 
 // Enhanced echarts mock
 const mockChartInstance = {

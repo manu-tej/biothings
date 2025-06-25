@@ -9,11 +9,31 @@ from datetime import datetime
 import uuid
 import logging
 
-from backend.agents.executives import CEOAgent, COOAgent, CSOAgent, CFOAgent, CTOAgent
+from backend.app.agents.ceo_agent import CEOAgent
+from backend.app.agents.coo_agent import COOAgent
+from backend.app.agents.cso_agent import CSOAgent
+from backend.app.agents.cfo_agent import CFOAgent
+from backend.app.agents.cto_agent import CTOAgent
 from backend.services.mock_communication import get_mock_communication_service
 from backend.services.agent_registry import get_agent_registry
 from backend.services.websocket_manager import WebSocketManager
-from backend.models.agent_models import AgentStatus, AgentType
+from enum import Enum
+
+# Define AgentStatus and AgentType here since they're not in the newer implementation
+class AgentStatus(str, Enum):
+    IDLE = "idle"
+    THINKING = "thinking"
+    EXECUTING = "executing"
+    WAITING = "waiting"
+    ERROR = "error"
+    OFFLINE = "offline"
+
+class AgentType(str, Enum):
+    CEO = "CEO"
+    COO = "COO"
+    CSO = "CSO"
+    CFO = "CFO"
+    CTO = "CTO"
 
 logger = logging.getLogger(__name__)
 
@@ -81,8 +101,15 @@ class AgentOrchestrator:
         self.agents[cfo.agent_id] = cfo
         self.agents[cto.agent_id] = cto
         
-        # Set up reporting relationships
+        # Set up reporting relationships (store as attribute since newer agents don't have this)
         ceo.subordinates = [coo.agent_id, cso.agent_id, cfo.agent_id, cto.agent_id]
+        
+        # Add additional attributes for compatibility
+        for agent in self.agents.values():
+            agent.name = f"{agent.agent_type} Agent"
+            agent.status = AgentStatus.IDLE
+            agent.subordinates = getattr(agent, 'subordinates', [])
+            agent.last_active = datetime.utcnow()
         
         # Register all agents
         for agent_id, agent in self.agents.items():
@@ -93,13 +120,13 @@ class AgentOrchestrator:
     async def _register_agent(self, agent):
         """Register an agent with the system"""
         agent_info = {
-            "name": agent.name,
-            "agent_type": agent.agent_type.value,
+            "name": getattr(agent, 'name', f"{agent.agent_type} Agent"),
+            "agent_type": agent.agent_type,
             "department": getattr(agent, 'department', 'general'),
             "capabilities": getattr(agent, 'capabilities', []),
             "reporting_to": getattr(agent, 'reporting_to', None),
-            "subordinates": agent.subordinates,
-            "status": agent.status.value
+            "subordinates": getattr(agent, 'subordinates', []),
+            "status": getattr(agent, 'status', AgentStatus.IDLE).value
         }
         
         await self.agent_registry.register_agent(agent.agent_id, agent_info)
@@ -117,8 +144,8 @@ class AgentOrchestrator:
             logger.warning(f"No agent found for ID: {agent_id}")
             return
             
-        # Process message through agent
-        result = await agent.process_message(
+        # Process message through agent using the newer API
+        result = await agent.process_task(
             f"Message type: {message.message_type}, Content: {message.payload}",
             {"message": message.dict()}
         )
@@ -139,12 +166,12 @@ class AgentOrchestrator:
                 for agent_id, agent in self.agents.items():
                     status = {
                         "id": agent_id,
-                        "name": agent.name,
-                        "type": agent.agent_type.value,
-                        "status": agent.status.value,
+                        "name": getattr(agent, 'name', f"{agent.agent_type} Agent"),
+                        "type": agent.agent_type,
+                        "status": getattr(agent, 'status', AgentStatus.IDLE).value,
                         "department": getattr(agent, 'department', 'general'),
-                        "last_active": agent.last_active.isoformat() if hasattr(agent, 'last_active') else datetime.utcnow().isoformat(),
-                        "subordinates": agent.subordinates,
+                        "last_active": getattr(agent, 'last_active', datetime.utcnow()).isoformat(),
+                        "subordinates": getattr(agent, 'subordinates', []),
                         "reporting_to": getattr(agent, 'reporting_to', None)
                     }
                     agent_statuses.append(status)
@@ -172,12 +199,12 @@ class AgentOrchestrator:
                 
     async def _collect_system_metrics(self) -> Dict[str, Any]:
         """Collect system-wide metrics"""
-        active_agents = len([a for a in self.agents.values() if hasattr(a, 'status') and a.status != AgentStatus.OFFLINE])
+        active_agents = len([a for a in self.agents.values() if getattr(a, 'status', AgentStatus.IDLE) != AgentStatus.OFFLINE])
         
         # Count agents by type
         agent_types = {}
         for agent in self.agents.values():
-            agent_type = agent.agent_type.value
+            agent_type = agent.agent_type
             agent_types[agent_type] = agent_types.get(agent_type, 0) + 1
         
         # Get message history
@@ -238,7 +265,7 @@ class AgentOrchestrator:
         # Find CEO (top-level agent)
         ceo = None
         for agent in self.agents.values():
-            if agent.agent_type == AgentType.CEO:
+            if agent.agent_type == "CEO":
                 ceo = agent
                 break
                 
@@ -251,9 +278,9 @@ class AgentOrchestrator:
         """Build hierarchy node for an agent"""
         node = {
             "id": agent.agent_id,
-            "name": agent.name,
-            "type": agent.agent_type.value,
-            "status": agent.status.value,
+            "name": getattr(agent, 'name', f"{agent.agent_type} Agent"),
+            "type": agent.agent_type,
+            "status": getattr(agent, 'status', AgentStatus.IDLE).value,
             "department": getattr(agent, 'department', 'general'),
             "subordinates": []
         }
@@ -273,7 +300,7 @@ class AgentOrchestrator:
         
         if workflow_type == "drug_discovery":
             # CEO initiates drug discovery project
-            ceo = next((a for a in self.agents.values() if a.agent_type == AgentType.CEO), None)
+            ceo = next((a for a in self.agents.values() if a.agent_type == "CEO"), None)
             if ceo:
                 # Send command to CEO
                 await self.send_command_to_agent(
@@ -293,7 +320,7 @@ class AgentOrchestrator:
                 
         elif workflow_type == "production_scale_up":
             # COO leads production scale-up
-            coo = next((a for a in self.agents.values() if a.agent_type == AgentType.COO), None)
+            coo = next((a for a in self.agents.values() if a.agent_type == "COO"), None)
             if coo:
                 await self.send_command_to_agent(
                     coo.agent_id,

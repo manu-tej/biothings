@@ -1,18 +1,18 @@
 'use client';
 
+import { Plus, Filter, Download, RefreshCw } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { Card } from '@/components/ui/atoms/Card';
+
 import { Badge } from '@/components/ui/atoms/Badge';
 import { Button } from '@/components/ui/atoms/Button';
-import { Input } from '@/components/ui/atoms/Input';
+import { Card } from '@/components/ui/atoms/Card';
 import { Select } from '@/components/ui/atoms/Select';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { AgentCard } from '@/components/ui/molecules/AgentCard';
-import { SearchBar } from '@/components/ui/molecules/SearchBar';
 import { FilterPanel } from '@/components/ui/molecules/FilterPanel';
-import { useDashboardStore } from '@/lib/stores/dashboardStore';
+import { SearchBar } from '@/components/ui/molecules/SearchBar';
+import { useDashboardStore, type Agent } from '@/lib/stores/dashboardStore';
 import { useWebSocketStore } from '@/lib/stores/websocketStore';
-import { Agent } from '@/lib/stores/dashboardStore';
-import { Plus, Filter, Download, RefreshCw } from 'lucide-react';
 
 export default function AgentsPage() {
   const {
@@ -36,8 +36,8 @@ export default function AgentsPage() {
         if (!connectionStatus || connectionStatus === 'disconnected') {
           connect('agents', process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws');
         }
-      } catch (error) {
-        console.error('Failed to initialize agents page:', error);
+      } catch (_error) {
+        // TODO: Replace with proper logging service
       } finally {
         setIsLoading(false);
       }
@@ -80,17 +80,17 @@ export default function AgentsPage() {
 
   const handleCreateAgent = () => {
     // TODO: Open create agent modal/form
-    console.log('Create new agent');
+    // TODO: Implement create agent functionality
   };
 
   const handleExportAgents = () => {
     // TODO: Export agents data
-    console.log('Export agents data');
+    // TODO: Implement export agents functionality
   };
 
   const handleRefresh = () => {
     // TODO: Refresh agents data
-    console.log('Refresh agents');
+    // TODO: Implement refresh agents functionality
   };
 
   if (isLoading) {
@@ -148,51 +148,53 @@ export default function AgentsPage() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {agentsArray.length}
+      <ErrorBoundary isolate showDetails={false}>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="p-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                {agentsArray.length}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Total Agents
+              </div>
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Total Agents
+          </Card>
+          
+          <Card className="p-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {activeAgents}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Active
+              </div>
             </div>
-          </div>
-        </Card>
-        
-        <Card className="p-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-              {activeAgents}
+          </Card>
+          
+          <Card className="p-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                {idleAgents}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Idle
+              </div>
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Active
+          </Card>
+          
+          <Card className="p-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                {errorAgents}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Error
+              </div>
             </div>
-          </div>
-        </Card>
-        
-        <Card className="p-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-              {idleAgents}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Idle
-            </div>
-          </div>
-        </Card>
-        
-        <Card className="p-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-              {errorAgents}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Error
-            </div>
-          </div>
-        </Card>
-      </div>
+          </Card>
+        </div>
+      </ErrorBoundary>
 
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -265,19 +267,30 @@ export default function AgentsPage() {
               },
             ]}
             values={{}}
-            onFilterChange={(filterId: string, value: any) => {
-              console.log('Filter changed:', filterId, value);
+            onFilterChange={(_filterId: string, _value: any) => {
+              // Filter changed
             }}
             onClearAll={() => {
-              console.log('Clear all filters');
+              // Clear all filters
             }}
           />
         </Card>
       )}
 
       {/* Agents Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAgents.length === 0 ? (
+      <ErrorBoundary 
+        isolate 
+        showDetails={false}
+        fallback={
+          <div className="text-center py-12">
+            <p className="text-gray-600 dark:text-gray-400">
+              Unable to display agents. Please refresh the page.
+            </p>
+          </div>
+        }
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredAgents.length === 0 ? (
           <div className="col-span-full text-center py-12">
             <div className="text-gray-400 text-6xl mb-4">🤖</div>
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -301,38 +314,49 @@ export default function AgentsPage() {
           </div>
         ) : (
           filteredAgents.map((agent) => (
-            <AgentCard
+            <ErrorBoundary
               key={agent.id}
-              id={agent.id}
-              name={agent.name}
-              type={agent.type}
-              status={{
-                status: agent.status,
-                lastSeen: agent.lastActivity,
-                uptime: agent.metrics.uptime,
-                tasksCompleted: agent.metrics.tasksCompleted,
-              }}
-              metrics={{
-                cpuUsage: agent.metrics.cpuUsage,
-                memoryUsage: agent.metrics.memoryUsage,
-              }}
-              tags={agent.capabilities}
-              selected={selectedAgentId === agent.id}
-              selectable={true}
-              onSelect={() => handleAgentSelect(agent)}
-              actions={{
-                onStart: () => {
-                  console.log(`Start agent ${agent.id}`);
-                },
-                onStop: () => {
-                  console.log(`Stop agent ${agent.id}`);
-                },
-                onView: () => handleAgentSelect(agent),
-              }}
-            />
+              isolate
+              showDetails={false}
+              fallback={
+                <Card className="p-4">
+                  <p className="text-center text-gray-500">Unable to display agent</p>
+                </Card>
+              }
+            >
+              <AgentCard
+                id={agent.id}
+                name={agent.name}
+                type={agent.type}
+                status={{
+                  status: agent.status,
+                  lastSeen: agent.lastActivity,
+                  uptime: agent.metrics.uptime,
+                  tasksCompleted: agent.metrics.tasksCompleted,
+                }}
+                metrics={{
+                  cpuUsage: agent.metrics.cpuUsage,
+                  memoryUsage: agent.metrics.memoryUsage,
+                }}
+                tags={agent.capabilities}
+                selected={selectedAgentId === agent.id}
+                selectable={true}
+                onSelect={() => handleAgentSelect(agent)}
+                actions={{
+                  onStart: () => {
+                    // TODO: Implement start agent functionality
+                  },
+                  onStop: () => {
+                    // TODO: Implement stop agent functionality
+                  },
+                  onView: () => handleAgentSelect(agent),
+                }}
+              />
+            </ErrorBoundary>
           ))
         )}
-      </div>
+        </div>
+      </ErrorBoundary>
 
       {/* Results Info */}
       {filteredAgents.length > 0 && (

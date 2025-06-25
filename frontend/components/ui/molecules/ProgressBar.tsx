@@ -1,7 +1,8 @@
 'use client';
 
-import React, { forwardRef } from 'react';
 import { clsx } from 'clsx';
+import React, { forwardRef } from 'react';
+
 import { Badge } from '../atoms/Badge';
 
 export interface ProgressSegment {
@@ -90,7 +91,7 @@ export const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(
         width: `${segment.percentage}%`,
       };
 
-      let className = clsx(
+      const className = clsx(
         backgroundClass,
         animated && 'transition-all duration-500 ease-out',
         segment.pattern === 'striped' && 'bg-stripes'

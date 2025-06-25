@@ -1,4 +1,5 @@
-import Fuse, { FuseResult, FuseResultMatch } from 'fuse.js';
+import Fuse, { FuseResultMatch } from 'fuse.js';
+
 // Import from dashboard store for the actual data types
 import type { Agent, WorkflowStatus } from '../stores/dashboardStore';
 

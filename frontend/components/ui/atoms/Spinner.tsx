@@ -1,7 +1,7 @@
 'use client';
 
-import React, { forwardRef, HTMLAttributes } from 'react';
 import { clsx } from 'clsx';
+import React, { forwardRef, HTMLAttributes } from 'react';
 
 export interface SpinnerProps extends HTMLAttributes<HTMLDivElement> {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';

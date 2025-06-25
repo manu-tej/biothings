@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useQuickSearch } from '../../../lib/search/useSearch';
-import { Button } from '../atoms/Button';
-import { Input } from '../atoms/Input';
+
 import { Badge } from '../atoms/Badge';
+import { Input } from '../atoms/Input';
 
 export interface Command {
   id: string;

@@ -1,15 +1,16 @@
 'use client';
 
+import { Plus, Download, RefreshCw, Play, Pause } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { Card } from '@/components/ui/atoms/Card';
+
 import { Badge } from '@/components/ui/atoms/Badge';
 import { Button } from '@/components/ui/atoms/Button';
+import { Card } from '@/components/ui/atoms/Card';
 import { SearchBar } from '@/components/ui/molecules/SearchBar';
 import { WorkflowCard } from '@/components/ui/molecules/WorkflowCard';
 import { useDashboardStore } from '@/lib/stores/dashboardStore';
-import { useWebSocketStore } from '@/lib/stores/websocketStore';
 import { WorkflowStatus } from '@/lib/stores/dashboardStore';
-import { Plus, Filter, Download, RefreshCw, Play, Pause } from 'lucide-react';
+import { useWebSocketStore } from '@/lib/stores/websocketStore';
 
 export default function WorkflowsPage() {
   const {

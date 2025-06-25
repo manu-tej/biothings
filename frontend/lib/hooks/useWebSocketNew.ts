@@ -1,10 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
-import { useWebSocket as useWebSocketContext, useWebSocketSubscription } from '../websocket/WebSocketProvider';
+
 import { useWebSocketStore } from '../stores/websocketStore';
-import type { MessageHandler, WebSocketMessage } from '../stores/websocketStore';
+import type { WebSocketMessage } from '../stores/websocketStore';
 import type { WebSocketConfig } from '../websocket/WebSocketManager';
+import { useWebSocket as useWebSocketContext, useWebSocketSubscription } from '../websocket/WebSocketProvider';
 
 // Re-export message types for backward compatibility
 export type MessageType = 
@@ -96,7 +97,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   // Initialize connection on mount
   useEffect(() => {
     connect(connectionRef.current, config).catch(error => {
-      console.error('Failed to connect WebSocket:', error);
+      // TODO: Replace with proper logging service
     });
 
     return () => {

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import dynamic from 'next/dynamic'
-import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { Users, Crown, Briefcase, FlaskConical, DollarSign, Cpu, UserCheck, MessageCircle, Eye } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { useState } from 'react'
+
+import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { apiClient } from '@/lib/api/client'
 
 // Lazy load heavy components

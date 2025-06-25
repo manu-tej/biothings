@@ -1,8 +1,9 @@
 'use client'
 
-import React from 'react'
 import { Wifi, WifiOff } from 'lucide-react'
-import { useWebSocket } from '@/lib/hooks/useWebSocket'
+import React from 'react'
+
+import { useWebSocket } from '@/lib/hooks/useWebSocketNew'
 
 export default function WebSocketStatus() {
   const { isConnected, connectionState } = useWebSocket()

@@ -1,7 +1,7 @@
 'use client';
 
-import React, { forwardRef, HTMLAttributes } from 'react';
 import { clsx } from 'clsx';
+import React, { forwardRef, HTMLAttributes } from 'react';
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'outline' | 'ghost' | 'elevated';
@@ -142,7 +142,7 @@ export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
 
 CardHeader.displayName = 'CardHeader';
 
-export interface CardBodyProps extends HTMLAttributes<HTMLDivElement> {}
+export type CardBodyProps = HTMLAttributes<HTMLDivElement>
 
 export const CardBody = forwardRef<HTMLDivElement, CardBodyProps>(
   ({ className, ...props }, ref) => {

@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
 import { BarChart3, TrendingUp, FileText } from 'lucide-react'
+import React from 'react'
+
 import type { Experiment, AnalysisResult } from '@/lib/laboratory/types'
 
 interface DataAnalysisPanelProps {

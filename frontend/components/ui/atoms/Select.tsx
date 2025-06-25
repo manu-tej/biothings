@@ -1,8 +1,8 @@
 'use client';
 
-import React, { forwardRef, useState, useRef, useEffect } from 'react';
 import { clsx } from 'clsx';
 import { ChevronDown, Search, Check } from 'lucide-react';
+import React, { forwardRef, useState, useRef, useEffect } from 'react';
 
 export interface SelectOption {
   value: string;

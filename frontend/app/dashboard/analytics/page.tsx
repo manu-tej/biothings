@@ -1,16 +1,17 @@
 'use client';
 
+import { Download, RefreshCw, Calendar, TrendingUp, BarChart3 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { Card } from '@/components/ui/atoms/Card';
+
 import { Badge } from '@/components/ui/atoms/Badge';
 import { Button } from '@/components/ui/atoms/Button';
+import { Card } from '@/components/ui/atoms/Card';
 import { Select } from '@/components/ui/atoms/Select';
-import { StatCard } from '@/components/ui/molecules/StatCard';
-import { MetricChart } from '@/components/ui/molecules/MetricChart';
 import { DataTable } from '@/components/ui/molecules/DataTable';
+import { MetricChart } from '@/components/ui/molecules/MetricChart';
+import { StatCard } from '@/components/ui/molecules/StatCard';
 import { useDashboardStore } from '@/lib/stores/dashboardStore';
 import { useWebSocketStore } from '@/lib/stores/websocketStore';
-import { Download, RefreshCw, Calendar, TrendingUp, BarChart3 } from 'lucide-react';
 
 // Chart series interface for MetricChart  
 interface ChartDataPoint {
@@ -32,7 +33,7 @@ export default function AnalyticsPage() {
   const {
     agents,
     workflows,
-    systemHealth,
+    systemHealth: _systemHealth,
   } = useDashboardStore();
 
   const { connect, disconnect, getConnectionStatus } = useWebSocketStore();
@@ -48,8 +49,8 @@ export default function AnalyticsPage() {
         if (!connectionStatus || connectionStatus === 'disconnected') {
           connect('analytics', process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws');
         }
-      } catch (error) {
-        console.error('Failed to initialize analytics page:', error);
+      } catch (_error) {
+        // Handle initialization error silently
       } finally {
         setIsLoading(false);
       }
@@ -64,7 +65,7 @@ export default function AnalyticsPage() {
 
   // Convert Maps to arrays for calculations
   const agentsArray = Array.from(agents.values());
-  const workflowsArray = Array.from(workflows.values());
+  const _workflowsArray = Array.from(workflows.values());
 
   // Calculate analytics metrics
   const totalTasks = agentsArray.reduce((sum, agent) => sum + (agent.metrics.tasksCompleted || 0), 0);
@@ -177,11 +178,11 @@ export default function AnalyticsPage() {
   ];
 
   const handleExportAnalytics = () => {
-    console.log('Export analytics data');
+    // TODO: Implement export analytics functionality
   };
 
   const handleRefresh = () => {
-    console.log('Refresh analytics');
+    // TODO: Implement refresh analytics functionality
   };
 
   if (isLoading) {

@@ -1,6 +1,5 @@
 'use client';
 
-import React, { forwardRef, useState, useMemo, useCallback, useEffect } from 'react';
 import { clsx } from 'clsx';
 import { 
   Bell, 
@@ -12,22 +11,18 @@ import {
   CheckCircle, 
   XCircle,
   Settings,
-  Filter,
   Search,
-  MoreHorizontal,
-  Trash2,
-  Archive,
-  Eye,
-  EyeOff
+  Trash2
 } from 'lucide-react';
-import { Card } from '../atoms/Card';
-import { Button } from '../atoms/Button';
+import React, { forwardRef, useState, useMemo, useCallback, useEffect } from 'react';
+
 import { Badge } from '../atoms/Badge';
+import { Button } from '../atoms/Button';
+import { Card } from '../atoms/Card';
+import { Checkbox } from '../atoms/Checkbox';
 import { Input } from '../atoms/Input';
 import { Select, SelectOption } from '../atoms/Select';
-import { Checkbox } from '../atoms/Checkbox';
 import { Tooltip } from '../atoms/Tooltip';
-import { AlertBanner } from '../molecules/AlertBanner';
 
 export interface Notification {
   id: string;

@@ -1,6 +1,5 @@
 'use client';
 
-import React, { forwardRef, useState, useMemo, useCallback } from 'react';
 import { clsx } from 'clsx';
 import { 
   ChevronRight, 
@@ -12,11 +11,13 @@ import {
   Maximize2,
   Minimize2
 } from 'lucide-react';
-import { Card } from '../atoms/Card';
-import { Button } from '../atoms/Button';
-import { Input } from '../atoms/Input';
+import React, { forwardRef, useState, useMemo, useCallback } from 'react';
+
 import { Badge } from '../atoms/Badge';
+import { Button } from '../atoms/Button';
+import { Card } from '../atoms/Card';
 import { Checkbox } from '../atoms/Checkbox';
+import { Input } from '../atoms/Input';
 import { AgentCard, AgentCardProps } from '../molecules/AgentCard';
 // import { SearchBar } from '../molecules/SearchBar';
 

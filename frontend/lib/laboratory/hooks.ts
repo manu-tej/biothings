@@ -4,12 +4,13 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, useCallback, useMemo } from 'react'
+
 import { apiClient } from '@/lib/api/client'
 import { useWebSocket } from '@/lib/websocket/hooks'
+
 import type { 
   Experiment, 
   Equipment, 
-  AnalysisResult, 
   SimulationRun,
   EquipmentFilters 
 } from './types'

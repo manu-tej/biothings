@@ -408,7 +408,7 @@ class UnifiedApiClient {
     this.wsConnection = new WebSocket(`${this.wsUrl}/${clientId}`)
 
     this.wsConnection.onopen = () => {
-      console.log('WebSocket connected')
+      // WebSocket connected
       this.reconnectAttempts = 0
       this.startHeartbeat()
     }
@@ -418,7 +418,7 @@ class UnifiedApiClient {
         const data = JSON.parse(event.data)
         
         if (data.type === 'connection') {
-          console.log('WebSocket connection confirmed:', data)
+          // WebSocket connection confirmed
         } else if (data.type === 'pong') {
           // Heartbeat response
         } else {
@@ -428,23 +428,23 @@ class UnifiedApiClient {
           })
         }
       } catch (error) {
-        console.error('Error parsing WebSocket message:', error)
+        // TODO: Replace with proper logging service
       }
     }
 
     this.wsConnection.onerror = (error) => {
-      console.error('WebSocket error:', error)
+      // TODO: Replace with proper logging service
     }
 
     this.wsConnection.onclose = () => {
-      console.log('WebSocket disconnected')
+      // WebSocket disconnected
       this.stopHeartbeat()
 
       // Attempt reconnection
       if (this.reconnectAttempts < this.maxReconnectAttempts) {
         this.reconnectAttempts++
         setTimeout(() => {
-          console.log(`Reconnecting WebSocket (attempt ${this.reconnectAttempts})...`)
+          // Reconnecting WebSocket
           this.connectWebSocket(clientId)
         }, 2000 * this.reconnectAttempts)
       }
@@ -473,7 +473,7 @@ class UnifiedApiClient {
     if (this.wsConnection?.readyState === WebSocket.OPEN) {
       this.wsConnection.send(JSON.stringify(message))
     } else {
-      console.warn('WebSocket not connected')
+      // TODO: Replace with proper logging service
     }
   }
 

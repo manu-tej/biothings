@@ -1,7 +1,5 @@
 'use client';
 
-import React, { forwardRef } from 'react';
-import { clsx } from 'clsx';
 import { 
   Play, 
   Pause, 
@@ -14,11 +12,14 @@ import {
   Timer,
   Activity
 } from 'lucide-react';
-import { Card, CardHeader, CardBody, CardFooter } from '../atoms/Card';
+import React, { forwardRef } from 'react';
+
 import { Badge } from '../atoms/Badge';
 import { Button } from '../atoms/Button';
-import { SimpleProgressBar } from './ProgressBar';
+import { Card, CardHeader, CardBody, CardFooter } from '../atoms/Card';
 import { Tooltip } from '../atoms/Tooltip';
+
+import { SimpleProgressBar } from './ProgressBar';
 
 export interface WorkflowStep {
   id: string;

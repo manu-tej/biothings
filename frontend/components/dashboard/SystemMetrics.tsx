@@ -1,6 +1,5 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import * as echarts from 'echarts'
 import type { EChartsOption } from 'echarts'
@@ -12,8 +11,10 @@ import {
   TrendingUp,
   TrendingDown
 } from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
+
 import { apiClient } from '@/lib/api/client'
-import { useMetricsWebSocket } from '@/lib/hooks/useWebSocket'
+import { useMetricsWebSocket } from '@/lib/hooks/useWebSocketNew'
 
 interface MetricCardProps {
   title: string

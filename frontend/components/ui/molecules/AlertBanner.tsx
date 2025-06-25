@@ -1,16 +1,16 @@
 'use client';
 
-import React, { forwardRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { 
   AlertCircle, 
   CheckCircle, 
   Info, 
   AlertTriangle, 
-  X, 
-  ChevronRight,
+  X,
   ExternalLink 
 } from 'lucide-react';
+import React, { forwardRef, useState } from 'react';
+
 import { Button } from '../atoms/Button';
 
 export interface AlertAction {

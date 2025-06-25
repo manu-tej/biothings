@@ -1,10 +1,4 @@
-import { useWebSocketStore } from '../stores/websocketStore';
-import type { 
-  ConnectionInfo, 
-  WebSocketMessage, 
-  MessageType,
-  ConnectionStatus 
-} from '../stores/websocketStore';
+import { useWebSocketStore, type WebSocketMessage, type MessageType, type ConnectionStatus } from '../stores/websocketStore';
 
 export interface WebSocketConfig {
   url: string;
@@ -51,7 +45,6 @@ class WebSocketManager {
   async connect(connectionId: string, config: WebSocketConfig): Promise<void> {
     // Check if already connected
     if (this.connections.has(connectionId)) {
-      console.warn(`Connection ${connectionId} already exists`);
       return;
     }
 
@@ -82,7 +75,6 @@ class WebSocketManager {
   disconnect(connectionId: string): void {
     const connection = this.connections.get(connectionId);
     if (!connection) {
-      console.warn(`Connection ${connectionId} not found`);
       return;
     }
 
@@ -95,7 +87,7 @@ class WebSocketManager {
   }
 
   disconnectAll(): void {
-    this.connections.forEach((connection, id) => {
+    this.connections.forEach((connection, _id) => {
       connection.disconnect();
     });
     this.connections.clear();
@@ -108,7 +100,6 @@ class WebSocketManager {
   send(connectionId: string, topic: string, data: any, type: MessageType = 'update'): void {
     const connection = this.connections.get(connectionId);
     if (!connection) {
-      console.error(`Connection ${connectionId} not found`);
       return;
     }
 
@@ -161,8 +152,6 @@ class WebSocketManager {
   }
 
   private handleError(connectionId: string, error: Error): void {
-    console.error(`WebSocket error on ${connectionId}:`, error);
-    
     if (this.onError) {
       this.onError(error, connectionId);
     }
@@ -219,12 +208,11 @@ class ManagedWebSocket {
             const message = JSON.parse(event.data) as WebSocketMessage;
             this.onMessage(this.connectionId, message);
           } catch (error) {
-            console.error('Failed to parse WebSocket message:', error);
             this.onError(this.connectionId, error as Error);
           }
         };
 
-        this.socket.onerror = (event) => {
+        this.socket.onerror = (_event) => {
           const error = new Error('WebSocket error');
           this.onError(this.connectionId, error);
           this.onStatusChange(this.connectionId, 'error');
@@ -270,8 +258,7 @@ class ManagedWebSocket {
     if (this.isConnected() && this.socket) {
       try {
         this.socket.send(JSON.stringify(fullMessage));
-      } catch (error) {
-        console.error('Failed to send message:', error);
+      } catch (_error) {
         this.queueMessage(message);
       }
     } else {
@@ -292,7 +279,6 @@ class ManagedWebSocket {
     
     const maxAttempts = this.config.maxReconnectAttempts || 5;
     if (this.reconnectAttempts >= maxAttempts) {
-      console.error(`Max reconnection attempts (${maxAttempts}) reached for ${this.connectionId}`);
       this.onStatusChange(this.connectionId, 'error');
       return;
     }
@@ -301,12 +287,11 @@ class ManagedWebSocket {
     this.reconnectAttempts++;
 
     const delay = this.calculateReconnectDelay();
-    console.log(`Reconnecting ${this.connectionId} in ${delay}ms (attempt ${this.reconnectAttempts})`);
 
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
-      this.connect().catch(error => {
-        console.error('Reconnection failed:', error);
+      this.connect().catch(_error => {
+        // Handle reconnection error silently
       });
     }, delay);
   }

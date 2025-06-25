@@ -1,6 +1,5 @@
 'use client'
 
-import React, { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { 
   Play, 
@@ -14,8 +13,10 @@ import {
   Shield,
   BarChart
 } from 'lucide-react'
+import React from 'react'
+
 import { apiClient } from '@/lib/api/client'
-import { useWorkflowWebSocket } from '@/lib/hooks/useWebSocket'
+import { useWorkflowWebSocket } from '@/lib/hooks/useWebSocketNew'
 
 interface Workflow {
   id: string

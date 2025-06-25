@@ -1,14 +1,16 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { 
   useWebSocket, 
   useMetricsWebSocket, 
   useAlertsWebSocket, 
   useAgentStatusWebSocket,
   useWorkflowWebSocket,
-  type WebSocketMessage 
-} from '@/lib/hooks/useWebSocket'
+  type LegacyWebSocketMessage as WebSocketMessage 
+} from '@/lib/hooks/useWebSocketNew'
+
 import { ConnectionIndicator } from './WebSocketStatus'
 
 export default function WebSocketDemo() {

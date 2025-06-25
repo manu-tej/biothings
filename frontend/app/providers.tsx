@@ -3,6 +3,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useState, useEffect } from 'react'
+
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { registerServiceWorker } from '@/lib/register-sw'
 import { WebSocketProvider } from '@/lib/websocket/WebSocketProvider'
 
@@ -33,11 +35,42 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <WebSocketProvider>
-        {children}
-      </WebSocketProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <ErrorBoundary
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold mb-4">Unable to initialize application</h2>
+            <p className="text-gray-600 mb-4">Please refresh the page to try again</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      }
+      onError={(error) => {
+        console.error('Provider initialization error:', error);
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <ErrorBoundary
+          isolate
+          fallback={
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/10 rounded-lg">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                WebSocket connection error. The application will continue to work in offline mode.
+              </p>
+            </div>
+          }
+        >
+          <WebSocketProvider>
+            {children}
+          </WebSocketProvider>
+        </ErrorBoundary>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </ErrorBoundary>
   )
 }

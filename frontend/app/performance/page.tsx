@@ -1,11 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import dynamic from 'next/dynamic'
-import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { 
   Zap, 
-  TrendingUp, 
   Clock, 
   Database, 
   Wifi,
@@ -13,9 +9,12 @@ import {
   BarChart3,
   AlertCircle
 } from 'lucide-react'
-import { useWebSocketInfo } from '@/lib/websocket/hooks'
+import dynamic from 'next/dynamic'
+import React, { useState, useEffect } from 'react'
+
+import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { batchClient } from '@/lib/api/batch-client'
-import { perfMonitor } from '@/lib/performance/optimization-toolkit'
+import { useWebSocketInfo } from '@/lib/websocket/hooks'
 
 // Lazy load chart
 const PerformanceChart = dynamic(

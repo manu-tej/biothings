@@ -1,8 +1,5 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
 import { 
   Home, 
@@ -11,13 +8,17 @@ import {
   Workflow, 
   Settings,
   ChevronLeft,
-  Activity,
-  Bell
+  Activity
 } from 'lucide-react';
-import { Button } from '../atoms/Button';
-import { Badge } from '../atoms/Badge';
-import { useUIStore } from '@/lib/stores/uiStore';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import React from 'react';
+
 import { useDashboardStore } from '@/lib/stores/dashboardStore';
+import { useUIStore } from '@/lib/stores/uiStore';
+
+import { Badge } from '../atoms/Badge';
+import { Button } from '../atoms/Button';
 
 export interface SidebarProps {
   className?: string;

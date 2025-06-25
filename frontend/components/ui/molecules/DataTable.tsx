@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useMemo, useCallback, forwardRef } from 'react';
 import { clsx } from 'clsx';
-import { ChevronUp, ChevronDown, MoreHorizontal, Filter, Download } from 'lucide-react';
-import { Button } from '../atoms/Button';
-import { Input } from '../atoms/Input';
+import { ChevronUp, ChevronDown, Filter } from 'lucide-react';
+import React, { useState, useMemo, useCallback, forwardRef } from 'react';
+
 import { Checkbox } from '../atoms/Checkbox';
-import { Badge } from '../atoms/Badge';
+import { Input } from '../atoms/Input';
 import { Spinner } from '../atoms/Spinner';
 
 export interface DataTableColumn<T = any> {

@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
-import { useWebSocket } from '@/lib/hooks/useWebSocket';
+import { useWebSocket } from '@/lib/hooks/useWebSocketNew';
 
-describe('useWebSocket', () => {
+describe('useWebSocket (new implementation)', () => {
   let mockWebSocket: any;
 
   beforeEach(() => {

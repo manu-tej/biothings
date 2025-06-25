@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
 import { Clock, Users, AlertCircle } from 'lucide-react'
+import React from 'react'
+
 import { experimentTypeIcons, statusColors } from '@/lib/laboratory/constants'
 import type { Experiment } from '@/lib/laboratory/types'
 

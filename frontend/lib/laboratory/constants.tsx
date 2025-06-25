@@ -2,9 +2,7 @@
  * Laboratory Constants
  */
 
-import React from 'react'
 import { 
-  Activity, 
   Beaker, 
   BarChart3, 
   Brain,
@@ -14,6 +12,7 @@ import {
   Pill,
   Heart
 } from 'lucide-react'
+import React from 'react'
 
 export const experimentTypeIcons: Record<string, React.ReactNode> = {
   drug_discovery: <Pill className="w-5 h-5" />,

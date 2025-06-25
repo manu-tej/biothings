@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState, forwardRef, useCallback } from 'react';
 import { clsx } from 'clsx';
+import { X } from 'lucide-react';
+import React, { useState, forwardRef, useCallback } from 'react';
+
 import { Badge } from '../atoms/Badge';
 import { Button } from '../atoms/Button';
-import { X } from 'lucide-react';
+
 
 export interface TabItem {
   id: string;

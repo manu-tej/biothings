@@ -1,11 +1,11 @@
 'use client';
 
-import React, { forwardRef } from 'react';
 import { clsx } from 'clsx';
 import { TrendingUp, TrendingDown, Minus, MoreHorizontal } from 'lucide-react';
-import { Card, CardHeader, CardBody } from '../atoms/Card';
-import { Badge } from '../atoms/Badge';
+import React, { forwardRef } from 'react';
+
 import { Button } from '../atoms/Button';
+import { Card, CardHeader, CardBody } from '../atoms/Card';
 
 export interface TrendData {
   value: number;

@@ -1,8 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useRef, ReactNode } from 'react';
-import { wsManager, WebSocketConfig } from './WebSocketManager';
+
 import { useWebSocketStore, ConnectionStatus, MessageHandler, MessageFilter } from '../stores/websocketStore';
+
+import { wsManager, WebSocketConfig } from './WebSocketManager';
 
 export interface WebSocketContextValue {
   status: ConnectionStatus;
@@ -49,7 +51,7 @@ export function WebSocketProvider({
       // Configure the WebSocket manager instance
       if (onError || onConnectionChange) {
         // Re-initialize with callbacks
-        const manager = wsManager;
+        const _manager = wsManager;
         // Note: In a real implementation, we'd need to update the manager's callbacks
         // For now, we'll use the existing singleton
       }
@@ -133,7 +135,7 @@ export function useWebSocketSubscription<T = any>(
   handler: (data: T) => void,
   deps: React.DependencyList = []
 ) {
-  const { subscribe, unsubscribe } = useWebSocket();
+  const { subscribe, unsubscribe: _unsubscribe } = useWebSocket();
   
   useEffect(() => {
     const messageHandler: MessageHandler = (message) => {

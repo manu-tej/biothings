@@ -1,11 +1,17 @@
 'use client'
 
-import { useState } from 'react'
-import dynamic from 'next/dynamic'
-import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { Plus, Beaker, Wrench, BarChart3, Brain } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { useState } from 'react'
+
+import DashboardLayout from '@/components/dashboard/DashboardLayout'
+
 
 // Hooks
+import { EquipmentFilters } from '@/components/laboratory/equipment/EquipmentFilters'
+import { EquipmentGrid } from '@/components/laboratory/equipment/EquipmentGrid'
+import { ExperimentCard } from '@/components/laboratory/experiments/ExperimentCard'
+import { NewExperimentModal } from '@/components/laboratory/experiments/NewExperimentModal'
 import { 
   useExperiments, 
   useEquipment, 
@@ -14,10 +20,6 @@ import {
 } from '@/lib/laboratory/hooks'
 
 // Components
-import { ExperimentCard } from '@/components/laboratory/experiments/ExperimentCard'
-import { NewExperimentModal } from '@/components/laboratory/experiments/NewExperimentModal'
-import { EquipmentGrid } from '@/components/laboratory/equipment/EquipmentGrid'
-import { EquipmentFilters } from '@/components/laboratory/equipment/EquipmentFilters'
 
 // Lazy load heavy components
 const DataAnalysisPanel = dynamic(

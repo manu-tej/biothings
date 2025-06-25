@@ -1,16 +1,5 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/atoms/Card';
-import { Button } from '@/components/ui/atoms/Button';
-import { Input } from '@/components/ui/atoms/Input';
-import { Select } from '@/components/ui/atoms/Select';
-import { Switch } from '@/components/ui/atoms/Switch';
-import { Badge } from '@/components/ui/atoms/Badge';
-import { AlertBanner } from '@/components/ui/molecules/AlertBanner';
-import { useDashboardStore } from '@/lib/stores/dashboardStore';
-import { useUIStore } from '@/lib/stores/uiStore';
-import { useWebSocketStore } from '@/lib/stores/websocketStore';
 import { 
   Settings, 
   Save, 
@@ -18,11 +7,22 @@ import {
   Bell, 
   Palette, 
   Shield, 
-  Database, 
   Wifi,
   Users,
   Activity
 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+
+import { Badge } from '@/components/ui/atoms/Badge';
+import { Button } from '@/components/ui/atoms/Button';
+import { Card } from '@/components/ui/atoms/Card';
+import { Input } from '@/components/ui/atoms/Input';
+import { Select } from '@/components/ui/atoms/Select';
+import { Switch } from '@/components/ui/atoms/Switch';
+import { AlertBanner } from '@/components/ui/molecules/AlertBanner';
+import { useDashboardStore } from '@/lib/stores/dashboardStore';
+import { useUIStore } from '@/lib/stores/uiStore';
+import { useWebSocketStore } from '@/lib/stores/websocketStore';
 
 interface SettingsSection {
   id: string;
@@ -32,12 +32,12 @@ interface SettingsSection {
 }
 
 export default function SettingsPage() {
-  const { addNotification } = useDashboardStore();
+  const { addNotification: _addNotification } = useDashboardStore();
   const {
     preferences,
-    layout,
+    layout: _layout,
     setTheme,
-    toggleSidebar,
+    toggleSidebar: _toggleSidebar,
     updatePreferences
   } = useUIStore();
   const { getConnectionStatus } = useWebSocketStore();

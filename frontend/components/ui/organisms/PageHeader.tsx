@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { clsx } from 'clsx';
 import { 
   Bell, 
@@ -13,13 +12,17 @@ import {
   LogOut,
   ChevronDown
 } from 'lucide-react';
+import React from 'react';
+import { useState, useRef, useEffect } from 'react';
+
+import { useDashboardStore } from '@/lib/stores/dashboardStore';
+import { useUIStore } from '@/lib/stores/uiStore';
+import { useWebSocketStore } from '@/lib/stores/websocketStore';
+
+import { Badge } from '../atoms/Badge';
 import { Button } from '../atoms/Button';
 import { Input } from '../atoms/Input';
-import { Badge } from '../atoms/Badge';
-import { useUIStore } from '@/lib/stores/uiStore';
-import { useDashboardStore } from '@/lib/stores/dashboardStore';
-import { useWebSocketStore } from '@/lib/stores/websocketStore';
-import { useState, useRef, useEffect } from 'react';
+
 
 export interface PageHeaderProps {
   className?: string;

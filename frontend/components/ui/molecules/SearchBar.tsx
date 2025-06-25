@@ -1,12 +1,13 @@
 'use client';
 
-import React, { forwardRef, useState, useRef, useEffect } from 'react';
 import { clsx } from 'clsx';
-import { Search, X, Filter, ChevronDown } from 'lucide-react';
-import { Input } from '../atoms/Input';
-import { Button } from '../atoms/Button';
+import { Search, Filter, ChevronDown } from 'lucide-react';
+import React, { forwardRef, useState, useRef, useEffect } from 'react';
+
 import { Badge } from '../atoms/Badge';
+import { Button } from '../atoms/Button';
 import { Card } from '../atoms/Card';
+import { Input } from '../atoms/Input';
 
 export interface SearchSuggestion {
   id: string;

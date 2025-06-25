@@ -3,8 +3,8 @@
  * Immediate actions to make the UI snappy on M1 MacBooks
  */
 
-import React, { memo, useMemo, useCallback, ComponentType, MemoExoticComponent } from 'react';
 import dynamic from 'next/dynamic';
+import React, { memo, useCallback, ComponentType, MemoExoticComponent } from 'react';
 
 // ============================================
 // 1. MEMOIZATION UTILITIES
@@ -58,7 +58,7 @@ function isReactElement(value: any): boolean {
 // ============================================
 
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useRef, CSSProperties } from 'react';
+import { useRef } from 'react';
 
 interface VirtualListProps<T> {
   items: T[];

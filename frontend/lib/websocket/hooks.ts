@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+
 import { wsManager, type ConnectionState } from './connection-manager';
 
 interface UseWebSocketOptions {
@@ -83,9 +84,9 @@ export function useWebSocket<T = any>(
  */
 export function useAgentStatusWebSocket(
   onUpdate: (data: any) => void,
-  options?: UseWebSocketOptions
+  _options?: UseWebSocketOptions
 ) {
-  return useWebSocket('agent-status', onUpdate, options);
+  return useWebSocket('agent-status', onUpdate, _options);
 }
 
 /**
@@ -93,9 +94,9 @@ export function useAgentStatusWebSocket(
  */
 export function useWorkflowWebSocket(
   onUpdate: (data: any) => void,
-  options?: UseWebSocketOptions
+  _options?: UseWebSocketOptions
 ) {
-  return useWebSocket('workflow-updates', onUpdate, options);
+  return useWebSocket('workflow-updates', onUpdate, _options);
 }
 
 /**
@@ -103,9 +104,9 @@ export function useWorkflowWebSocket(
  */
 export function useAlertsWebSocket(
   onAlert: (data: any) => void,
-  options?: UseWebSocketOptions
+  _options?: UseWebSocketOptions
 ) {
-  return useWebSocket('alerts', onAlert, options);
+  return useWebSocket('alerts', onAlert, _options);
 }
 
 /**
@@ -113,9 +114,9 @@ export function useAlertsWebSocket(
  */
 export function useMetricsWebSocket(
   onUpdate: (data: any) => void,
-  options?: UseWebSocketOptions
+  _options?: UseWebSocketOptions
 ) {
-  return useWebSocket('metrics', onUpdate, options);
+  return useWebSocket('metrics', onUpdate, _options);
 }
 
 /**

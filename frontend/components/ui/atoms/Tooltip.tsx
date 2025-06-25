@@ -1,7 +1,7 @@
 'use client';
 
-import React, { forwardRef, ReactNode, useState, useRef, useEffect } from 'react';
 import { clsx } from 'clsx';
+import React, { forwardRef, ReactNode, useState, useRef, useEffect } from 'react';
 
 export interface TooltipProps {
   children: ReactNode;

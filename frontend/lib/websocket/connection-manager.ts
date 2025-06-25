@@ -129,11 +129,10 @@ export class WebSocketConnectionManager {
         connection.ws.send(message);
         connection.lastActivity = Date.now();
       } catch (error) {
-        console.error(`Failed to send message to ${topic}:`, error);
         this.handleConnectionError(connectionKey, error);
       }
     } else {
-      console.warn(`Cannot send message: connection ${connectionKey} not ready`);
+      // Cannot send message: connection not ready
     }
   }
 
@@ -195,7 +194,6 @@ export class WebSocketConnectionManager {
     const { ws } = connection;
 
     ws.onopen = () => {
-      console.log(`WebSocket ${key} connected`);
       connection.state = 'connected';
       connection.reconnectAttempts = 0;
       connection.lastActivity = Date.now();
@@ -228,24 +226,22 @@ export class WebSocketConnectionManager {
           handlers.forEach(subscription => {
             try {
               subscription.handler(message.data || message);
-            } catch (error) {
-              console.error(`Handler error for topic ${topic}:`, error);
+            } catch (_error) {
+              // Handler error - continue processing other handlers
             }
           });
         }
-      } catch (error) {
-        console.error('WebSocket message parse error:', error);
+      } catch (_error) {
+        // WebSocket message parse error - ignore malformed messages
       }
     };
 
     ws.onerror = (error) => {
-      console.error(`WebSocket ${key} error:`, error);
       connection.state = 'error';
       this.handleConnectionError(key, error);
     };
 
     ws.onclose = () => {
-      console.log(`WebSocket ${key} closed`);
       connection.state = 'disconnected';
       this.stopHeartbeat(connection);
 
@@ -267,7 +263,6 @@ export class WebSocketConnectionManager {
         try {
           connection.ws.send(JSON.stringify({ type: 'ping' }));
         } catch (error) {
-          console.error(`Heartbeat failed for ${key}:`, error);
           this.handleConnectionError(key, error);
         }
       }
@@ -281,7 +276,7 @@ export class WebSocketConnectionManager {
     }
   }
 
-  private handleConnectionError(key: string, error: any): void {
+  private handleConnectionError(key: string, _error: any): void {
     const connection = this.connections.get(key);
     if (connection) {
       connection.state = 'error';
@@ -301,8 +296,6 @@ export class WebSocketConnectionManager {
 
     const attempts = connection.reconnectAttempts;
     const interval = (config.reconnectInterval || 5000) * Math.pow(2, attempts);
-    
-    console.log(`Scheduling reconnection for ${key} in ${interval}ms (attempt ${attempts + 1})`);
     
     setTimeout(() => {
       const conn = this.connections.get(key);
@@ -324,8 +317,8 @@ export class WebSocketConnectionManager {
         topic,
         timestamp: new Date().toISOString()
       }));
-    } catch (error) {
-      console.error(`Failed to send ${action} for topic ${topic}:`, error);
+    } catch (_error) {
+      // Failed to send subscription message - will retry on reconnect
     }
   }
 
@@ -354,8 +347,8 @@ export class WebSocketConnectionManager {
         if (connection.ws.readyState === WebSocket.OPEN) {
           connection.ws.close(1000, 'No active subscriptions');
         }
-      } catch (error) {
-        console.error(`Error closing connection ${key}:`, error);
+      } catch (_error) {
+        // Error closing connection - ignore
       }
       
       this.connections.delete(key);
@@ -368,7 +361,6 @@ export class WebSocketConnectionManager {
     this.connections.forEach((connection, key) => {
       if (connection.topics.size === 0 && 
           now - connection.lastActivity > this.CONNECTION_TIMEOUT) {
-        console.log(`Cleaning up idle connection ${key}`);
         this.closeConnection(key);
       }
     });
